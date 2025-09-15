@@ -22,8 +22,8 @@ Starts the development server on http://localhost:3060
 
 ### Build & Lint
 ```bash
-bun run build   # Production build with Turbopack
-bun run lint    # Run ESLint
+pnpm run build   # Production build with Turbopack
+pnpm run lint    # Run ESLint
 ```
 
 ## Project Structure
@@ -33,7 +33,7 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 - **Framework**: Next.js 15 with App Router, TypeScript, React 19
 - **Styling**: Tailwind CSS v4
 - **Deployment**: Cloudflare Workers (Edge Runtime)
-- **Package Manager**: Bun
+- **Package Manager**: pnpm
 
 ## Architecture Highlights
 

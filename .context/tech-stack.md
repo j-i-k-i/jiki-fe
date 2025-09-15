@@ -5,7 +5,7 @@
 - **Language**: TypeScript 5
 - **UI Library**: React 19.1.0
 - **Styling**: Tailwind CSS v4
-- **Package Manager**: Bun
+- **Package Manager**: pnpm
 - **Deployment Target**: Cloudflare Workers
 
 ## Development Tools
