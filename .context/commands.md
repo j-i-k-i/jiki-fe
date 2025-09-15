@@ -21,9 +21,9 @@
 - `pnpm test:e2e:headful` - Run E2E tests with visible browser
 - `pnpm test:all` - Run both unit and E2E tests
 
-### E2E Setup
+### Setup
 
-- `npx puppeteer browsers install chrome` - Install Chrome browser for Puppeteer (run once after clone)
+- `npx puppeteer browsers install chrome` - Install Chrome browser for Puppeteer E2E tests (required after fresh clone)
 
 ## Package Management
 
