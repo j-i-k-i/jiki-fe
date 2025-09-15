@@ -40,7 +40,7 @@ jobs:
           echo "Running tests from: $(pwd)"
           echo "Test files:"
           find tests -name "*.test.*" -type f | grep -v e2e
-          pnpm test -- --coverage --ci
+          pnpm run test --coverage --ci
 
       - name: Upload coverage reports
         if: matrix.node-version == '20.x'

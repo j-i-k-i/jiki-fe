@@ -15,7 +15,8 @@
       "WebSearch",
       "Bash(pnpm test:*)",
       "Bash(npx puppeteer browsers:*)",
-      "Read(//Users/iHiD/Desktop/**)"
+      "Read(//Users/iHiD/Desktop/**)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
