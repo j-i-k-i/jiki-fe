@@ -31,9 +31,12 @@ jobs:
       - name: Build application
         run: pnpm run build
 
-      - name: Install Puppeteer browser
+      - name: Install Puppeteer browser and dependencies
         run: |
+          # Install Chrome browser for Puppeteer
           npx puppeteer browsers install chrome
+
+          # Install required system dependencies
           sudo apt-get update
           sudo apt-get install -y \
             libnss3 \
@@ -44,9 +47,11 @@ jobs:
             libxrandr2 \
             libgbm1 \
             libxkbcommon0 \
-            libasound2 \
             libxss1 \
-            libgtk-3-0
+            libgtk-3-0 \
+            libgbm-dev \
+            libatspi2.0-0 \
+            libcups2
 
       - name: Run E2E tests
         run: pnpm test:e2e
