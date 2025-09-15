@@ -11,6 +11,8 @@ Load the relevant context files from `.context/` directory based on your task:
 - `.context/tech-stack.md` - Technologies, frameworks, and dependencies
 - `.context/architecture.md` - Frontend architecture and design decisions
 - `.context/deployment.md` - Deployment process and configuration
+- `.context/git.md` - Git hooks configuration
+- `.context/testing.md` - Testing setup and guidelines
 
 ## Quick Start
 
