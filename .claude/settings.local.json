@@ -12,7 +12,8 @@
       "Read(//Users/iHiD/Code/jiki/interpreters/**)",
       "Read(//Users/iHiD/Code/exercism/website/**)",
       "Bash(chmod:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(pnpm test:*)"
     ],
     "deny": [],
     "ask": []
