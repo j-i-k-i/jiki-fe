@@ -5,7 +5,10 @@ const createJestConfig = nextJest({
 });
 
 const customJestConfig = {
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.js", "<rootDir>/jest.miniflare.setup.js"],
+  setupFilesAfterEnv: [
+    "<rootDir>/jest.setup.js",
+    "<rootDir>/jest.miniflare.setup.js",
+  ],
   testEnvironment: "<rootDir>/miniflare.env.mjs",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
