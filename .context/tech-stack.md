@@ -21,5 +21,5 @@
 ## Configuration
 - TypeScript paths: `@/*` maps to project root
 - Strict TypeScript mode enabled
-- ES2017 compilation target
+- ES2022 compilation target
 - Module resolution: bundler
