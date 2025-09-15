@@ -14,7 +14,8 @@
       "Bash(chmod:*)",
       "WebSearch",
       "Bash(pnpm test:*)",
-      "Bash(npx puppeteer browsers:*)"
+      "Bash(npx puppeteer browsers:*)",
+      "Read(//Users/iHiD/Desktop/**)"
     ],
     "deny": [],
     "ask": []

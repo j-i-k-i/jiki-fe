@@ -35,7 +35,18 @@ jobs:
         run: |
           npx puppeteer browsers install chrome
           sudo apt-get update
-          sudo apt-get install -y libnss3 libatk-bridge2.0-0 libdrm2 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxkbcommon0 libasound2
+          sudo apt-get install -y \
+            libnss3 \
+            libatk-bridge2.0-0 \
+            libdrm2 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxrandr2 \
+            libgbm1 \
+            libxkbcommon0 \
+            libasound2 \
+            libxss1 \
+            libgtk-3-0
 
       - name: Run E2E tests
         run: pnpm test:e2e
