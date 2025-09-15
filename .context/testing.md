@@ -2,38 +2,73 @@
 
 ## Overview
 
-The project uses Jest with React Testing Library for testing React components and application logic.
+The project uses two testing approaches:
+
+- **Unit/Integration Tests**: Jest with React Testing Library for component and logic testing
+- **E2E Tests**: Puppeteer with Jest for full browser automation testing
 
 ## Test Structure
 
-- **Location**: `tests/integration/` for integration tests
+### Unit/Integration Tests
+
+- **Location**: `tests/integration/`
 - **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`
 - **Example**: `tests/integration/home.test.tsx`
 
+### E2E Tests
+
+- **Location**: `tests/e2e/`
+- **Naming Convention**: `[feature].test.ts`
+- **Examples**: `tests/e2e/home.test.ts`, `tests/e2e/navigation.test.ts`
+
 ## Configuration
 
-### Jest Configuration (`jest.config.mjs`)
+### Unit Test Configuration (`jest.config.mjs`)
 
 - Uses Next.js Jest configuration as base
 - Test environment: `jest-environment-jsdom` for DOM testing
 - Module mapping: `@/*` resolves to project root
 - Setup file: `jest.setup.js` for test environment configuration
 
+### E2E Test Configuration
+
+- **Jest Config**: `jest.e2e.config.mjs` - Separate Jest configuration for E2E tests
+- **Puppeteer Config**: `jest-puppeteer.config.js` - Browser launch and server settings
+- Test environment: `jest-environment-puppeteer`
+- Automatically starts dev server on port 3060
+- Headless mode by default (set `HEADLESS=false` for debugging)
+
 ### TypeScript Support
 
 - Type definitions: `jest-dom.d.ts` provides types for jest-dom matchers
-- Full TypeScript support in test files
+- Full TypeScript support in all test files
 
 ## Running Tests
 
+### Unit/Integration Tests
+
 ```bash
-pnpm test        # Run all tests once
-pnpm test:watch  # Run tests in watch mode
+pnpm test        # Run unit tests once
+pnpm test:watch  # Run unit tests in watch mode
+```
+
+### E2E Tests
+
+```bash
+pnpm test:e2e          # Run E2E tests in headless mode
+pnpm test:e2e:watch    # Run E2E tests in watch mode
+pnpm test:e2e:headful  # Run E2E tests with visible browser (debugging)
+```
+
+### All Tests
+
+```bash
+pnpm test:all    # Run both unit and E2E tests
 ```
 
 ## Writing Tests
 
-### Basic Test Structure
+### Unit Test Structure
 
 ```typescript
 import { render, screen } from '@testing-library/react'
@@ -47,6 +82,25 @@ describe('Component Name', () => {
 })
 ```
 
+### E2E Test Structure
+
+```typescript
+describe("Feature E2E", () => {
+  beforeAll(async () => {
+    await page.goto("http://localhost:3060", {
+      waitUntil: "networkidle2",
+    });
+  });
+
+  it("performs user interaction", async () => {
+    await page.click('button[type="submit"]');
+    await page.waitForNavigation();
+    const result = await page.$eval(".result", (el) => el.textContent);
+    expect(result).toContain("Success");
+  });
+});
+```
+
 ### Best Practices
 
 1. **Test user behavior, not implementation details**
@@ -54,10 +108,33 @@ describe('Component Name', () => {
 3. **Group related tests** using `describe` blocks
 4. **Keep tests focused** - one assertion per test when possible
 5. **Use descriptive test names** that explain what is being tested
+6. **E2E tests should test critical user journeys**
+7. **Keep E2E tests independent** - each test should be able to run in isolation
+
+## CI/CD Integration
+
+### GitHub Actions
+
+- **Unit Tests**: Run on every push and PR via `.github/workflows/unit-tests.yml`
+- **E2E Tests**: Run on every push and PR via `.github/workflows/e2e-tests.yml`
+- Both workflows run independently in parallel
+
+### Git Hooks
+
+- **Pre-commit**: Runs only unit tests (not E2E) to keep commits fast
+- Configured in `.husky/pre-commit`
 
 ## Dependencies
+
+### Unit Testing
 
 - `jest`: Test runner
 - `@testing-library/react`: React component testing utilities
 - `@testing-library/jest-dom`: Custom Jest matchers for DOM assertions
 - `jest-environment-jsdom`: Browser-like environment for tests
+
+### E2E Testing
+
+- `puppeteer`: Headless Chrome automation
+- `jest-puppeteer`: Jest preset for Puppeteer integration
+- `ts-jest`: TypeScript support for Jest

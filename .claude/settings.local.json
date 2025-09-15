@@ -13,7 +13,8 @@
       "Read(//Users/iHiD/Code/exercism/website/**)",
       "Bash(chmod:*)",
       "WebSearch",
-      "Bash(pnpm test:*)"
+      "Bash(pnpm test:*)",
+      "Bash(npx puppeteer browsers:*)"
     ],
     "deny": [],
     "ask": []

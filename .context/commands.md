@@ -7,6 +7,24 @@
 - `pnpm run start` - Start production server
 - `pnpm run lint` - Run ESLint for code quality checks
 
+## Testing Commands
+
+### Unit/Integration Tests
+
+- `pnpm test` - Run unit tests once
+- `pnpm test:watch` - Run unit tests in watch mode
+
+### E2E Tests
+
+- `pnpm test:e2e` - Run E2E tests in headless mode
+- `pnpm test:e2e:watch` - Run E2E tests in watch mode
+- `pnpm test:e2e:headful` - Run E2E tests with visible browser
+- `pnpm test:all` - Run both unit and E2E tests
+
+### E2E Setup
+
+- `npx puppeteer browsers install chrome` - Install Chrome browser for Puppeteer (run once after clone)
+
 ## Package Management
 
 This project uses pnpm for package management:
