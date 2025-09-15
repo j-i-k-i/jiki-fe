@@ -53,9 +53,11 @@ Following Next.js best practices, we use the "Store project files outside of app
 
 ```
 /app              # Only routing files (page.tsx, layout.tsx, etc.)
+  /dev            # Development-only tools and utilities (blocked in production)
 /components       # Reusable React components used by pages
 /lib              # Utility functions and shared logic
 /public           # Static assets
+/middleware.ts    # Edge middleware for route protection and filtering
 ```
 
 ### Key Principles
@@ -71,3 +73,14 @@ This approach provides:
 - Clear separation between routing and implementation
 - Easier navigation and discovery of components
 - Flexibility to reorganize components without affecting routing
+
+## Development Environment
+
+### Development-Only Routes
+
+The `/dev` route provides access to development tools and utilities that are only available in development mode:
+
+- **Location**: `/app/dev/` directory contains all development-specific pages
+- **Protection**: Middleware at `/middleware.ts` blocks access to `/dev/*` routes in production (returns 404)
+- **Detection**: Routes are available when `NODE_ENV === 'development'` or `VERCEL_ENV === 'development'`
+- **Purpose**: Debug panels, component galleries, test data generators, and other dev tools

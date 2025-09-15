@@ -56,7 +56,21 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 
 ## Important Rules
 
-1. **Documentation is current state** - All documentation in .context and CLAUDE.md should reflect the current state of the codebase (never use changelog format)
+1. **Documentation is current state** - All documentation in .context and CLAUDE.md should reflect the current state of the codebase. Never use changelog format where you document the things you got wrong. Just document how things are.
+
+   ✅ **GOOD EXAMPLE** (current state documentation):
+
+   ```markdown
+   The `/dev` route provides development-only tools.
+   ```
+
+   ❌ **BAD EXAMPLE** (changelog-style writing):
+
+   ```markdown
+   The `/dev` route provides development-only tools.
+   **Note**: Folders prefixed with underscore (e.g., `_dev`) are treated as private by Next.js and don't create routes, so we use `/dev` instead.
+   ```
+
 2. **Continuous learning** - When you learn something important or make a mistake, immediately update the relevant .context file to prevent future errors
 3. **Regular commits** - Git commit regularly to save progress
 4. **Post-task documentation** - Before committing, always check if any .context files need updating to reflect the new state of the codebase
