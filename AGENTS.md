@@ -85,7 +85,7 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 
 ## Important Rules
 
-1. **Documentation is current state** - All documentation in .context and AGENTS.md should reflect the current state of the codebase. Never use changelog format where you document the things you got wrong. Just document how things are.
+1. **Documentation is current state** - All documentation in .context and AGENTS.md should reflect the current state of the codebase. Never use changelog format that documents iterative changes or corrections. Focus on documenting the current implementation.
 
    ✅ **GOOD EXAMPLE** (current state documentation):
 
