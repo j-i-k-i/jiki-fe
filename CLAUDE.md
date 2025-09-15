@@ -22,8 +22,8 @@ Starts the development server on http://localhost:3060
 
 ### Build & Lint
 ```bash
-npm run build   # Production build with Turbopack
-npm run lint    # Run ESLint
+bun run build   # Production build with Turbopack
+bun run lint    # Run ESLint
 ```
 
 ## Project Structure

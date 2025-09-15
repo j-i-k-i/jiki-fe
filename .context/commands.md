@@ -1,10 +1,10 @@
 # Development Commands
 
 ## Core Commands
-- `./bin/dev` or `npm run dev` - Start development server on port 3060
-- `npm run build` - Build production bundle with Turbopack
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint for code quality checks
+- `./bin/dev` or `bun run dev` - Start development server on port 3060
+- `bun run build` - Build production bundle with Turbopack
+- `bun run start` - Start production server
+- `bun run lint` - Run ESLint for code quality checks
 
 ## Package Management
 This project uses Bun for package management:
