@@ -1,20 +1,23 @@
 const config = {
-  preset: 'jest-puppeteer',
-  testMatch: ['<rootDir>/tests/e2e/**/*.test.{js,ts}'],
+  preset: "jest-puppeteer",
+  testMatch: ["<rootDir>/tests/e2e/**/*.test.{js,ts}"],
   testTimeout: 30000,
   transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react',
-        esModuleInterop: true,
-        moduleResolution: 'node'
-      }
-    }],
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        tsconfig: {
+          jsx: "react",
+          esModuleInterop: true,
+          moduleResolution: "node",
+        },
+      },
+    ],
   },
-  testEnvironment: 'jest-environment-puppeteer',
+  testEnvironment: "jest-environment-puppeteer",
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
+    "^@/(.*)$": "<rootDir>/$1",
   },
-}
+};
 
-export default config
+export default config;
