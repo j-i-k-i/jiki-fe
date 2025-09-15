@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack --port 3060",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "15.5.2",
@@ -22,6 +25,8 @@
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -15,12 +15,15 @@ Load the relevant context files from `.context/` directory based on your task:
 ## Quick Start
 
 ### Development
+
 ```bash
 ./bin/dev
 ```
+
 Starts the development server on http://localhost:3060
 
 ### Build & Lint
+
 ```bash
 pnpm run build   # Production build with Turbopack
 pnpm run lint    # Run ESLint

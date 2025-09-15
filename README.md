@@ -14,6 +14,7 @@ First, run the development server:
 Open [http://localhost:3060](http://localhost:3060) with your browser to see the result.
 
 ## Initial TODOs
+
 - [ ] Svg support
 - [ ] [Fonts](https://nextjs.org/docs/app/getting-started/fonts)
 - [ ] Deploy on Cloudflare
