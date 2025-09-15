@@ -44,3 +44,30 @@ The Jiki frontend is a Next.js application designed for global edge deployment o
 - Edge caching strategies
 - Bundle optimization for exercises and content
 - Mobile-first responsive design
+
+## Project Structure
+
+Following Next.js best practices, we use the "Store project files outside of app" strategy:
+
+### Directory Organization
+
+```
+/app              # Only routing files (page.tsx, layout.tsx, etc.)
+/components       # Reusable React components used by pages
+/lib              # Utility functions and shared logic
+/public           # Static assets
+```
+
+### Key Principles
+
+- **App directory**: Contains only routing-related files - pages, layouts, loading, and error boundaries
+- **Components directory**: All UI components that pages use live here, organized by feature or type
+- **Separation of concerns**: Business logic, components, and utilities are kept outside the app directory
+- **Clean routing**: The app directory structure directly mirrors the URL structure without clutter
+
+This approach provides:
+
+- Better code organization and maintainability
+- Clear separation between routing and implementation
+- Easier navigation and discovery of components
+- Flexibility to reorganize components without affecting routing
