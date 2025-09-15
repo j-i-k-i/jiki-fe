@@ -11,7 +11,7 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/$1",
   },
   testMatch: ["<rootDir>/tests/**/*.test.{js,jsx,ts,tsx}"],
-  testPathIgnorePatterns: ["<rootDir>/tests/e2e/"],
+  testPathIgnorePatterns: ["<rootDir>/tests/e2e/", "<rootDir>/tests/miniflare/"],
 };
 
 export default createJestConfig(customJestConfig);
