@@ -91,3 +91,25 @@ The ComplexExercise feature demonstrates this pattern:
 - `components/complex-exercise/RunButton.tsx` - Child using orchestrator
 
 Each child component receives the orchestrator and uses `useOrchestratorStore(orchestrator)` to subscribe to state changes.
+
+## Frame and Timeline System
+
+### Frame Structure
+
+Frames represent execution states at specific points in time:
+
+```typescript
+interface Frame {
+  time: number; // Internal clock value (1 unit = 1/100 of a millisecond)
+  timelineTime: number; // Timeline position in milliseconds
+  line: number; // Line number in code
+  status: "SUCCESS" | "ERROR";
+  description: string; // Human-readable description
+}
+```
+
+**Time Scale:**
+
+- `time`: Internal clock that represents 1/100th of a millisecond per unit
+- `timelineTime`: Value in milliseconds for timeline positioning
+- This scaling avoids floating-point precision issues when scrubbing

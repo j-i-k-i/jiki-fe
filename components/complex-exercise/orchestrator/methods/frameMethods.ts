@@ -54,7 +54,6 @@ function findFrameNearestTimelineTime(this: Orchestrator, timelineTime: number):
   if (!frames?.length) {
     return null;
   }
-
   const lastFrame = frames[frames.length - 1];
 
   // If we're past the last frame, return the last frame

@@ -15,9 +15,6 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const animationTimeline = currentTest?.animationTimeline || null;
   const timelineValue = currentTest?.timelineValue || 0;
 
-  // Get the nearest frame to the current timeline position
-  const _currentFrame = orchestrator.getNearestCurrentFrame();
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
     orchestrator.setTimelineValue(newValue);

@@ -70,10 +70,10 @@ class Orchestrator {
     const mockTest: TestState = {
       frames: [
         { time: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
-        { time: 0.01, timelineTime: 1, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
-        { time: 0.02, timelineTime: 2, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
-        { time: 0.03, timelineTime: 3, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
-        { time: 0.04, timelineTime: 4, line: 5, status: "SUCCESS", description: "End" } as Frame
+        { time: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
+        { time: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
+        { time: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
+        { time: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
       ],
       animationTimeline: {
         duration: 5,
