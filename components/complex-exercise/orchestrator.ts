@@ -7,8 +7,6 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
 
-import { scrollToLine } from "../CodeMirror/scrollToLine";
-
 // Public read-only state that components can access
 export interface OrchestratorState {
   exerciseUuid: string;

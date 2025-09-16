@@ -13,6 +13,7 @@ Load the relevant context files from `.context/` directory based on your task:
 - `.context/deployment.md` - Deployment process and configuration
 - `.context/git.md` - Git hooks configuration
 - `.context/testing.md` - Testing setup and guidelines
+- `.context/orchestrator-pattern.md` - Orchestrator pattern for complex state management
 
 ## Quick Start
 

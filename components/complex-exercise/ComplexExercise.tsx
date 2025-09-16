@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Orchestrator, { useOrchestratorStore } from "./orchestrator";
+import Orchestrator, { useOrchestratorStore } from "./Orchestrator";
 import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
 
@@ -10,7 +10,7 @@ export default function ComplexExercise() {
   const orchestratorRef = useRef<Orchestrator>(
     new Orchestrator(
       "example-exercise-001",
-      `// Custom initial code\n function greet(name) {\n return "Hello, " + name + "!";\n }\n\n console.log(greet("World"));`
+      `// Custom initial code\nfunction greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("World"));`
     )
   );
   const orchestrator = orchestratorRef.current;
