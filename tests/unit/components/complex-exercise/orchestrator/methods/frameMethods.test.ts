@@ -41,13 +41,39 @@ function createMockOrchestrator(currentTest: any = null, foldedLines: number[] =
     }))
   );
 
+  // Create the orchestrator-like object with accessor methods
   const orchestrator = {
     exerciseUuid: "test-uuid",
     store,
     getStore: () => store,
-    getNearestCurrentFrame: getNearestCurrentFrame.bind({ store }),
+    _cachedCurrentFrame: undefined as any,
+    // Add state accessor methods
+    getCurrentTest: function () {
+      return store.getState().currentTest;
+    },
+    getCurrentTestFrames: function () {
+      const currentTest = store.getState().currentTest;
+      return currentTest ? currentTest.frames : null;
+    },
+    getFramesAndFoldedLines: function () {
+      const currentTest = store.getState().currentTest;
+      if (!currentTest) {
+        return null;
+      }
+      return {
+        frames: currentTest.frames,
+        foldedLines: store.getState().foldedLines
+      };
+    },
+    getFoldedLines: function () {
+      return store.getState().foldedLines;
+    },
+    getNearestCurrentFrame: jest.fn(),
     findNextFrame: jest.fn()
   } as unknown as Orchestrator;
+
+  // Bind getNearestCurrentFrame with proper context
+  orchestrator.getNearestCurrentFrame = getNearestCurrentFrame.bind(orchestrator);
 
   // Properly bind findNextFrame with access to store
   orchestrator.findNextFrame = function (currentIdx: number) {

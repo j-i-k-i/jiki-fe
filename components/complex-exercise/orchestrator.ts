@@ -8,6 +8,21 @@ import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { Frame, AnimationTimeline } from "./stubs";
 import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/methods/frameMethods";
+import {
+  getCode,
+  getOutput,
+  getStatus,
+  getError,
+  getHasCodeBeenEdited,
+  getIsSpotlightActive,
+  getFoldedLines,
+  getCurrentTest,
+  getCurrentTestFrames,
+  getCurrentTestAnimationTimeline,
+  getCurrentTestTimelineValue,
+  getFramesAndFoldedLines,
+  hasValidTest
+} from "./orchestrator/methods/stateAccessors";
 
 interface TestState {
   frames: Frame[];
@@ -164,6 +179,21 @@ class Orchestrator {
   setFoldedLines(lines: number[]) {
     this.store.getState().setFoldedLines(lines);
   }
+
+  // Protected state accessor methods from stateAccessors.ts
+  protected getCode = getCode.bind(this);
+  protected getOutput = getOutput.bind(this);
+  protected getStatus = getStatus.bind(this);
+  protected getError = getError.bind(this);
+  protected getHasCodeBeenEdited = getHasCodeBeenEdited.bind(this);
+  protected getIsSpotlightActive = getIsSpotlightActive.bind(this);
+  protected getFoldedLines = getFoldedLines.bind(this);
+  protected getCurrentTest = getCurrentTest.bind(this);
+  protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
+  protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
+  protected getCurrentTestTimelineValue = getCurrentTestTimelineValue.bind(this);
+  protected getFramesAndFoldedLines = getFramesAndFoldedLines.bind(this);
+  protected hasValidTest = hasValidTest.bind(this);
 
   // Methods from frameMethods.ts
   getNearestCurrentFrame = getNearestCurrentFrame.bind(this);
