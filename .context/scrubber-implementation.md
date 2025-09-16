@@ -1,86 +1,78 @@
 # Scrubber Implementation Details
 
+## Architecture
+
+The scrubber uses the orchestrator pattern for centralized state management with modular UI components.
+
 ## Core Components
 
-### Scrubber.tsx
+### Component Structure
 
-Main UI component containing:
+```
+components/complex-exercise/ui/scrubber/
+├── Scrubber.tsx              # Main container, coordinates state
+├── ScrubberInput.tsx          # Range input for timeline scrubbing
+└── FrameStepperButtons.tsx   # Previous/next frame navigation
+```
 
-- Play/pause button
-- Range input (HTML5 slider)
-- Frame stepper buttons (prev/next)
-- Breakpoint stepper buttons
-- Information widget toggle
-- Tooltip information
+### Orchestrator Integration
 
-### useScrubber Hook
+The orchestrator (`components/complex-exercise/lib/Orchestrator.ts`) manages:
 
-Complex state management hook handling:
-
-- Timeline synchronization
-- Frame navigation
-- Breakpoint detection
-- Keyboard shortcuts
-- Auto-pause on errors/breakpoints
+- Timeline state synchronization
+- Frame navigation logic
+- Timeline time calculations
+- Animation timeline integration
 
 ## Key Concepts
 
-### Timeline Time Scale
+### Timeline Time vs Interpreter Time
 
-- **Frame Time**: Increments by 0.01ms per expression
-- **Timeline Time**: Frame time × 100 (for integer precision)
-- **TIME_TO_TIMELINE_SCALE_FACTOR**: 100
-- All operations use integer timeline time to avoid floating point errors
+- **Interpreter Time**: Internal clock value from the interpreter
+- **Timeline Time**: Position on the animation timeline for UI
+- Orchestrator provides conversion methods between the two
 
-### Frame Finding Logic
+### Frame Navigation Methods
 
-Multiple finder functions handle navigation:
+The orchestrator provides key navigation methods:
 
 ```typescript
-findFrameIdxNearestTimelineTime(timelineTime);
-// Finds frame closest to given time, considering folded lines
+// Set timeline position directly
+orchestrator.setCurrentTestTimelineTime(timelineTime: number)
 
-findPrevFrameIdx(currentIdx);
-// Finds previous non-folded frame
+// Set by interpreter time (converts automatically)
+orchestrator.setCurrentTestInterpreterTime(interpreterTime: number)
 
-findNextFrame(currentIdx);
-// Finds next non-folded frame
+// Get nearest frame to current position
+orchestrator.getNearestCurrentFrame(): Frame | null
 
-findPrevBreakpointFrame(currentIndex);
-// Finds previous frame at a breakpoint line
-
-findNextBreakpointFrame(currentIndex);
-// Finds next frame at a breakpoint line
-
-findBreakpointFrameBetweenTimes(startTime, endTime);
-// Finds breakpoint frames in time range
+// Get current frame (cached for performance)
+orchestrator.getCurrentFrame(): Frame | null
 ```
 
-### State Synchronization
+### Component Responsibilities
 
-Three main synchronization points:
+1. **Scrubber.tsx**
+   - Manages enabled/disabled state logic
+   - Passes orchestrator to child components
+   - Handles container click to focus input
 
-1. **Animation Playing** (`onUpdate` callback)
-   - Updates timeline value as animation progresses
-   - Checks for breakpoints between frames
-   - Auto-pauses at breakpoints
-   - Marks timeline complete when finished
+2. **ScrubberInput.tsx**
+   - Range input for timeline scrubbing
+   - Calls `orchestrator.setCurrentTestTimelineTime` on change
+   - Snaps to nearest frame on mouse release
+   - Keyboard event handlers (space, arrows - TODO)
 
-2. **Manual Scrubbing** (`handleChange`)
-   - Updates timeline value from slider
-   - Finds nearest frame
-   - Seeks animation to that point
-   - Shows information widget
-
-3. **Frame Changes** (`useEffect` on `timelineValue`)
-   - Updates highlighted line in editor
-   - Updates information widget content
-   - Scrolls editor to line (if widget visible)
-   - Shows error details if frame has error
+3. **FrameStepperButtons.tsx**
+   - Previous/next frame navigation buttons
+   - Calculates frame existence for button states
+   - Calls orchestrator methods for navigation
 
 ## Navigation Controls
 
-### Keyboard Shortcuts
+### Keyboard Shortcuts (TODO)
+
+Planned keyboard shortcuts in ScrubberInput:
 
 - **Arrow Left**: Previous frame
 - **Arrow Right**: Next frame
@@ -90,95 +82,68 @@ Three main synchronization points:
 
 ### Mouse Interactions
 
-- **Scrub**: Drag slider to navigate
-- **Release**: Snaps to nearest frame
+- **Scrub**: Drag slider to navigate timeline
+- **Release**: Snaps to nearest frame via `getNearestCurrentFrame()`
 - **Frame Buttons**: Jump to prev/next frame
-- **Breakpoint Buttons**: Jump to prev/next breakpoint
+- **Container Click**: Focus input for keyboard control
 
-## Disabled States
+## Enabled State Logic
 
-Scrubber is disabled when:
+The scrubber uses a single-line enabled calculation:
 
-- Code has been edited (`hasCodeBeenEdited`)
-- Less than 2 frames exist
-- Spotlight mode is active (`isSpotlightActive`)
-
-## Error Handling
-
-### Initial Error Jump
-
-When frames change (new test run):
-
-1. Check for first error frame
-2. If breakpoint exists before error, jump there
-3. Otherwise jump directly to error frame
-4. Show information widget
-
-### Error Display
-
-Errors trigger:
-
-- Line highlighting with error color
-- Underline range for specific error location
-- Information widget with error details
-- Editor scroll to error line
-
-## Breakpoint Integration
-
-Breakpoints are editor line numbers where execution pauses:
-
-- Stored in `editorStore.breakpoints`
-- Checked during animation playback
-- Skipped if line is folded
-- Auto-show information widget at breakpoints
-
-## Folded Lines
-
-Folded lines in editor are:
-
-- Skipped during frame navigation
-- Not considered for breakpoints
-- Stored in `editorStore.foldedLines`
-
-## Information Widget
-
-Shows frame details:
-
-- Success: Frame description/value
-- Error: Error message and details
-- Controlled by `shouldShowInformationWidget`
-- Auto-scrolls editor when visible
-
-## Animation Timeline Integration
-
-### Methods Used
-
-- `play()`: Start animation playback
-- `pause()`: Stop animation
-- `seek(time)`: Jump to specific time
-- `seekEndOfTimeline()`: Jump to end
-- `onUpdate(callback)`: Animation progress callback
-
-### State Tracking
-
-- `hasPlayedOrScrubbed`: Prevents auto-reset
-- `paused`: Current play state
-- `completed`: Animation finished
-- `progress`: Current time position
-- `duration`: Total timeline length
-
-## Range Input Styling
-
-Dynamic gradient background shows progress:
-
-```javascript
-percentage = ((value - min) / (max - min)) * 100;
-background = `linear-gradient(to right, #7128F5 ${percentage}%, #fff ${percentage}%)`;
+```typescript
+const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 ```
 
-## Performance Optimizations
+All child components receive this as an `enabled` prop.
 
-- Update callbacks throttled to 60fps (16ms)
-- Batch state updates in effects
-- Use integer math for timeline calculations
-- Memoized frame finding functions
+## Frame Structure
+
+```typescript
+interface Frame {
+  interpreterTime: number; // Internal interpreter clock
+  timelineTime: number; // Timeline position for UI
+  line: number; // Code line number
+  status: "SUCCESS" | "ERROR";
+  description: string; // Human-readable description
+}
+```
+
+## Range Input Calculations
+
+### Min/Max Values
+
+```typescript
+// Min: -1 for single frame, 0 for multiple frames
+function calculateMinInputValue(frames: Frame[]) {
+  return frames.length < 2 ? -1 : 0;
+}
+
+// Max: Animation duration * 100
+function calculateMaxInputValue(animationTimeline: AnimationTimeline) {
+  return Math.round(animationTimeline.duration * 100);
+}
+```
+
+### Frame Snapping
+
+On mouse release, the scrubber snaps to the nearest frame:
+
+```typescript
+function handleOnMouseUp(orchestrator: Orchestrator) {
+  const nearestFrame = orchestrator.getNearestCurrentFrame();
+  if (nearestFrame) {
+    orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
+  }
+}
+```
+
+## Testing Strategy
+
+Tests are organized by component responsibility:
+
+- **Scrubber.test.tsx**: Container behavior and prop coordination
+- **ScrubberInput.test.tsx**: Range input, onChange, and frame snapping
+- **FrameStepperButtons.test.tsx**: Navigation button states and clicks
+
+Each test file uses consistent mock helpers at the top for creating test data.

@@ -42,30 +42,74 @@ pnpm run build   # Production build with Turbopack (AVOID - breaks dev server)
 - **Always use `npx tsc --noEmit` for TypeScript checking** instead of `pnpm run build`. Running the build command can cause the dev server to break with ENOENT errors for buildManifest.js.tmp files due to Turbopack cache conflicts.
 - Before fixing any ESLint errors, always read `.context/eslint.md` for guidelines on handling lint issues and when to add exception comments.
 
-## Project Structure
+## Project Structure Patterns
 
-This is the frontend for Jiki, a learn-to-code platform. Key aspects:
+This is the frontend for Jiki, a learn-to-code platform.
+
+### Core Technology Stack
 
 - **Framework**: Next.js 15 with App Router, TypeScript, React 19
 - **Styling**: Tailwind CSS v4
 - **Deployment**: Cloudflare Workers (Edge Runtime)
 - **Package Manager**: pnpm
 
-## Architecture Highlights
+### Organizational Patterns
 
-- **Exercise System**: Exercises are compiled and deployed with the app, executed locally using custom interpreters
-- **Content**: Markdown content is statically built at deployment time
-- **State Management**: User progress synced with Rails API backend
-- **i18n**: Full internationalization support with PPP pricing
-- **Performance**: Edge deployment for global low-latency access
+#### Component Organization
+
+Components follow a hierarchical pattern:
+
+- **Feature-based folders** in `/components/` (e.g., `complex-exercise/`)
+- **UI subfolder** for presentational components within features
+- **Lib subfolder** for business logic and utilities
+- **Single responsibility** - each component has one clear purpose
+
+#### State Management Patterns
+
+- **Orchestrator pattern** for complex features needing centralized state
+  - Class-based orchestrator with instance-based Zustand store
+  - Hook exports for React component integration
+  - Clear separation: read via hooks, write via orchestrator methods
+- **Local state** with useState/useReducer for simple components
+- **No global stores** - all state is scoped to component trees
+
+#### Testing Patterns
+
+Tests mirror source structure but are centralized:
+
+- `tests/unit/components/[feature]/` mirrors `components/[feature]/`
+- Parent component tests focus on integration
+- Child component tests focus on specific functionality
+- Consistent mock helper functions at top of test files
+
+#### File Organization Within Components
+
+Components follow a top-to-bottom flow:
+
+1. Imports
+2. Types/Interfaces
+3. Main component (what it renders)
+4. Sub-components (if any)
+5. Event handlers (can be module-level for testability)
+6. Helper functions (implementation details)
+
+This pattern makes components readable from high-level to low-level details.
+
+## Architecture Principles
+
+- **Feature isolation**: Each feature is self-contained with its own components, logic, and tests
+- **Prop drilling over context**: Pass orchestrators/props explicitly for clarity
+- **Composition over inheritance**: Use component composition and hooks
+- **Type safety everywhere**: Full TypeScript with strict mode
+- **Performance by default**: Edge deployment, code splitting, lazy loading
 
 ## Development Guidelines
 
-- Use TypeScript strict mode
-- Follow existing code patterns in `/app` directory
-- Path alias `@/*` maps to project root
-- Mobile-first responsive design
-- No commits unless explicitly requested
+- **Match existing patterns** - Look at similar features before implementing new ones
+- **Use semantic HTML** and accessibility attributes
+- **Mobile-first responsive design** with Tailwind
+- **Path alias** `@/*` maps to project root for clean imports
+- **Commit regularly** to save progress (but never on main branch)
 
 ## Testing Guidelines
 
@@ -122,6 +166,6 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
    ```
 
 2. **Continuous learning** - When you learn something important or make a mistake, immediately update the relevant .context file to prevent future errors
-3. **Regular commits** - Git commit regularly to save progress
+3. **Regular commits** - Git commit regularly to save progress (always on feature branches, never on main)
 4. **Post-task documentation** - Before committing, always check if any .context files need updating to reflect the new state of the codebase
 5. **Ask, don't guess** - Prefer asking questions over making assumptions. If multiple approaches exist, ask which to use

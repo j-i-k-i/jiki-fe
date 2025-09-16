@@ -100,16 +100,39 @@ Frames represent execution states at specific points in time:
 
 ```typescript
 interface Frame {
-  time: number; // Internal clock value (1 unit = 1/100 of a millisecond)
-  timelineTime: number; // Timeline position in milliseconds
+  interpreterTime: number; // Internal interpreter clock value
+  timelineTime: number; // Timeline position for animation/scrubbing
   line: number; // Line number in code
   status: "SUCCESS" | "ERROR";
   description: string; // Human-readable description
 }
 ```
 
-**Time Scale:**
+### Timeline Management
 
-- `time`: Internal clock that represents 1/100th of a millisecond per unit
-- `timelineTime`: Value in milliseconds for timeline positioning
-- This scaling avoids floating-point precision issues when scrubbing
+The orchestrator manages timeline state and provides methods for navigation:
+
+```typescript
+// Set the current timeline position
+orchestrator.setCurrentTestTimelineTime(timelineTime: number)
+
+// Set by interpreter time (automatically converts to timeline time)
+orchestrator.setCurrentTestInterpreterTime(interpreterTime: number)
+
+// Get nearest frame to current position
+orchestrator.getNearestCurrentFrame(): Frame | null
+```
+
+### Scrubber Components
+
+The scrubber UI is modularized into focused components:
+
+- `Scrubber.tsx` - Main container that coordinates state
+- `ScrubberInput.tsx` - Range input for timeline scrubbing
+- `FrameStepperButtons.tsx` - Previous/next frame navigation
+
+Each component receives the orchestrator and uses the enabled prop pattern:
+
+```typescript
+const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
+```

@@ -13,8 +13,12 @@ The project uses two testing approaches:
 
 - **Location**: `tests/unit/`
 - **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`
-- **Example**: `tests/unit/useScrubber.test.tsx`
+- **Examples**:
+  - `tests/unit/AnimationTimeline.test.ts`
+  - `tests/unit/components/complex-exercise/Scrubber.test.tsx`
+  - `tests/unit/components/complex-exercise/scrubber/ScrubberInput.test.tsx`
 - **Important**: All unit tests MUST be placed in the `tests/unit/` directory, not alongside source files
+- **Directory Structure**: Match the source directory structure within `tests/unit/`
 
 ### Integration Tests
 
@@ -57,10 +61,10 @@ The project uses two testing approaches:
 **After running tests, ALWAYS check for TypeScript errors by running:**
 
 ```bash
-pnpm run build
+npx tsc --noEmit
 ```
 
-This ensures that test changes haven't introduced any type errors.
+**Note**: Do NOT use `pnpm run build` during development as it can cause Turbopack cache conflicts and ENOENT errors. Use `npx tsc --noEmit` for type checking only.
 
 ### Unit/Integration Tests
 
@@ -129,6 +133,14 @@ describe("Feature E2E", () => {
 6. **Use descriptive test names** that explain what is being tested
 7. **E2E tests should test critical user journeys**
 8. **Keep E2E tests independent** - each test should be able to run in isolation
+9. **Component test organization**:
+   - Test parent components for integration behavior
+   - Test child components for specific functionality
+   - Use helper functions to create mock data consistently
+10. **Mock external dependencies** properly:
+    - Use `jest.mock()` for module mocking
+    - Create reusable mock factories for complex objects
+11. **Test component event handlers** to ensure functions are called with correct arguments
 
 ## CI/CD Integration
 
