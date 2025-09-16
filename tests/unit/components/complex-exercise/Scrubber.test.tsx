@@ -87,7 +87,7 @@ describe("Scrubber Component", () => {
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider") as HTMLInputElement;
+      const input = screen.getByRole("slider");
       expect(input).toBeDisabled();
       expect(input.min).toBe("-1"); // calculateMinInputValue([]) returns -1
       expect(input.max).toBe("0"); // calculateMaxInputValue({ duration: 0 }) returns 0
@@ -123,7 +123,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.min).toBe("-1");
       });
 
@@ -143,7 +143,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.min).toBe("0");
       });
 
@@ -163,7 +163,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.max).toBe("750"); // 7.5 * 100
       });
     });
@@ -185,7 +185,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.value).toBe("250");
       });
     });
@@ -347,7 +347,7 @@ describe("Scrubber Component", () => {
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider") as HTMLInputElement;
+      const input = screen.getByRole("slider");
       expect(input.min).toBe("-1");
     });
 
@@ -375,7 +375,7 @@ describe("Scrubber Component", () => {
 
         const { rerender } = render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.max).toBe(expected);
 
         rerender(<></>); // Clean up between test cases

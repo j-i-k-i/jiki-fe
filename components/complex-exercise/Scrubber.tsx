@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import type { Orchestrator } from "./orchestrator";
 import { useOrchestratorStore } from "./orchestrator";
+import type { Frame, AnimationTimeline, TestState } from "./stubs";
 
 interface ScrubberProps {
   orchestrator: Orchestrator;
@@ -11,9 +12,9 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const rangeRef = useRef<HTMLInputElement>(null);
 
   // Default values when no test is available
-  const frames = currentTest?.frames || [];
-  const animationTimeline = currentTest?.animationTimeline || null;
-  const timelineValue = currentTest?.timelineValue || 0;
+  const frames = currentTest?.frames ?? [];
+  const animationTimeline = currentTest?.animationTimeline ?? null;
+  const timelineValue = currentTest?.timelineValue ?? 0;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
@@ -22,15 +23,22 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
     // updateInputBackground() - commented out
   };
 
-  const handleOnKeyUp = (event: any, animationTimeline: any) => {
+  const handleOnKeyUp = (
+    _event: React.KeyboardEvent<HTMLInputElement>,
+    _animationTimeline: AnimationTimeline | null
+  ) => {
     // TODO: Implement
   };
 
-  const handleOnKeyDown = (event: any, animationTimeline: any, frames: any) => {
+  const handleOnKeyDown = (
+    _event: React.KeyboardEvent<HTMLInputElement>,
+    _animationTimeline: AnimationTimeline | null,
+    _frames: Frame[]
+  ) => {
     // TODO: Implement
   };
 
-  const handleOnMouseUp = (animationTimeline: any, frames: any) => {
+  const handleOnMouseUp = (_animationTimeline: AnimationTimeline | null, _frames: Frame[]) => {
     // TODO: Implement
   };
 
@@ -39,9 +47,9 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   };
 
   const shouldScrubberBeDisabled = (
-    currentTest: any,
+    currentTest: TestState | null,
     hasCodeBeenEdited: boolean,
-    frames: any[],
+    frames: Frame[],
     isSpotlightActive: boolean
   ) => {
     return !currentTest || hasCodeBeenEdited || isSpotlightActive || frames.length < 2;
@@ -80,7 +88,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         onKeyUp={(event) => handleOnKeyUp(event, animationTimeline)}
         onKeyDown={(event) => handleOnKeyDown(event, animationTimeline, frames)}
         min={calculateMinInputValue(frames)}
-        max={calculateMaxInputValue(animationTimeline || { duration: 0 })}
+        max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
         ref={rangeRef}
         onInput={updateInputBackground}
         value={timelineValue}
@@ -125,10 +133,10 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
 }
 
 // Helper functions
-function calculateMinInputValue(frames: any[]) {
+function calculateMinInputValue(frames: Frame[]) {
   return frames.length < 2 ? -1 : 0;
 }
 
-function calculateMaxInputValue(animationTimeline: any) {
+function calculateMaxInputValue(animationTimeline: AnimationTimeline | { duration: number }) {
   return Math.round(animationTimeline.duration * 100);
 }

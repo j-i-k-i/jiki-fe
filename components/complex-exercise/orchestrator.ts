@@ -6,7 +6,7 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
-import type { Frame, AnimationTimeline } from "./stubs";
+import type { Frame, AnimationTimeline, TestState } from "./stubs";
 import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/methods/frameMethods";
 import {
   getCode,
@@ -22,12 +22,6 @@ import {
   getCurrentTestTimelineValue,
   hasValidTest
 } from "./orchestrator/methods/stateAccessors";
-
-interface TestState {
-  frames: Frame[];
-  animationTimeline: AnimationTimeline;
-  timelineValue: number;
-}
 
 // Public read-only state that components can access
 export interface OrchestratorState {

@@ -27,6 +27,12 @@ export interface Frame {
   error?: StaticError;
 }
 
+export interface TestState {
+  frames: Frame[];
+  animationTimeline: AnimationTimeline;
+  timelineValue: number;
+}
+
 export interface StaticError {
   message: string;
   line?: number;
