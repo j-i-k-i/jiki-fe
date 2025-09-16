@@ -17,11 +17,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const animationTimeline = currentTest?.animationTimeline ?? null;
   const timelineTime = currentTest?.timelineTime ?? 0;
 
-  const shouldScrubberBeDisabled = () => {
-    return !currentTest || hasCodeBeenEdited || isSpotlightActive || frames.length < 2;
-  };
-
-  const isDisabled = shouldScrubberBeDisabled();
+  const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
   return (
     <div
@@ -36,7 +32,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
     >
       {/* <PlayPauseButton
         animationTimeline={animationTimeline}
-        disabled={isDisabled}
+        enabled={isEnabled}
         onPlay={() => {
           animationTimeline.play(() => setShouldShowInformationWidget(false))
         }}
@@ -50,20 +46,20 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         frames={frames}
         animationTimeline={animationTimeline}
         timelineTime={timelineTime}
-        disabled={isDisabled}
+        enabled={isEnabled}
       />
       <FrameStepperButtons
         orchestrator={orchestrator}
         frames={frames}
         timelineTime={timelineTime}
-        disabled={isDisabled}
+        enabled={isEnabled}
       />
       {/* <BreakpointStepperButtons
         currentFrame={_currentFrame}
         frames={frames}
         onNext={() => handleGoToNextBreakpoint(animationTimeline)}
         onPrev={() => handleGoToPreviousBreakpoint(animationTimeline)}
-        disabled={isDisabled}
+        enabled={isEnabled}
       /> */}
       {/* <InformationWidgetToggleButton
         disabled={hasCodeBeenEdited || isSpotlightActive}

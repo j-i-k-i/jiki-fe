@@ -6,22 +6,17 @@ interface FrameStepperButtonsProps {
   orchestrator: Orchestrator;
   frames: Frame[];
   timelineTime: number;
-  disabled: boolean;
+  enabled: boolean;
 }
 
-export default function FrameStepperButtons({
-  orchestrator,
-  frames,
-  timelineTime,
-  disabled
-}: FrameStepperButtonsProps) {
+export default function FrameStepperButtons({ orchestrator, frames, timelineTime, enabled }: FrameStepperButtonsProps) {
   const isPrevFrame = prevFrameExists(timelineTime, frames);
   const isNextFrame = nextFrameExists(timelineTime, frames);
 
   return (
     <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
       <button
-        disabled={disabled || !isPrevFrame}
+        disabled={!enabled || !isPrevFrame}
         onClick={() => handleGoToPreviousFrame(orchestrator, frames, timelineTime)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Previous frame"
@@ -29,7 +24,7 @@ export default function FrameStepperButtons({
         ←
       </button>
       <button
-        disabled={disabled || !isNextFrame}
+        disabled={!enabled || !isNextFrame}
         onClick={() => handleGoToNextFrame(orchestrator, frames, timelineTime)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Next frame"

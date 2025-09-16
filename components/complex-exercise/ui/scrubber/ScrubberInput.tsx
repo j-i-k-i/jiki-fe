@@ -7,15 +7,15 @@ interface ScrubberInputProps {
   frames: Frame[];
   animationTimeline: AnimationTimeline | null;
   timelineTime: number;
-  disabled: boolean;
+  enabled: boolean;
 }
 
 const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
-  ({ orchestrator, frames, animationTimeline, timelineTime, disabled }, ref) => {
+  ({ orchestrator, frames, animationTimeline, timelineTime, enabled }, ref) => {
     return (
       <input
         data-testid="scrubber-range-input"
-        disabled={disabled}
+        disabled={!enabled}
         type="range"
         className="w-full"
         onKeyUp={(event) => handleOnKeyUp(event, animationTimeline)}
