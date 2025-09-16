@@ -59,7 +59,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         rangeRef.current?.focus();
       }}
       tabIndex={-1}
-      className="relative group"
+      className="relative group flex-1"
     >
       {/* <PlayPauseButton
         animationTimeline={animationTimeline}
@@ -79,6 +79,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         data-testid="scrubber-range-input"
         disabled={shouldScrubberBeDisabled(currentTest, hasCodeBeenEdited, frames, isSpotlightActive)}
         type="range"
+        className="w-full"
         onKeyUp={(event) => handleOnKeyUp(event, animationTimeline)}
         onKeyDown={(event) => handleOnKeyDown(event, animationTimeline, frames)}
         min={calculateMinInputValue(frames)}

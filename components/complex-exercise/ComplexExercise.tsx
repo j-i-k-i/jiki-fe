@@ -5,6 +5,7 @@ import Orchestrator, { useOrchestratorStore } from "./orchestrator";
 import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
 import Scrubber from "./Scrubber";
+import FrameDescription from "./FrameDescription";
 
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance
@@ -35,7 +36,10 @@ export default function ComplexExercise() {
             <CodeEditor orchestrator={orchestrator} />
           </div>
           <div className="border-t border-gray-200 px-4 py-2">
-            <Scrubber orchestrator={orchestrator} />
+            <div className="flex items-center gap-4">
+              <Scrubber orchestrator={orchestrator} />
+              <FrameDescription orchestrator={orchestrator} />
+            </div>
           </div>
         </div>
 
