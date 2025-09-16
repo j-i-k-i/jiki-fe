@@ -13,7 +13,6 @@ interface TestState {
   frames: Frame[];
   animationTimeline: AnimationTimeline;
   timelineValue: number;
-  currentFrame?: Frame | null; // undefined means needs recalculation
 }
 
 // Public read-only state that components can access
@@ -46,6 +45,7 @@ type OrchestratorStore = OrchestratorState & OrchestratorActions;
 class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
+  protected _cachedCurrentFrame: Frame | null | undefined; // undefined means needs recalculation, not private so methods can access
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
@@ -105,8 +105,7 @@ class Orchestrator {
             return {
               currentTest: {
                 ...state.currentTest,
-                timelineValue: value,
-                currentFrame: undefined // Invalidate - will recalculate on next access
+                timelineValue: value
               }
             };
           }),
@@ -137,10 +136,12 @@ class Orchestrator {
   }
 
   setTimelineValue(value: number) {
+    this._cachedCurrentFrame = undefined; // Invalidate cache
     this.store.getState().setTimelineValue(value);
   }
 
   setCurrentTest(test: TestState | null) {
+    this._cachedCurrentFrame = undefined; // Invalidate cache when test changes
     this.store.getState().setCurrentTest(test);
   }
 

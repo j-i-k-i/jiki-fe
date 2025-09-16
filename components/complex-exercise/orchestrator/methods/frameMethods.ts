@@ -19,6 +19,10 @@ import type { Frame } from "../../stubs";
  * - Animation playback at arbitrary positions
  * - Determining which frame's information to display
  *
+ * Uses caching to avoid recalculation:
+ * - Cache is stored on the Orchestrator instance
+ * - Invalidated when timelineValue or currentTest changes
+ *
  * @returns The frame nearest to current timeline value, or null if no test
  */
 export function getNearestCurrentFrame(this: Orchestrator): Frame | null {
@@ -28,17 +32,15 @@ export function getNearestCurrentFrame(this: Orchestrator): Frame | null {
   }
 
   // Return cached value if available
-  if (state.currentTest.currentFrame !== undefined) {
-    return state.currentTest.currentFrame;
+  if (this._cachedCurrentFrame !== undefined) {
+    return this._cachedCurrentFrame;
   }
 
-  // Calculate the nearest frame
+  // Calculate and cache the nearest frame
   const { frames, timelineValue } = state.currentTest;
   const frame = findFrameNearestTimelineTime(timelineValue, frames);
 
-  // Cache the result
-  // @ts-ignore - we're mutating state directly for caching
-  state.currentTest.currentFrame = frame;
+  this._cachedCurrentFrame = frame;
 
   return frame;
 }

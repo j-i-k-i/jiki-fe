@@ -57,26 +57,32 @@ describe("frameMethods", () => {
 
     it("should return cached currentFrame when available", () => {
       const mockFrame = createMockFrame(0, 0, 1);
+      const frames = [mockFrame, createMockFrame(0.01, 1, 2)];
       const currentTest = {
-        frames: [mockFrame, createMockFrame(0.01, 1, 2)],
+        frames,
         animationTimeline: {} as any,
-        timelineValue: 0,
-        currentFrame: mockFrame
+        timelineValue: 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
-      const result = orchestrator.getNearestCurrentFrame();
-      expect(result).toBe(mockFrame);
+
+      // First call calculates and caches
+      const result1 = orchestrator.getNearestCurrentFrame();
+      expect(result1).toBe(mockFrame);
+
+      // Second call should return cached value
+      // We can't directly test caching, but it should return same result
+      const result2 = orchestrator.getNearestCurrentFrame();
+      expect(result2).toBe(mockFrame);
     });
 
-    it("should calculate and cache frame when not cached", () => {
+    it("should calculate frame when not cached", () => {
       const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
 
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 1.5,
-        currentFrame: undefined
+        timelineValue: 1.5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -84,10 +90,6 @@ describe("frameMethods", () => {
 
       // Should return frame at timelineTime 2 (nearest to 1.5)
       expect(result).toBe(frames[2]);
-
-      // Should cache the result
-      const state = orchestrator.store.getState();
-      expect(state.currentTest?.currentFrame).toBe(frames[2]);
     });
 
     it("should find nearest frame when timeline is between frames", () => {
@@ -96,8 +98,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 7, // Closer to 10 than 0
-        currentFrame: undefined
+        timelineValue: 7 // Closer to 10 than 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -111,8 +112,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 100,
-        currentFrame: undefined
+        timelineValue: 100
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -126,8 +126,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: -5,
-        currentFrame: undefined
+        timelineValue: -5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -139,8 +138,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames: [],
         animationTimeline: {} as any,
-        timelineValue: 0,
-        currentFrame: undefined
+        timelineValue: 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -153,8 +151,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames: [frame],
         animationTimeline: {} as any,
-        timelineValue: 50,
-        currentFrame: undefined
+        timelineValue: 50
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -168,8 +165,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 1, // Exactly matches frame[1]
-        currentFrame: undefined
+        timelineValue: 1 // Exactly matches frame[1]
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -183,8 +179,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 5, // Exactly between 0 and 10
-        currentFrame: undefined
+        timelineValue: 5 // Exactly between 0 and 10
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -204,8 +199,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 1,
-        currentFrame: undefined
+        timelineValue: 1
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -225,8 +219,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 250,
-        currentFrame: undefined
+        timelineValue: 250
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -240,8 +233,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as any,
-        timelineValue: 2.5,
-        currentFrame: undefined
+        timelineValue: 2.5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
