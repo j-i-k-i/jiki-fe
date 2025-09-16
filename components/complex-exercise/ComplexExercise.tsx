@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "./orchestrator";
 import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
+import Scrubber from "./Scrubber";
 
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance
@@ -32,6 +33,9 @@ export default function ComplexExercise() {
           </div>
           <div className="flex-1 p-4">
             <CodeEditor orchestrator={orchestrator} />
+          </div>
+          <div className="border-t border-gray-200 px-4 py-2">
+            <Scrubber orchestrator={orchestrator} />
           </div>
         </div>
 

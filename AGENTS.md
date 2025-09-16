@@ -6,6 +6,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 Load the relevant context files from `.context/` directory based on your task:
 
+- **`.context/coding-style.md`** - **ALWAYS READ THIS FIRST** - Coding style and file organization guidelines
 - `.context/about-jiki.md` - Overview of Jiki platform and business model
 - `.context/commands.md` - Development commands and scripts
 - `.context/tech-stack.md` - Technologies, frameworks, and dependencies
@@ -65,6 +66,7 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 - Integration tests go in `tests/integration/` directory
 - E2E tests go in `tests/e2e/` directory
 - Never place test files alongside source files
+- **ALWAYS run `pnpm run build` after running tests to check for TypeScript errors**
 
 ## Git Workflow
 

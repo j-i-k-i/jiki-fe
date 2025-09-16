@@ -52,6 +52,16 @@ The project uses two testing approaches:
 
 ## Running Tests
 
+### Important: Always Check TypeScript After Tests
+
+**After running tests, ALWAYS check for TypeScript errors by running:**
+
+```bash
+pnpm run build
+```
+
+This ensures that test changes haven't introduced any type errors.
+
 ### Unit/Integration Tests
 
 ```bash
@@ -111,12 +121,14 @@ describe("Feature E2E", () => {
 ### Best Practices
 
 1. **Test user behavior, not implementation details**
-2. **Use semantic queries** (getByRole, getByLabelText) over test IDs
-3. **Group related tests** using `describe` blocks
-4. **Keep tests focused** - one assertion per test when possible
-5. **Use descriptive test names** that explain what is being tested
-6. **E2E tests should test critical user journeys**
-7. **Keep E2E tests independent** - each test should be able to run in isolation
+2. **Use semantic queries** (getByRole, getByLabelText) over test IDs when possible
+3. **Use `data-testid` attributes for test selectors** when semantic queries aren't sufficient
+   - Example: `<div data-testid="scrubber">` can be queried with `screen.getByTestId('scrubber')`
+4. **Group related tests** using `describe` blocks
+5. **Keep tests focused** - one assertion per test when possible
+6. **Use descriptive test names** that explain what is being tested
+7. **E2E tests should test critical user journeys**
+8. **Keep E2E tests independent** - each test should be able to run in isolation
 
 ## CI/CD Integration
 
