@@ -196,3 +196,4 @@ export function useOrchestratorStore(orchestrator: Orchestrator): OrchestratorSt
 }
 
 export default Orchestrator;
+export type { Orchestrator };

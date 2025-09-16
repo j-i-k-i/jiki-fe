@@ -1,4 +1,4 @@
-import type Orchestrator from "@/components/complex-exercise/orchestrator";
+import type { Orchestrator } from "@/components/complex-exercise/orchestrator";
 import type { Frame } from "@/components/complex-exercise/stubs";
 import { getNearestCurrentFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
 import { createStore, type StoreApi } from "zustand/vanilla";

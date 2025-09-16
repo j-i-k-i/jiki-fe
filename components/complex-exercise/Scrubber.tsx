@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import type Orchestrator from "./orchestrator";
+import type { Orchestrator } from "./orchestrator";
 import { useOrchestratorStore } from "./orchestrator";
 
 interface ScrubberProps {
