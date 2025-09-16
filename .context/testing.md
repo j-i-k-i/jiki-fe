@@ -9,7 +9,14 @@ The project uses two testing approaches:
 
 ## Test Structure
 
-### Unit/Integration Tests
+### Unit Tests
+
+- **Location**: `tests/unit/`
+- **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`
+- **Example**: `tests/unit/useScrubber.test.tsx`
+- **Important**: All unit tests MUST be placed in the `tests/unit/` directory, not alongside source files
+
+### Integration Tests
 
 - **Location**: `tests/integration/`
 - **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`

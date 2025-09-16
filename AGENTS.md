@@ -56,6 +56,15 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 - Mobile-first responsive design
 - No commits unless explicitly requested
 
+## Testing Guidelines
+
+**IMPORTANT: Always read `.context/testing.md` before writing tests**
+
+- Unit tests MUST be placed in `tests/unit/` directory
+- Integration tests go in `tests/integration/` directory
+- E2E tests go in `tests/e2e/` directory
+- Never place test files alongside source files
+
 ## Git Workflow
 
 ### Branching and Pull Requests
