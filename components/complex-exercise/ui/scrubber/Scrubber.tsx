@@ -16,7 +16,6 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const frames = currentTest?.frames ?? [];
   const animationTimeline = currentTest?.animationTimeline ?? null;
   const timelineTime = currentTest?.timelineTime ?? 0;
-
   const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
   return (
