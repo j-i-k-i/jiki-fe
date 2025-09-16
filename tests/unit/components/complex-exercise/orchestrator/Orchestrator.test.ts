@@ -72,7 +72,7 @@ describe("Orchestrator", () => {
       // First, set the cache to something
       orchestrator._cachedCurrentFrame = {
         line: 1,
-        time: 0,
+        interpreterTime: 0,
         timelineTime: 0,
         status: "SUCCESS"
       };
@@ -89,7 +89,7 @@ describe("Orchestrator", () => {
       // Set cache
       orchestrator._cachedCurrentFrame = {
         line: 1,
-        time: 0,
+        interpreterTime: 0,
         timelineTime: 0,
         status: "SUCCESS"
       };
@@ -111,7 +111,7 @@ describe("Orchestrator", () => {
       // Set cache
       orchestrator._cachedCurrentFrame = {
         line: 1,
-        time: 0,
+        interpreterTime: 0,
         timelineTime: 0,
         status: "SUCCESS"
       };

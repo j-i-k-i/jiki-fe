@@ -6,9 +6,9 @@ import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 
 // Helper to create mock frames
-function createMockFrame(time: number, timelineTime: number, line: number): Frame {
+function createMockFrame(interpreterTime: number, timelineTime: number, line: number): Frame {
   return {
-    time,
+    interpreterTime,
     timelineTime,
     line,
     status: "SUCCESS" as const,

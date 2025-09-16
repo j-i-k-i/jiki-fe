@@ -4,6 +4,8 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Context Files
 
+Context files explain how everthing works. If the human MENTIONS something that MIGHT BE explained by one or more of these files, READ THE FILES before putting together any plan or action.
+
 Load the relevant context files from `.context/` directory based on your task:
 
 - **`.context/coding-style.md`** - **ALWAYS READ THIS FIRST** - Coding style and file organization guidelines
@@ -13,9 +15,9 @@ Load the relevant context files from `.context/` directory based on your task:
 - `.context/architecture.md` - Frontend architecture and design decisions
 - `.context/deployment.md` - Deployment process and configuration
 - `.context/git.md` - Git hooks configuration
-- `.context/testing.md` - Testing setup and guidelines
+- `.context/testing.md` - Testing setup and guidelines. **ALWAYS READ THIS BEFORE EDITING OR ADDING TESTS.**
 - `.context/orchestrator-pattern.md` - Orchestrator pattern for complex state management
-- `.context/eslint.md` - ESLint configuration and how to handle lint errors
+- `.context/eslint.md` - ESLint configuration and how to handle lint errors. **ALWAYS READ THIS BEFORE LINTING**
 
 ## Quick Start
 
@@ -27,14 +29,18 @@ Load the relevant context files from `.context/` directory based on your task:
 
 Starts the development server on http://localhost:3060
 
-### Build & Lint
+### Build, TypeScript & Lint
 
 ```bash
-pnpm run build   # Production build with Turbopack
+npx tsc --noEmit # Check TypeScript types (use this instead of build)
 pnpm run lint    # Run ESLint
+pnpm run build   # Production build with Turbopack (AVOID - breaks dev server)
 ```
 
-**IMPORTANT**: Before fixing any ESLint errors, always read `.context/eslint.md` for guidelines on handling lint issues and when to add exception comments.
+**IMPORTANT**:
+
+- **Always use `npx tsc --noEmit` for TypeScript checking** instead of `pnpm run build`. Running the build command can cause the dev server to break with ENOENT errors for buildManifest.js.tmp files due to Turbopack cache conflicts.
+- Before fixing any ESLint errors, always read `.context/eslint.md` for guidelines on handling lint issues and when to add exception comments.
 
 ## Project Structure
 
@@ -69,7 +75,7 @@ This is the frontend for Jiki, a learn-to-code platform. Key aspects:
 - Integration tests go in `tests/integration/` directory
 - E2E tests go in `tests/e2e/` directory
 - Never place test files alongside source files
-- **ALWAYS run `pnpm run build` after running tests to check for TypeScript errors**
+- **ALWAYS run `npx tsc --noEmit` after running tests to check for TypeScript errors**
 
 ## Git Workflow
 

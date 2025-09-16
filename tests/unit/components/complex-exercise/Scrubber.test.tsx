@@ -18,7 +18,7 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
   return Array.from({ length: count }, (_, i) => ({
-    time: i * 0.01,
+    interpreterTime: i * 0.01,
     timelineTime: i,
     line: i + 1,
     status: "SUCCESS" as const,

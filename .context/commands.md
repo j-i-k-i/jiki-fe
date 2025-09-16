@@ -3,9 +3,10 @@
 ## Core Commands
 
 - `./bin/dev` or `pnpm run dev` - Start development server on port 3060
-- `pnpm run build` - Build production bundle with Turbopack
-- `pnpm run start` - Start production server
+- `npx tsc --noEmit` - Check TypeScript types (preferred for type checking)
 - `pnpm run lint` - Run ESLint for code quality checks
+- `pnpm run build` - Build production bundle with Turbopack (AVOID during dev - can break dev server)
+- `pnpm run start` - Start production server
 
 ## Testing Commands
 
@@ -13,6 +14,7 @@
 
 - `pnpm test` - Run unit tests once
 - `pnpm test:watch` - Run unit tests in watch mode
+- `npx tsc --noEmit` - Run after tests to check for TypeScript errors
 
 ### E2E Tests
 
@@ -40,3 +42,11 @@ The dev server runs on port 3060 by default:
 - URL: http://localhost:3060
 - Uses Next.js Turbopack for fast refresh
 - Hot module replacement enabled
+
+### Troubleshooting Dev Server
+
+**ENOENT buildManifest.js.tmp errors**: If you encounter these errors after running `pnpm run build`, the dev server's Turbopack cache is corrupted. Fix by:
+
+1. Stop the dev server (Ctrl+C)
+2. Restart with `pnpm run dev` (manual restart fixes the cache)
+3. Avoid running `pnpm run build` while developing - use `npx tsc --noEmit` for type checking instead

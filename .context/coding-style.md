@@ -75,6 +75,7 @@ function formatValue(value: number): string {
 - Use descriptive variable names
 - Keep functions small and focused on a single responsibility
 - Group related functionality together
+- Check TypeScript types with `npx tsc --noEmit` (not `pnpm run build` which can break dev server)
 
 ### React Specific
 
