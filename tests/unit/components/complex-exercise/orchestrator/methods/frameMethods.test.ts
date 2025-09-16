@@ -1,6 +1,7 @@
-import type { Orchestrator } from "@/components/complex-exercise/orchestrator";
-import type { Frame, TestState } from "@/components/complex-exercise/stubs";
-import { getNearestCurrentFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
+import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
+import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import type { TestState } from "@/components/complex-exercise/lib/types";
+import { getNearestCurrentFrame } from "@/components/complex-exercise/lib/orchestrator/frameMethods";
 import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -99,7 +100,7 @@ describe("frameMethods", () => {
       const frames = [mockFrame, createMockFrame(0.01, 1, 2)];
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 0
       };
 
@@ -120,7 +121,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 1.5
       };
 
@@ -136,7 +137,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 7 // Closer to 10 than 0
       };
 
@@ -150,7 +151,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 100
       };
 
@@ -164,7 +165,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: -5
       };
 
@@ -176,7 +177,7 @@ describe("frameMethods", () => {
     it("should return null when frames array is empty", () => {
       const currentTest = {
         frames: [],
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 0
       };
 
@@ -189,7 +190,7 @@ describe("frameMethods", () => {
       const frame = createMockFrame(0, 0, 1);
       const currentTest = {
         frames: [frame],
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 50
       };
 
@@ -203,7 +204,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 1 // Exactly matches frame[1]
       };
 
@@ -217,7 +218,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 5 // Exactly between 0 and 10
       };
 
@@ -237,7 +238,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 1
       };
 
@@ -257,7 +258,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 250
       };
 
@@ -271,7 +272,7 @@ describe("frameMethods", () => {
 
       const currentTest = {
         frames,
-        animationTimeline: {} as unknown,
+        animationTimeline: {} as AnimationTimeline,
         timelineValue: 2.5
       };
 
@@ -297,7 +298,11 @@ describe("frameMethods", () => {
         createMockFrame(0.03, 3, 4)
       ];
 
-      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as unknown, timelineValue: 0 });
+      const orchestrator = createMockOrchestrator({
+        frames,
+        animationTimeline: {} as AnimationTimeline,
+        timelineValue: 0
+      });
       const result = orchestrator.findNextFrame(1);
       expect(result).toBe(frames[2]);
     });
@@ -313,7 +318,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [3, 4]; // Lines 3 and 4 are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as unknown, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(1);
@@ -323,7 +328,11 @@ describe("frameMethods", () => {
     it("should return undefined when at the last frame", () => {
       const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
 
-      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as unknown, timelineValue: 0 });
+      const orchestrator = createMockOrchestrator({
+        frames,
+        animationTimeline: {} as AnimationTimeline,
+        timelineValue: 0
+      });
       const result = orchestrator.findNextFrame(2);
       expect(result).toBeUndefined();
     });
@@ -338,7 +347,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [3, 4]; // Last two lines are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as unknown, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(1);
@@ -348,13 +357,21 @@ describe("frameMethods", () => {
     it("should handle starting from index 0", () => {
       const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
 
-      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as unknown, timelineValue: 0 });
+      const orchestrator = createMockOrchestrator({
+        frames,
+        animationTimeline: {} as AnimationTimeline,
+        timelineValue: 0
+      });
       const result = orchestrator.findNextFrame(0);
       expect(result).toBe(frames[1]);
     });
 
     it("should handle empty frames array", () => {
-      const orchestrator = createMockOrchestrator({ frames: [], animationTimeline: {} as unknown, timelineValue: 0 });
+      const orchestrator = createMockOrchestrator({
+        frames: [],
+        animationTimeline: {} as AnimationTimeline,
+        timelineValue: 0
+      });
       const result = orchestrator.findNextFrame(0);
       expect(result).toBeUndefined();
     });
@@ -371,7 +388,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [2, 3, 4]; // Middle frames are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as unknown, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(0);

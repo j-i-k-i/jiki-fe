@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import Orchestrator, { useOrchestratorStore } from "./orchestrator";
-import CodeEditor from "./CodeEditor";
-import RunButton from "./RunButton";
-import Scrubber from "./Scrubber";
-import FrameDescription from "./FrameDescription";
+import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
+import CodeEditor from "./ui/CodeEditor";
+import RunButton from "./ui/RunButton";
+import Scrubber from "./ui/Scrubber";
+import FrameDescription from "./ui/FrameDescription";
 
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance

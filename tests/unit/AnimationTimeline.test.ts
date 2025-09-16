@@ -1,7 +1,7 @@
-import { AnimationTimeline } from "@/components/complex-exercise/AnimationTimeline";
+import { AnimationTimeline } from "@/components/complex-exercise/lib/AnimationTimeline";
 import { createTimeline } from "animejs";
 import type { Timeline, DefaultsParams } from "animejs";
-import type { Frame } from "@/components/complex-exercise/stubs";
+import type { Frame } from "@/components/complex-exercise/lib/stubs";
 
 // Mock animejs
 jest.mock("animejs", () => ({

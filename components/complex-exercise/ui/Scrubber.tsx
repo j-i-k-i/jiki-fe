@@ -1,7 +1,8 @@
 import React, { useRef } from "react";
-import type { Orchestrator } from "./orchestrator";
-import { useOrchestratorStore } from "./orchestrator";
-import type { Frame, AnimationTimeline, TestState } from "./stubs";
+import type { Orchestrator } from "../lib/Orchestrator";
+import { useOrchestratorStore } from "../lib/Orchestrator";
+import type { Frame, AnimationTimeline } from "../lib/stubs";
+import type { TestState } from "../lib/types";
 
 interface ScrubberProps {
   orchestrator: Orchestrator;

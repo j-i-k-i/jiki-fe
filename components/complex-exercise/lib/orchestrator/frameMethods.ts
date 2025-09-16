@@ -1,5 +1,5 @@
-import type { Orchestrator } from "../../orchestrator";
-import type { Frame } from "../../stubs";
+import type { Orchestrator } from "../Orchestrator";
+import type { Frame } from "../stubs";
 
 /**
  * Gets the frame nearest to the current timeline value.

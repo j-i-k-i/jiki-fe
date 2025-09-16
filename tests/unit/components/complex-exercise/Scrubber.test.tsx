@@ -1,13 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+// ESLint thinks the type assertion is unnecessary but TypeScript needs it to access HTMLInputElement
+// properties like min, max, and value. This is a known issue with @testing-library/react types.
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Scrubber from "@/components/complex-exercise/Scrubber";
-import type { Orchestrator } from "@/components/complex-exercise/orchestrator";
-import type { Frame, AnimationTimeline } from "@/components/complex-exercise/stubs";
-import { useOrchestratorStore } from "@/components/complex-exercise/orchestrator";
+import Scrubber from "@/components/complex-exercise/ui/Scrubber";
+import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
+import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 
 // Mock the orchestrator store hook
-jest.mock("@/components/complex-exercise/orchestrator", () => ({
+jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
   useOrchestratorStore: jest.fn(),
   default: jest.fn()
 }));
@@ -87,7 +90,7 @@ describe("Scrubber Component", () => {
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider");
+      const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input).toBeDisabled();
       expect(input.min).toBe("-1"); // calculateMinInputValue([]) returns -1
       expect(input.max).toBe("0"); // calculateMaxInputValue({ duration: 0 }) returns 0
@@ -123,7 +126,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input.min).toBe("-1");
       });
 
@@ -143,7 +146,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input.min).toBe("0");
       });
 
@@ -163,7 +166,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input.max).toBe("750"); // 7.5 * 100
       });
     });
@@ -185,7 +188,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input.value).toBe("250");
       });
     });
@@ -207,7 +210,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         fireEvent.change(input, { target: { value: "300" } });
 
         expect(mockOrchestrator.setTimelineValue).toHaveBeenCalledWith(300);
@@ -233,7 +236,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input).toBeDisabled();
       });
 
@@ -254,7 +257,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input).toBeDisabled();
       });
 
@@ -274,7 +277,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input).toBeDisabled();
       });
 
@@ -294,7 +297,7 @@ describe("Scrubber Component", () => {
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input).not.toBeDisabled();
       });
     });
@@ -317,7 +320,7 @@ describe("Scrubber Component", () => {
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
         const container = screen.getByTestId("scrubber");
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
 
         // Mock the focus method
         const focusSpy = jest.spyOn(input, "focus");
@@ -347,7 +350,7 @@ describe("Scrubber Component", () => {
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider");
+      const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input.min).toBe("-1");
     });
 
@@ -375,7 +378,7 @@ describe("Scrubber Component", () => {
 
         const { rerender } = render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider");
+        const input = screen.getByRole("slider") as HTMLInputElement;
         expect(input.max).toBe(expected);
 
         rerender(<></>); // Clean up between test cases

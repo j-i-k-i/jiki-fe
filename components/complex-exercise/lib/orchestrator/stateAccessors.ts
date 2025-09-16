@@ -8,8 +8,8 @@
  * For reactive access in React components, use the useOrchestratorStore hook instead.
  */
 
-import type { Orchestrator } from "../../orchestrator";
-import type { Frame, AnimationTimeline } from "../../stubs";
+import type { Orchestrator } from "../Orchestrator";
+import type { Frame, AnimationTimeline } from "../stubs";
 
 // ========================================
 // Primary State Accessors

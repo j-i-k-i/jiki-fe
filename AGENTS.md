@@ -15,6 +15,7 @@ Load the relevant context files from `.context/` directory based on your task:
 - `.context/git.md` - Git hooks configuration
 - `.context/testing.md` - Testing setup and guidelines
 - `.context/orchestrator-pattern.md` - Orchestrator pattern for complex state management
+- `.context/eslint.md` - ESLint configuration and how to handle lint errors
 
 ## Quick Start
 
@@ -32,6 +33,8 @@ Starts the development server on http://localhost:3060
 pnpm run build   # Production build with Turbopack
 pnpm run lint    # Run ESLint
 ```
+
+**IMPORTANT**: Before fixing any ESLint errors, always read `.context/eslint.md` for guidelines on handling lint issues and when to add exception comments.
 
 ## Project Structure
 

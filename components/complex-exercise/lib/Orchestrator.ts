@@ -6,8 +6,9 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
-import type { Frame, AnimationTimeline, TestState } from "./stubs";
-import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/methods/frameMethods";
+import type { Frame, AnimationTimeline } from "./stubs";
+import type { TestState, OrchestratorState } from "./types";
+import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/frameMethods";
 import {
   getCode,
   getOutput,
@@ -21,20 +22,7 @@ import {
   getCurrentTestAnimationTimeline,
   getCurrentTestTimelineValue,
   hasValidTest
-} from "./orchestrator/methods/stateAccessors";
-
-// Public read-only state that components can access
-export interface OrchestratorState {
-  exerciseUuid: string;
-  code: string;
-  output: string;
-  status: "idle" | "running" | "success" | "error";
-  error: string | null;
-  currentTest: TestState | null;
-  hasCodeBeenEdited: boolean;
-  isSpotlightActive: boolean;
-  foldedLines: number[]; // Line numbers that are currently folded in the editor
-}
+} from "./orchestrator/stateAccessors";
 
 // Private actions only accessible within the orchestrator
 interface OrchestratorActions {

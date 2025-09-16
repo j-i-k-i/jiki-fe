@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import type { Orchestrator } from "./orchestrator";
-import { useOrchestratorStore } from "./orchestrator";
+import type { Orchestrator } from "../lib/Orchestrator";
+import { useOrchestratorStore } from "../lib/Orchestrator";
 
 interface FrameDescriptionProps {
   orchestrator: Orchestrator;
