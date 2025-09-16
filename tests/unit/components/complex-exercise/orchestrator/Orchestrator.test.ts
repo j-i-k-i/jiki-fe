@@ -31,7 +31,7 @@ describe("Orchestrator", () => {
 
       expect(state.currentTest).not.toBeNull();
       expect(state.currentTest?.frames).toHaveLength(5);
-      expect(state.currentTest?.timelineValue).toBe(0);
+      expect(state.currentTest?.timelineTime).toBe(0);
       expect(state.currentTest?.animationTimeline).toBeDefined();
     });
 
@@ -66,7 +66,7 @@ describe("Orchestrator", () => {
       expect(orchestrator._cachedCurrentFrame).toBeUndefined();
     });
 
-    it("should invalidate cache when setTimelineValue is called", () => {
+    it("should invalidate cache when setCurrentTestTimelineTime is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
       // First, set the cache to something
@@ -77,8 +77,8 @@ describe("Orchestrator", () => {
         status: "SUCCESS"
       };
 
-      // Call setTimelineValue which should invalidate
-      orchestrator.setTimelineValue(100);
+      // Call setCurrentTestTimelineTime which should invalidate
+      orchestrator.setCurrentTestTimelineTime(100);
 
       expect(orchestrator._cachedCurrentFrame).toBeUndefined();
     });
@@ -97,7 +97,7 @@ describe("Orchestrator", () => {
       const newTest: TestState = {
         frames: [],
         animationTimeline: { duration: 5 } as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       };
 
       orchestrator.setCurrentTest(newTest);

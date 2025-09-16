@@ -15,12 +15,11 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   // Default values when no test is available
   const frames = currentTest?.frames ?? [];
   const animationTimeline = currentTest?.animationTimeline ?? null;
-  const timelineValue = currentTest?.timelineValue ?? 0;
+  const timelineTime = currentTest?.timelineTime ?? 0;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
-    orchestrator.setTimelineValue(newValue);
-    animationTimeline?.seek(newValue / 100);
+    orchestrator.setCurrentTestTimelineTime(newValue);
     // updateInputBackground() - commented out
   };
 
@@ -92,24 +91,20 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
         ref={rangeRef}
         onInput={updateInputBackground}
-        value={timelineValue}
+        value={timelineTime}
         onChange={(event) => {
           handleChange(event);
           updateInputBackground();
         }}
         onMouseUp={() => handleOnMouseUp(animationTimeline, frames)}
       />
-      {/* <FrameStepperButtons
-        timelineTime={timelineValue}
+      <FrameStepperButtons
+        timelineTime={timelineTime}
         frames={frames}
-        onNext={() => handleGoToNextFrame(animationTimeline, frames)}
-        onPrev={() => handleGoToPreviousFrame(animationTimeline, frames)}
-        disabled={shouldScrubberBeDisabled(
-          hasCodeBeenEdited,
-          frames,
-          isSpotlightActive
-        )}
-      /> */}
+        onNext={() => handleGoToNextFrame(orchestrator, frames, timelineTime)}
+        onPrev={() => handleGoToPreviousFrame(orchestrator, frames, timelineTime)}
+        disabled={shouldScrubberBeDisabled(currentTest, hasCodeBeenEdited, frames, isSpotlightActive)}
+      />
       {/* <BreakpointStepperButtons
         currentFrame={_currentFrame}
         frames={frames}
@@ -133,11 +128,87 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   );
 }
 
-// Helper functions
+function FrameStepperButtons({
+  timelineTime,
+  frames,
+  onNext,
+  onPrev,
+  disabled
+}: {
+  timelineTime: number;
+  frames: Frame[];
+  onNext: () => void;
+  onPrev: () => void;
+  disabled: boolean;
+}) {
+  const isPrevFrame = prevFrameExists(timelineTime, frames);
+  const isNextFrame = nextFrameExists(timelineTime, frames);
+  return (
+    <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
+      <button
+        disabled={disabled || !isPrevFrame}
+        onClick={onPrev}
+        className="p-1 border rounded disabled:opacity-50"
+        aria-label="Previous frame"
+      >
+        ←
+      </button>
+      <button
+        disabled={disabled || !isNextFrame}
+        onClick={onNext}
+        className="p-1 border rounded disabled:opacity-50"
+        aria-label="Next frame"
+      >
+        →
+      </button>
+    </div>
+  );
+}
+
+/* ************** */
+/* ************** */
+/* EVENT HANDLERS */
+/* ************** */
+/* ************** */
+
+function handleGoToPreviousFrame(orchestrator: Orchestrator, frames: Frame[], currentTimelineTime: number) {
+  const previousFrames = frames.filter((frame) => frame.timelineTime < currentTimelineTime);
+  if (previousFrames.length > 0) {
+    const previousFrame = previousFrames[previousFrames.length - 1];
+    orchestrator.setCurrentTestTimelineTime(previousFrame.timelineTime);
+  }
+}
+
+function handleGoToNextFrame(orchestrator: Orchestrator, frames: Frame[], currentTimelineTime: number) {
+  const nextFrame = frames.find((frame) => frame.timelineTime > currentTimelineTime);
+  if (nextFrame) {
+    orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
+  }
+}
+
+/* **************** */
+/* **************** */
+/* HELPER FUNCTIONS */
+/* **************** */
+/* **************** */
 function calculateMinInputValue(frames: Frame[]) {
   return frames.length < 2 ? -1 : 0;
 }
 
 function calculateMaxInputValue(animationTimeline: AnimationTimeline | { duration: number }) {
   return Math.round(animationTimeline.duration * 100);
+}
+
+function prevFrameExists(timelineTime: number, frames: Frame[]): boolean {
+  if (frames.length === 0) {
+    return false;
+  }
+  return frames.some((frame) => frame.timelineTime < timelineTime);
+}
+
+function nextFrameExists(timelineTime: number, frames: Frame[]): boolean {
+  if (frames.length === 0) {
+    return false;
+  }
+  return frames.some((frame) => frame.timelineTime > timelineTime);
 }

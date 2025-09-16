@@ -20,7 +20,7 @@ export interface AnimationTimeline {
 
 export interface Frame {
   line: number;
-  time: number;
+  interpreterTime: number;
   timelineTime: number;
   status: "SUCCESS" | "ERROR";
   description?: string;

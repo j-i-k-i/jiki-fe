@@ -52,7 +52,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setTimelineValue: jest.fn(),
+    setCurrentTestTimelineTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -119,7 +119,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(1),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -139,7 +139,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(3),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -159,7 +159,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(5),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -172,7 +172,7 @@ describe("Scrubber Component", () => {
     });
 
     describe("current value", () => {
-      it("should display the current timelineValue", () => {
+      it("should display the current timelineTime", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(10);
 
@@ -181,7 +181,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(5),
               animationTimeline: mockTimeline,
-              timelineValue: 250
+              timelineTime: 250
             }
           })
         );
@@ -194,7 +194,7 @@ describe("Scrubber Component", () => {
     });
 
     describe("handleChange", () => {
-      it("should call setTimelineValue and seek when value changes", () => {
+      it("should call setCurrentTestTimelineTime and seek when value changes", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(10);
 
@@ -203,7 +203,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(5),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -213,8 +213,8 @@ describe("Scrubber Component", () => {
         const input = screen.getByRole("slider") as HTMLInputElement;
         fireEvent.change(input, { target: { value: "300" } });
 
-        expect(mockOrchestrator.setTimelineValue).toHaveBeenCalledWith(300);
-        expect(mockTimeline.seek).toHaveBeenCalledWith(3); // 300 / 100
+        expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(300);
+        // seek is now called internally by setCurrentTestTimelineTime
       });
     });
 
@@ -228,7 +228,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(3),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             },
             hasCodeBeenEdited: true
           })
@@ -249,7 +249,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(3),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             },
             isSpotlightActive: true
           })
@@ -270,7 +270,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(1),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -290,7 +290,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(2),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -312,7 +312,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(3),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );
@@ -344,7 +344,7 @@ describe("Scrubber Component", () => {
         currentTest: {
           frames: createMockFrames(1),
           animationTimeline: mockTimeline,
-          timelineValue: 0
+          timelineTime: 0
         }
       });
 
@@ -371,7 +371,7 @@ describe("Scrubber Component", () => {
             currentTest: {
               frames: createMockFrames(3),
               animationTimeline: mockTimeline,
-              timelineValue: 0
+              timelineTime: 0
             }
           })
         );

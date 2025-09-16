@@ -14,7 +14,7 @@ import {
   getCurrentTest,
   getCurrentTestFrames,
   getCurrentTestAnimationTimeline,
-  getCurrentTestTimelineValue,
+  getCurrentTestTimelineTime,
   hasValidTest
 } from "@/components/complex-exercise/lib/orchestrator/stateAccessors";
 
@@ -89,7 +89,7 @@ describe("stateAccessors", () => {
       const testState: TestState = {
         frames: [],
         animationTimeline: { duration: 5 } as AnimationTimeline,
-        timelineValue: 100
+        timelineTime: 100
       };
       const orchestrator = createMockOrchestrator({ currentTest: testState });
       const result = getCurrentTest.call(orchestrator);
@@ -100,11 +100,11 @@ describe("stateAccessors", () => {
   describe("Derived State Accessors", () => {
     describe("getCurrentTestFrames", () => {
       it("should return frames when currentTest exists", () => {
-        const frames: Frame[] = [{ line: 1, time: 0, timelineTime: 0, status: "SUCCESS" }];
+        const frames: Frame[] = [{ line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" }];
         const testState: TestState = {
           frames,
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineValue: 0
+          timelineTime: 0
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -125,7 +125,7 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: animationTimeline as AnimationTimeline,
-          timelineValue: 0
+          timelineTime: 0
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -140,22 +140,22 @@ describe("stateAccessors", () => {
       });
     });
 
-    describe("getCurrentTestTimelineValue", () => {
-      it("should return timelineValue when currentTest exists", () => {
+    describe("getCurrentTestTimelineTime", () => {
+      it("should return timelineTime when currentTest exists", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineValue: 250
+          timelineTime: 250
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
-        const result = getCurrentTestTimelineValue.call(orchestrator);
+        const result = getCurrentTestTimelineTime.call(orchestrator);
         expect(result).toBe(250);
       });
 
       it("should return null when currentTest is null", () => {
         const orchestrator = createMockOrchestrator({ currentTest: null });
-        const result = getCurrentTestTimelineValue.call(orchestrator);
+        const result = getCurrentTestTimelineTime.call(orchestrator);
         expect(result).toBeNull();
       });
     });
@@ -163,9 +163,9 @@ describe("stateAccessors", () => {
     describe("hasValidTest", () => {
       it("should return true when currentTest exists with frames", () => {
         const testState: TestState = {
-          frames: [{ line: 1, time: 0, timelineTime: 0, status: "SUCCESS" }],
+          frames: [{ line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" }],
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineValue: 0
+          timelineTime: 0
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -177,7 +177,7 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineValue: 0
+          timelineTime: 0
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 

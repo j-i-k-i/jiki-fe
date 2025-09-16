@@ -12,12 +12,12 @@ describe("AnimationTimeline", () => {
   let mockTimeline: Partial<Timeline>;
   let animationTimeline: AnimationTimeline;
   const mockFrames: Frame[] = [
-    { line: 1, time: 0, timelineTime: 0, status: "SUCCESS" },
-    { line: 2, time: 30, timelineTime: 30, status: "SUCCESS" },
-    { line: 3, time: 60, timelineTime: 60, status: "SUCCESS" },
+    { line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" },
+    { line: 2, interpreterTime: 30, timelineTime: 30, status: "SUCCESS" },
+    { line: 3, interpreterTime: 60, timelineTime: 60, status: "SUCCESS" },
     {
       line: 4,
-      time: 90,
+      interpreterTime: 90,
       timelineTime: 90,
       status: "ERROR",
       error: { message: "Test error" }

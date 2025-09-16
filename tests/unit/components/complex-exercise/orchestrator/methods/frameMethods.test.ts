@@ -34,7 +34,7 @@ function createMockOrchestrator(currentTest: TestState | null = null, foldedLine
       setStatus: jest.fn(),
       setError: jest.fn(),
       setCurrentTest: jest.fn(),
-      setTimelineValue: jest.fn(),
+      setCurrentTestTimelineTime: jest.fn(),
       setHasCodeBeenEdited: jest.fn(),
       setIsSpotlightActive: jest.fn(),
       setFoldedLines: jest.fn(),
@@ -101,7 +101,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -122,7 +122,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 1.5
+        timelineTime: 1.5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -138,7 +138,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 7 // Closer to 10 than 0
+        timelineTime: 7 // Closer to 10 than 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -152,7 +152,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 100
+        timelineTime: 100
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -166,7 +166,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: -5
+        timelineTime: -5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -178,7 +178,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames: [],
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -191,7 +191,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames: [frame],
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 50
+        timelineTime: 50
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -205,7 +205,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 1 // Exactly matches frame[1]
+        timelineTime: 1 // Exactly matches frame[1]
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -219,7 +219,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 5 // Exactly between 0 and 10
+        timelineTime: 5 // Exactly between 0 and 10
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -239,7 +239,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 1
+        timelineTime: 1
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -259,7 +259,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 250
+        timelineTime: 250
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -273,7 +273,7 @@ describe("frameMethods", () => {
       const currentTest = {
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 2.5
+        timelineTime: 2.5
       };
 
       const orchestrator = createMockOrchestrator(currentTest);
@@ -301,7 +301,7 @@ describe("frameMethods", () => {
       const orchestrator = createMockOrchestrator({
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       });
       const result = orchestrator.findNextFrame(1);
       expect(result).toBe(frames[2]);
@@ -318,7 +318,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [3, 4]; // Lines 3 and 4 are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineTime: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(1);
@@ -331,7 +331,7 @@ describe("frameMethods", () => {
       const orchestrator = createMockOrchestrator({
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       });
       const result = orchestrator.findNextFrame(2);
       expect(result).toBeUndefined();
@@ -347,7 +347,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [3, 4]; // Last two lines are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineTime: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(1);
@@ -360,7 +360,7 @@ describe("frameMethods", () => {
       const orchestrator = createMockOrchestrator({
         frames,
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       });
       const result = orchestrator.findNextFrame(0);
       expect(result).toBe(frames[1]);
@@ -370,7 +370,7 @@ describe("frameMethods", () => {
       const orchestrator = createMockOrchestrator({
         frames: [],
         animationTimeline: {} as AnimationTimeline,
-        timelineValue: 0
+        timelineTime: 0
       });
       const result = orchestrator.findNextFrame(0);
       expect(result).toBeUndefined();
@@ -388,7 +388,7 @@ describe("frameMethods", () => {
 
       const foldedLines = [2, 3, 4]; // Middle frames are folded
       const orchestrator = createMockOrchestrator(
-        { frames, animationTimeline: {} as AnimationTimeline, timelineValue: 0 },
+        { frames, animationTimeline: {} as AnimationTimeline, timelineTime: 0 },
         foldedLines
       );
       const result = orchestrator.findNextFrame(0);

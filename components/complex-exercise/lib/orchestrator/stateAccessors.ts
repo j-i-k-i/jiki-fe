@@ -67,12 +67,12 @@ export function getCurrentTestAnimationTimeline(this: Orchestrator): AnimationTi
   return currentTest.animationTimeline;
 }
 
-export function getCurrentTestTimelineValue(this: Orchestrator): number | null {
+export function getCurrentTestTimelineTime(this: Orchestrator): number | null {
   const currentTest = this.store.getState().currentTest;
   if (!currentTest) {
     return null;
   }
-  return currentTest.timelineValue;
+  return currentTest.timelineTime;
 }
 
 // ========================================

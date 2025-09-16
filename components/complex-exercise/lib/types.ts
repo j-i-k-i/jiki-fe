@@ -4,7 +4,7 @@ import type { Frame, AnimationTimeline } from "./stubs";
 export interface TestState {
   frames: Frame[];
   animationTimeline: AnimationTimeline;
-  timelineValue: number;
+  timelineTime: number;
 }
 
 // Public read-only state that components can access

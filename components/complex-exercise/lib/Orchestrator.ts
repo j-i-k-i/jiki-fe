@@ -20,7 +20,7 @@ import {
   getCurrentTest,
   getCurrentTestFrames,
   getCurrentTestAnimationTimeline,
-  getCurrentTestTimelineValue,
+  getCurrentTestTimelineTime,
   hasValidTest
 } from "./orchestrator/stateAccessors";
 
@@ -31,7 +31,7 @@ interface OrchestratorActions {
   setStatus: (status: OrchestratorState["status"]) => void;
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestState | null) => void;
-  setTimelineValue: (value: number) => void;
+  setCurrentTestTimelineTime: (time: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;
   setFoldedLines: (lines: number[]) => void;
@@ -51,11 +51,11 @@ class Orchestrator {
     // Temporary mock test data for testing the scrubber
     const mockTest: TestState = {
       frames: [
-        { time: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
-        { time: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
-        { time: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
-        { time: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
-        { time: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
+        { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
+        { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
+        { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
+        { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
+        { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
       ],
       animationTimeline: {
         duration: 5,
@@ -74,7 +74,7 @@ class Orchestrator {
           currentTime: 0
         }
       } as AnimationTimeline,
-      timelineValue: 0
+      timelineTime: 0
     };
 
     // Create instance-specific store
@@ -96,7 +96,7 @@ class Orchestrator {
         setStatus: (status) => set({ status }),
         setError: (error) => set({ error }),
         setCurrentTest: (test) => set({ currentTest: test }),
-        setTimelineValue: (value) =>
+        setCurrentTestTimelineTime: (time) =>
           set((state) => {
             if (!state.currentTest) {
               return {};
@@ -104,7 +104,7 @@ class Orchestrator {
             return {
               currentTest: {
                 ...state.currentTest,
-                timelineValue: value
+                timelineTime: time
               }
             };
           }),
@@ -139,9 +139,19 @@ class Orchestrator {
     this.store.getState().setCode(code);
   }
 
-  setTimelineValue(value: number) {
+  setCurrentTestTimelineTime(time: number) {
     this._cachedCurrentFrame = undefined; // Invalidate cache
-    this.store.getState().setTimelineValue(value);
+    const state = this.store.getState();
+    state.setCurrentTestTimelineTime(time);
+    // Also seek the animation timeline if it exists
+    const animationTimeline = state.currentTest?.animationTimeline;
+    if (animationTimeline) {
+      animationTimeline.seek(time / 100);
+    }
+  }
+
+  setCurrentTestInterpreterTime(interpreterTime: number) {
+    this.setCurrentTestTimelineTime(interpreterTime * 100);
   }
 
   setCurrentTest(test: TestState | null) {
@@ -172,7 +182,7 @@ class Orchestrator {
   protected getCurrentTest = getCurrentTest.bind(this);
   protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
   protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
-  protected getCurrentTestTimelineValue = getCurrentTestTimelineValue.bind(this);
+  protected getCurrentTestTimelineTime = getCurrentTestTimelineTime.bind(this);
   protected hasValidTest = hasValidTest.bind(this);
 
   // Methods from frameMethods.ts

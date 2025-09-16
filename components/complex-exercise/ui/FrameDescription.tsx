@@ -9,14 +9,14 @@ interface FrameDescriptionProps {
 export default function FrameDescription({ orchestrator }: FrameDescriptionProps) {
   const { currentTest } = useOrchestratorStore(orchestrator);
 
-  // Subscribe to timelineValue to trigger re-renders when scrubbing
-  const timelineValue = currentTest?.timelineValue || 0;
+  // Subscribe to timelineTime to trigger re-renders when scrubbing
+  const timelineTime = currentTest?.timelineTime || 0;
 
   // Use useMemo with explicit dependency to control when to recalculate
   const currentFrame = useMemo(
     () => orchestrator.getNearestCurrentFrame(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [orchestrator, timelineValue] // timelineValue triggers recalculation of internal orchestrator state
+    [orchestrator, timelineTime] // timelineTime triggers recalculation of internal orchestrator state
   );
 
   if (!currentTest || !currentFrame) {
@@ -46,7 +46,7 @@ export default function FrameDescription({ orchestrator }: FrameDescriptionProps
         <span className="text-sm text-gray-700 flex-1">{currentFrame.description}</span>
         <div className="flex items-center gap-2 text-xs">
           <span className="text-gray-400">Timeline:</span>
-          <span className="font-mono text-gray-600">{(timelineValue / 100).toFixed(2)}s</span>
+          <span className="font-mono text-gray-600">{(timelineTime / 100).toFixed(2)}s</span>
         </div>
       </div>
     </div>

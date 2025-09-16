@@ -10,9 +10,9 @@ import type { Frame } from "../stubs";
  * to the current timeline position.
  *
  * For example:
- * - Frames exist at times: [0, 1, 2, 3]
+ * - Frames exist at interpreterTime values: [0, 1, 2, 3]
  * - Timeline value: 2.3
- * - Returns: Frame at time 2 (nearest)
+ * - Returns: Frame at interpreterTime 2 (nearest)
  *
  * This distinction matters for:
  * - Scrubbing between frames
@@ -21,7 +21,7 @@ import type { Frame } from "../stubs";
  *
  * Uses caching to avoid recalculation:
  * - Cache is stored on the Orchestrator instance
- * - Invalidated when timelineValue or currentTest changes
+ * - Invalidated when timelineTime or currentTest changes
  *
  * @returns The frame nearest to current timeline value, or null if no test
  */
@@ -37,7 +37,7 @@ export function getNearestCurrentFrame(this: Orchestrator): Frame | null {
   }
 
   // Calculate and cache the nearest frame
-  const frame = findFrameNearestTimelineTime.call(this, currentTest.timelineValue);
+  const frame = findFrameNearestTimelineTime.call(this, currentTest.timelineTime);
 
   this._cachedCurrentFrame = frame;
 
