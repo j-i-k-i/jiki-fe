@@ -38,8 +38,18 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
     // TODO: Implement
   };
 
-  const handleOnMouseUp = (_animationTimeline: AnimationTimeline | null, _frames: Frame[]) => {
-    // TODO: Implement
+  // When we're sliding along the scrubber, we can sort of sit in between two
+  // frames, and that's fine. It allows the user to watch the animation back.
+  // But when they let go of the mouse we need to lock onto a frame. So this
+  // does that. It grabs the nearest frame to the current scrub and moves to it.
+  const handleOnMouseUp = () => {
+    const nearestFrame = orchestrator.getNearestCurrentFrame();
+    if (!nearestFrame) {
+      return;
+    }
+
+    // Snap to the nearest frame's timeline position
+    orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
   };
 
   const updateInputBackground = () => {
@@ -96,7 +106,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
           handleChange(event);
           updateInputBackground();
         }}
-        onMouseUp={() => handleOnMouseUp(animationTimeline, frames)}
+        onMouseUp={handleOnMouseUp}
       />
       <FrameStepperButtons
         timelineTime={timelineTime}
