@@ -25,6 +25,7 @@ export interface OrchestratorState {
   currentTest: TestState | null;
   hasCodeBeenEdited: boolean;
   isSpotlightActive: boolean;
+  foldedLines: number[]; // Line numbers that are currently folded in the editor
 }
 
 // Private actions only accessible within the orchestrator
@@ -37,6 +38,7 @@ interface OrchestratorActions {
   setTimelineValue: (value: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;
+  setFoldedLines: (lines: number[]) => void;
   reset: () => void;
 }
 
@@ -90,6 +92,7 @@ class Orchestrator {
         currentTest: mockTest, // Temporary: using mock test instead of null
         hasCodeBeenEdited: false,
         isSpotlightActive: false,
+        foldedLines: [],
 
         // Private actions - not exposed to components
         setCode: (code) => set({ code, hasCodeBeenEdited: true }),
@@ -111,6 +114,10 @@ class Orchestrator {
           }),
         setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
         setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
+        setFoldedLines: (lines) => {
+          this._cachedCurrentFrame = undefined; // Invalidate cache when folded lines change
+          set({ foldedLines: lines });
+        },
         reset: () =>
           set({
             code: "",
@@ -119,7 +126,8 @@ class Orchestrator {
             error: null,
             currentTest: mockTest, // Temporary: reset to mock test for testing
             hasCodeBeenEdited: false,
-            isSpotlightActive: false
+            isSpotlightActive: false,
+            foldedLines: []
           })
       }))
     );
@@ -151,6 +159,10 @@ class Orchestrator {
 
   setIsSpotlightActive(value: boolean) {
     this.store.getState().setIsSpotlightActive(value);
+  }
+
+  setFoldedLines(lines: number[]) {
+    this.store.getState().setFoldedLines(lines);
   }
 
   // Method from frameMethods.ts
@@ -191,7 +203,8 @@ export function useOrchestratorStore(orchestrator: Orchestrator): OrchestratorSt
       error: state.error,
       currentTest: state.currentTest,
       hasCodeBeenEdited: state.hasCodeBeenEdited,
-      isSpotlightActive: state.isSpotlightActive
+      isSpotlightActive: state.isSpotlightActive,
+      foldedLines: state.foldedLines
     }))
   );
 }

@@ -1,7 +1,7 @@
 import type { Orchestrator } from "@/components/complex-exercise/orchestrator";
 import type { Frame } from "@/components/complex-exercise/stubs";
-import { getNearestCurrentFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
-import { createStore, type StoreApi } from "zustand/vanilla";
+import { getNearestCurrentFrame, findNextFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
+import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 
 // Helper to create mock frames
@@ -27,6 +27,7 @@ function createMockOrchestrator(currentTest: any = null): Orchestrator {
       currentTest,
       hasCodeBeenEdited: false,
       isSpotlightActive: false,
+      foldedLines: [],
       setCode: jest.fn(),
       setOutput: jest.fn(),
       setStatus: jest.fn(),
@@ -35,6 +36,7 @@ function createMockOrchestrator(currentTest: any = null): Orchestrator {
       setTimelineValue: jest.fn(),
       setHasCodeBeenEdited: jest.fn(),
       setIsSpotlightActive: jest.fn(),
+      setFoldedLines: jest.fn(),
       reset: jest.fn()
     }))
   );
@@ -248,4 +250,79 @@ describe("frameMethods", () => {
   // - findFrameNearestTimelineTime
   // - findFrameIdxNearestTimelineTime
   // - findPrevFrameIdx (when folded lines are implemented)
+
+  describe("findNextFrame", () => {
+    it("should find the next frame when no lines are folded", () => {
+      const frames = [
+        createMockFrame(0, 0, 1),
+        createMockFrame(0.01, 1, 2),
+        createMockFrame(0.02, 2, 3),
+        createMockFrame(0.03, 3, 4)
+      ];
+
+      const result = findNextFrame(1, frames, []);
+      expect(result).toBe(frames[2]);
+    });
+
+    it("should skip folded lines and find the next visible frame", () => {
+      const frames = [
+        createMockFrame(0, 0, 1),
+        createMockFrame(0.01, 1, 2),
+        createMockFrame(0.02, 2, 3),
+        createMockFrame(0.03, 3, 4),
+        createMockFrame(0.04, 4, 5)
+      ];
+
+      const foldedLines = [3, 4]; // Lines 3 and 4 are folded
+      const result = findNextFrame(1, frames, foldedLines);
+      expect(result).toBe(frames[4]); // Should skip frames at lines 3 and 4
+    });
+
+    it("should return undefined when at the last frame", () => {
+      const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
+
+      const result = findNextFrame(2, frames, []);
+      expect(result).toBeUndefined();
+    });
+
+    it("should return undefined when all remaining frames are folded", () => {
+      const frames = [
+        createMockFrame(0, 0, 1),
+        createMockFrame(0.01, 1, 2),
+        createMockFrame(0.02, 2, 3),
+        createMockFrame(0.03, 3, 4)
+      ];
+
+      const foldedLines = [3, 4]; // Last two lines are folded
+      const result = findNextFrame(1, frames, foldedLines);
+      expect(result).toBeUndefined();
+    });
+
+    it("should handle starting from index 0", () => {
+      const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
+
+      const result = findNextFrame(0, frames, []);
+      expect(result).toBe(frames[1]);
+    });
+
+    it("should handle empty frames array", () => {
+      const result = findNextFrame(0, [], []);
+      expect(result).toBeUndefined();
+    });
+
+    it("should find next frame when some intermediate frames are folded", () => {
+      const frames = [
+        createMockFrame(0, 0, 1),
+        createMockFrame(0.01, 1, 2),
+        createMockFrame(0.02, 2, 3),
+        createMockFrame(0.03, 3, 4),
+        createMockFrame(0.04, 4, 5),
+        createMockFrame(0.05, 5, 6)
+      ];
+
+      const foldedLines = [2, 3, 4]; // Middle frames are folded
+      const result = findNextFrame(0, frames, foldedLines);
+      expect(result).toBe(frames[4]); // Should return frame at line 5
+    });
+  });
 });
