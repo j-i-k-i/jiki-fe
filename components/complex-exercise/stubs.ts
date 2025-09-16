@@ -40,11 +40,7 @@ export interface EditorStoreState {
   foldedLines: number[];
   setHighlightedLine: (line: number | undefined) => void;
   setHighlightedLineColor: (color: string) => void;
-  setInformationWidgetData: (data: {
-    html?: string;
-    line: number;
-    status: "SUCCESS" | "ERROR";
-  }) => void;
+  setInformationWidgetData: (data: { html?: string; line: number; status: "SUCCESS" | "ERROR" }) => void;
   shouldShowInformationWidget: boolean;
   setShouldShowInformationWidget: (value: boolean) => void;
   setUnderlineRange: (range: { from: number; to: number } | null) => void;
@@ -64,11 +60,7 @@ export interface ShowErrorParams {
   error: StaticError;
   setHighlightedLine: (line: number | undefined) => void;
   setHighlightedLineColor: (color: string) => void;
-  setInformationWidgetData: (data: {
-    html?: string;
-    line: number;
-    status: "SUCCESS" | "ERROR";
-  }) => void;
+  setInformationWidgetData: (data: { html?: string; line: number; status: "SUCCESS" | "ERROR" }) => void;
   setShouldShowInformationWidget: (value: boolean) => void;
   setUnderlineRange: (range: { from: number; to: number } | null) => void;
   editorView: unknown;

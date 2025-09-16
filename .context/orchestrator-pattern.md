@@ -43,7 +43,7 @@ export function useOrchestratorStore(orchestrator: Orchestrator): State {
     orchestrator.getStore(),
     useShallow((state) => ({
       // Select only the state needed
-    })),
+    }))
   );
 }
 ```
