@@ -1,0 +1,7 @@
+[
+  {
+    // TODO: Find an available shortcut
+    "key": "",
+    "command": "workbench.action.tasks.runTask"
+  }
+]
