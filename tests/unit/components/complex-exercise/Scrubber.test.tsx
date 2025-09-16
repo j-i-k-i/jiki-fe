@@ -4,7 +4,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Scrubber from "@/components/complex-exercise/ui/Scrubber";
+import Scrubber from "@/components/complex-exercise/ui/scrubber/Scrubber";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";

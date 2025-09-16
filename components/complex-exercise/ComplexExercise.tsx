@@ -4,7 +4,7 @@ import { useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import CodeEditor from "./ui/CodeEditor";
 import RunButton from "./ui/RunButton";
-import Scrubber from "./ui/Scrubber";
+import Scrubber from "./ui/scrubber/Scrubber";
 import FrameDescription from "./ui/FrameDescription";
 
 export default function ComplexExercise() {
