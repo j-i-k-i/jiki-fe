@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    reactCompiler: true,
+    reactCompiler: true
   },
-  allowedDevOrigins: ["localhost", "local.exercism.io"],
+  allowedDevOrigins: ["localhost", "local.exercism.io"]
 };
 
 export default nextConfig;
