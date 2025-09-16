@@ -7,7 +7,7 @@ interface ScrubberProps {
 }
 
 export default function Scrubber({ orchestrator }: ScrubberProps) {
-  const { currentTest } = useOrchestratorStore(orchestrator);
+  const { currentTest, hasCodeBeenEdited, isSpotlightActive } = useOrchestratorStore(orchestrator);
   const rangeRef = useRef<HTMLInputElement>(null);
 
   // If no test, show disabled scrubber
@@ -21,10 +21,8 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
 
   const { frames, animationTimeline, timelineValue } = currentTest;
 
-  // Temporary stubs for missing functionality
-  const hasCodeBeenEdited = false;
-  const isSpotlightActive = false;
-  const currentFrame = frames[0]; // temporary
+  // Get the nearest frame to the current timeline position
+  const _currentFrame = orchestrator.getNearestCurrentFrame();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
@@ -107,7 +105,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         )}
       /> */}
       {/* <BreakpointStepperButtons
-        currentFrame={currentFrame}
+        currentFrame={_currentFrame}
         frames={frames}
         onNext={() => handleGoToNextBreakpoint(animationTimeline)}
         onPrev={() => handleGoToPreviousBreakpoint(animationTimeline)}

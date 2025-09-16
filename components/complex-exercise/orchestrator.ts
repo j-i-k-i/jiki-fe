@@ -7,11 +7,13 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { Frame, AnimationTimeline } from "./stubs";
+import { getNearestCurrentFrame } from "./orchestrator/methods/frameMethods";
 
 interface TestState {
   frames: Frame[];
   animationTimeline: AnimationTimeline;
   timelineValue: number;
+  currentFrame?: Frame | null; // undefined means needs recalculation
 }
 
 // Public read-only state that components can access
@@ -22,6 +24,8 @@ export interface OrchestratorState {
   status: "idle" | "running" | "success" | "error";
   error: string | null;
   currentTest: TestState | null;
+  hasCodeBeenEdited: boolean;
+  isSpotlightActive: boolean;
 }
 
 // Private actions only accessible within the orchestrator
@@ -32,6 +36,8 @@ interface OrchestratorActions {
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestState | null) => void;
   setTimelineValue: (value: number) => void;
+  setHasCodeBeenEdited: (value: boolean) => void;
+  setIsSpotlightActive: (value: boolean) => void;
   reset: () => void;
 }
 
@@ -39,7 +45,7 @@ type OrchestratorStore = OrchestratorState & OrchestratorActions;
 
 class Orchestrator {
   exerciseUuid: string;
-  private readonly store: StoreApi<OrchestratorStore>;
+  readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
@@ -56,15 +62,15 @@ class Orchestrator {
       animationTimeline: {
         duration: 5,
         paused: true,
-        seek: (_time: number) => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-        play: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-        pause: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+        seek: (_time: number) => {},
+        play: () => {},
+        pause: () => {},
         progress: 0,
         currentTime: 0,
         completed: false,
         hasPlayedOrScrubbed: false,
-        seekEndOfTimeline: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
-        onUpdate: () => {}, // eslint-disable-line @typescript-eslint/no-empty-function
+        seekEndOfTimeline: () => {},
+        onUpdate: () => {},
         timeline: {
           duration: 5,
           currentTime: 0
@@ -82,9 +88,11 @@ class Orchestrator {
         status: "idle",
         error: null,
         currentTest: mockTest, // Temporary: using mock test instead of null
+        hasCodeBeenEdited: false,
+        isSpotlightActive: false,
 
         // Private actions - not exposed to components
-        setCode: (code) => set({ code }),
+        setCode: (code) => set({ code, hasCodeBeenEdited: true }),
         setOutput: (output) => set({ output }),
         setStatus: (status) => set({ status }),
         setError: (error) => set({ error }),
@@ -97,17 +105,22 @@ class Orchestrator {
             return {
               currentTest: {
                 ...state.currentTest,
-                timelineValue: value
+                timelineValue: value,
+                currentFrame: undefined // Invalidate - will recalculate on next access
               }
             };
           }),
+        setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
+        setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
         reset: () =>
           set({
             code: "",
             output: "",
             status: "idle",
             error: null,
-            currentTest: mockTest // Temporary: reset to mock test for testing
+            currentTest: mockTest, // Temporary: reset to mock test for testing
+            hasCodeBeenEdited: false,
+            isSpotlightActive: false
           })
       }))
     );
@@ -130,6 +143,17 @@ class Orchestrator {
   setCurrentTest(test: TestState | null) {
     this.store.getState().setCurrentTest(test);
   }
+
+  setHasCodeBeenEdited(value: boolean) {
+    this.store.getState().setHasCodeBeenEdited(value);
+  }
+
+  setIsSpotlightActive(value: boolean) {
+    this.store.getState().setIsSpotlightActive(value);
+  }
+
+  // Method from frameMethods.ts
+  getNearestCurrentFrame = getNearestCurrentFrame.bind(this);
 
   async runCode() {
     const state = this.store.getState();
@@ -164,7 +188,9 @@ export function useOrchestratorStore(orchestrator: Orchestrator): OrchestratorSt
       output: state.output,
       status: state.status,
       error: state.error,
-      currentTest: state.currentTest
+      currentTest: state.currentTest,
+      hasCodeBeenEdited: state.hasCodeBeenEdited,
+      isSpotlightActive: state.isSpotlightActive
     }))
   );
 }

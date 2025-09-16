@@ -51,9 +51,27 @@ function createMockOrchestrator(): Orchestrator {
     setCode: jest.fn(),
     setTimelineValue: jest.fn(),
     setCurrentTest: jest.fn(),
+    setHasCodeBeenEdited: jest.fn(),
+    setIsSpotlightActive: jest.fn(),
+    getNearestCurrentFrame: jest.fn().mockReturnValue(null),
     runCode: jest.fn(),
     getStore: jest.fn()
   } as unknown as Orchestrator;
+}
+
+// Helper to create mock store state
+function createMockStoreState(overrides?: Partial<ReturnType<typeof useOrchestratorStore>>) {
+  return {
+    currentTest: null,
+    hasCodeBeenEdited: false,
+    isSpotlightActive: false,
+    exerciseUuid: "test-uuid",
+    code: "",
+    output: "",
+    status: "idle" as const,
+    error: null,
+    ...overrides
+  };
 }
 
 describe("Scrubber Component", () => {
@@ -64,13 +82,11 @@ describe("Scrubber Component", () => {
   describe("when currentTest is null", () => {
     it("should render a disabled scrubber", () => {
       const mockOrchestrator = createMockOrchestrator();
-      (useOrchestratorStore as jest.Mock).mockReturnValue({
-        currentTest: null
-      });
+      (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider") as HTMLInputElement;
+      const input = screen.getByRole("slider");
       expect(input).toBeDisabled();
       expect(input.min).toBe("0");
       expect(input.max).toBe("100");
@@ -84,17 +100,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(0);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(1),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(1),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.min).toBe("-1");
       });
 
@@ -102,17 +120,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(5);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(3),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(3),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.min).toBe("0");
       });
 
@@ -120,17 +140,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(7.5);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(5),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(5),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.max).toBe("750"); // 7.5 * 100
       });
     });
@@ -140,17 +162,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(10);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(5),
-            animationTimeline: mockTimeline,
-            timelineValue: 250
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(5),
+              animationTimeline: mockTimeline,
+              timelineValue: 250
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.value).toBe("250");
       });
     });
@@ -160,17 +184,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(10);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(5),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(5),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         fireEvent.change(input, { target: { value: "300" } });
 
         expect(mockOrchestrator.setTimelineValue).toHaveBeenCalledWith(300);
@@ -179,21 +205,65 @@ describe("Scrubber Component", () => {
     });
 
     describe("disabled state", () => {
+      it("should be disabled when hasCodeBeenEdited is true", () => {
+        const mockOrchestrator = createMockOrchestrator();
+        const mockTimeline = createMockAnimationTimeline(5);
+
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(3),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            },
+            hasCodeBeenEdited: true
+          })
+        );
+
+        render(<Scrubber orchestrator={mockOrchestrator} />);
+
+        const input = screen.getByRole("slider");
+        expect(input).toBeDisabled();
+      });
+
+      it("should be disabled when isSpotlightActive is true", () => {
+        const mockOrchestrator = createMockOrchestrator();
+        const mockTimeline = createMockAnimationTimeline(5);
+
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(3),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            },
+            isSpotlightActive: true
+          })
+        );
+
+        render(<Scrubber orchestrator={mockOrchestrator} />);
+
+        const input = screen.getByRole("slider");
+        expect(input).toBeDisabled();
+      });
+
       it("should be disabled when less than 2 frames", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(5);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(1),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(1),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input).toBeDisabled();
       });
 
@@ -201,17 +271,19 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(5);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(2),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(2),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input).not.toBeDisabled();
       });
     });
@@ -221,18 +293,20 @@ describe("Scrubber Component", () => {
         const mockOrchestrator = createMockOrchestrator();
         const mockTimeline = createMockAnimationTimeline(5);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(3),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(3),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         render(<Scrubber orchestrator={mockOrchestrator} />);
 
         const container = screen.getByTestId("scrubber");
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
 
         // Mock the focus method
         const focusSpy = jest.spyOn(input, "focus");
@@ -262,7 +336,7 @@ describe("Scrubber Component", () => {
 
       render(<Scrubber orchestrator={mockOrchestrator} />);
 
-      const input = screen.getByRole("slider") as HTMLInputElement;
+      const input = screen.getByRole("slider");
       expect(input.min).toBe("-1");
     });
 
@@ -278,17 +352,19 @@ describe("Scrubber Component", () => {
       testCases.forEach(({ duration, expected }) => {
         const mockTimeline = createMockAnimationTimeline(duration);
 
-        (useOrchestratorStore as jest.Mock).mockReturnValue({
-          currentTest: {
-            frames: createMockFrames(3),
-            animationTimeline: mockTimeline,
-            timelineValue: 0
-          }
-        });
+        (useOrchestratorStore as jest.Mock).mockReturnValue(
+          createMockStoreState({
+            currentTest: {
+              frames: createMockFrames(3),
+              animationTimeline: mockTimeline,
+              timelineValue: 0
+            }
+          })
+        );
 
         const { rerender } = render(<Scrubber orchestrator={mockOrchestrator} />);
 
-        const input = screen.getByRole("slider") as HTMLInputElement;
+        const input = screen.getByRole("slider");
         expect(input.max).toBe(expected);
 
         rerender(<></>); // Clean up between test cases
