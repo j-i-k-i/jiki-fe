@@ -1,6 +1,6 @@
 import type { Orchestrator } from "@/components/complex-exercise/orchestrator";
 import type { Frame } from "@/components/complex-exercise/stubs";
-import { getNearestCurrentFrame, findNextFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
+import { getNearestCurrentFrame } from "@/components/complex-exercise/orchestrator/methods/frameMethods";
 import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -16,7 +16,7 @@ function createMockFrame(time: number, timelineTime: number, line: number): Fram
 }
 
 // Helper to create a mock orchestrator with store
-function createMockOrchestrator(currentTest: any = null): Orchestrator {
+function createMockOrchestrator(currentTest: any = null, foldedLines: number[] = []): Orchestrator {
   const store = createStore(
     subscribeWithSelector(() => ({
       exerciseUuid: "test-uuid",
@@ -27,7 +27,7 @@ function createMockOrchestrator(currentTest: any = null): Orchestrator {
       currentTest,
       hasCodeBeenEdited: false,
       isSpotlightActive: false,
-      foldedLines: [],
+      foldedLines,
       setCode: jest.fn(),
       setOutput: jest.fn(),
       setStatus: jest.fn(),
@@ -41,12 +41,33 @@ function createMockOrchestrator(currentTest: any = null): Orchestrator {
     }))
   );
 
-  return {
+  const orchestrator = {
     exerciseUuid: "test-uuid",
     store,
     getStore: () => store,
-    getNearestCurrentFrame: getNearestCurrentFrame.bind({ store })
+    getNearestCurrentFrame: getNearestCurrentFrame.bind({ store }),
+    findNextFrame: jest.fn()
   } as unknown as Orchestrator;
+
+  // Properly bind findNextFrame with access to store
+  orchestrator.findNextFrame = function (currentIdx: number) {
+    const state = store.getState();
+    if (!state.currentTest) {
+      return undefined;
+    }
+    const { frames } = state.currentTest;
+    const { foldedLines } = state;
+
+    for (let idx = currentIdx + 1; idx < frames.length; idx++) {
+      const frame = frames[idx];
+      if (!foldedLines.includes(frame.line)) {
+        return frame;
+      }
+    }
+    return undefined;
+  };
+
+  return orchestrator;
 }
 
 describe("frameMethods", () => {
@@ -260,7 +281,8 @@ describe("frameMethods", () => {
         createMockFrame(0.03, 3, 4)
       ];
 
-      const result = findNextFrame(1, frames, []);
+      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as any, timelineValue: 0 });
+      const result = orchestrator.findNextFrame(1);
       expect(result).toBe(frames[2]);
     });
 
@@ -274,14 +296,19 @@ describe("frameMethods", () => {
       ];
 
       const foldedLines = [3, 4]; // Lines 3 and 4 are folded
-      const result = findNextFrame(1, frames, foldedLines);
+      const orchestrator = createMockOrchestrator(
+        { frames, animationTimeline: {} as any, timelineValue: 0 },
+        foldedLines
+      );
+      const result = orchestrator.findNextFrame(1);
       expect(result).toBe(frames[4]); // Should skip frames at lines 3 and 4
     });
 
     it("should return undefined when at the last frame", () => {
       const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
 
-      const result = findNextFrame(2, frames, []);
+      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as any, timelineValue: 0 });
+      const result = orchestrator.findNextFrame(2);
       expect(result).toBeUndefined();
     });
 
@@ -294,19 +321,25 @@ describe("frameMethods", () => {
       ];
 
       const foldedLines = [3, 4]; // Last two lines are folded
-      const result = findNextFrame(1, frames, foldedLines);
+      const orchestrator = createMockOrchestrator(
+        { frames, animationTimeline: {} as any, timelineValue: 0 },
+        foldedLines
+      );
+      const result = orchestrator.findNextFrame(1);
       expect(result).toBeUndefined();
     });
 
     it("should handle starting from index 0", () => {
       const frames = [createMockFrame(0, 0, 1), createMockFrame(0.01, 1, 2), createMockFrame(0.02, 2, 3)];
 
-      const result = findNextFrame(0, frames, []);
+      const orchestrator = createMockOrchestrator({ frames, animationTimeline: {} as any, timelineValue: 0 });
+      const result = orchestrator.findNextFrame(0);
       expect(result).toBe(frames[1]);
     });
 
     it("should handle empty frames array", () => {
-      const result = findNextFrame(0, [], []);
+      const orchestrator = createMockOrchestrator({ frames: [], animationTimeline: {} as any, timelineValue: 0 });
+      const result = orchestrator.findNextFrame(0);
       expect(result).toBeUndefined();
     });
 
@@ -321,7 +354,11 @@ describe("frameMethods", () => {
       ];
 
       const foldedLines = [2, 3, 4]; // Middle frames are folded
-      const result = findNextFrame(0, frames, foldedLines);
+      const orchestrator = createMockOrchestrator(
+        { frames, animationTimeline: {} as any, timelineValue: 0 },
+        foldedLines
+      );
+      const result = orchestrator.findNextFrame(0);
       expect(result).toBe(frames[4]); // Should return frame at line 5
     });
   });

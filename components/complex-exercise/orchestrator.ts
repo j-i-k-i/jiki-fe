@@ -7,7 +7,7 @@ import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
 import type { Frame, AnimationTimeline } from "./stubs";
-import { getNearestCurrentFrame } from "./orchestrator/methods/frameMethods";
+import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/methods/frameMethods";
 
 interface TestState {
   frames: Frame[];
@@ -165,8 +165,9 @@ class Orchestrator {
     this.store.getState().setFoldedLines(lines);
   }
 
-  // Method from frameMethods.ts
+  // Methods from frameMethods.ts
   getNearestCurrentFrame = getNearestCurrentFrame.bind(this);
+  findNextFrame = findNextFrame.bind(this);
 
   async runCode() {
     const state = this.store.getState();

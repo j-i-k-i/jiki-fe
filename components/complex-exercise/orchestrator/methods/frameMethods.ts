@@ -37,8 +37,8 @@ export function getNearestCurrentFrame(this: Orchestrator): Frame | null {
   }
 
   // Calculate and cache the nearest frame
-  const { frames, timelineValue } = state.currentTest;
-  const frame = findFrameNearestTimelineTime(timelineValue, frames, state.foldedLines);
+  const { timelineValue } = state.currentTest;
+  const frame = findFrameNearestTimelineTime.call(this, timelineValue);
 
   this._cachedCurrentFrame = frame;
 
@@ -48,8 +48,16 @@ export function getNearestCurrentFrame(this: Orchestrator): Frame | null {
 /**
  * Finds the frame nearest to a given timeline time.
  * Takes into account folded lines which should be skipped.
+ * Uses frames and foldedLines from orchestrator state.
  */
-function findFrameNearestTimelineTime(timelineTime: number, frames: Frame[], foldedLines: number[]): Frame | null {
+function findFrameNearestTimelineTime(this: Orchestrator, timelineTime: number): Frame | null {
+  const state = this.store.getState();
+  if (!state.currentTest) {
+    return null;
+  }
+
+  const { frames } = state.currentTest;
+
   if (!frames.length) {
     return null;
   }
@@ -61,7 +69,7 @@ function findFrameNearestTimelineTime(timelineTime: number, frames: Frame[], fol
     return lastFrame;
   }
 
-  const idx = findFrameIdxNearestTimelineTime(timelineTime, frames, foldedLines);
+  const idx = findFrameIdxNearestTimelineTime.call(this, timelineTime);
   if (idx === undefined) {
     return null;
   }
@@ -76,12 +84,17 @@ function findFrameNearestTimelineTime(timelineTime: number, frames: Frame[], fol
  * - Frames after timeline ends (returns last frame)
  * - Finding closest frame when timeline is between two frames
  * - Skipping folded lines
+ * Uses frames and foldedLines from orchestrator state.
  */
-function findFrameIdxNearestTimelineTime(
-  timelineTime: number,
-  frames: Frame[],
-  foldedLines: number[]
-): number | undefined {
+function findFrameIdxNearestTimelineTime(this: Orchestrator, timelineTime: number): number | undefined {
+  const state = this.store.getState();
+  if (!state.currentTest) {
+    return undefined;
+  }
+
+  const { frames } = state.currentTest;
+  const { foldedLines } = state;
+
   if (!frames.length) {
     return undefined;
   }
@@ -107,7 +120,7 @@ function findFrameIdxNearestTimelineTime(
   }
 
   // Get the previous non-folded frame to compare with
-  const prevFrameIdx = findPrevFrameIdx(idx - 1, frames, foldedLines);
+  const prevFrameIdx = findPrevFrameIdx.call(this, idx - 1);
 
   // If there's no previous frame, then we're happy with what we've got
   if (prevFrameIdx === undefined) {
@@ -126,8 +139,17 @@ function findFrameIdxNearestTimelineTime(
 /**
  * Finds the previous frame index that isn't folded.
  * Searches backwards from the given index.
+ * Uses frames and foldedLines from orchestrator state.
  */
-function findPrevFrameIdx(startIdx: number, frames: Frame[], foldedLines: number[]): number | undefined {
+function findPrevFrameIdx(this: Orchestrator, startIdx: number): number | undefined {
+  const state = this.store.getState();
+  if (!state.currentTest) {
+    return undefined;
+  }
+
+  const { frames } = state.currentTest;
+  const { foldedLines } = state;
+
   // Go through all the frames from startIdx to the first,
   // and return the first one that isn't folded.
   for (let idx = startIdx; idx >= 0; idx--) {
@@ -142,13 +164,20 @@ function findPrevFrameIdx(startIdx: number, frames: Frame[], foldedLines: number
 /**
  * Finds the next frame that isn't folded.
  * Searches forward from the given index.
+ * Uses frames and foldedLines from orchestrator state.
  *
  * @param currentIdx The current frame index to search from
- * @param frames Array of frames to search through
- * @param foldedLines Array of line numbers that are currently folded
  * @returns The next non-folded frame, or undefined if none found
  */
-export function findNextFrame(currentIdx: number, frames: Frame[], foldedLines: number[]): Frame | undefined {
+export function findNextFrame(this: Orchestrator, currentIdx: number): Frame | undefined {
+  const state = this.store.getState();
+  if (!state.currentTest) {
+    return undefined;
+  }
+
+  const { frames } = state.currentTest;
+  const { foldedLines } = state;
+
   // Go through all the frames from the next one to the length
   // of the frames, and return the first one that isn't folded.
   for (let idx = currentIdx + 1; idx < frames.length; idx++) {
