@@ -91,17 +91,6 @@ const eslintConfig = [
       // Prefer `interface` over `type` for object shapes (cleaner merging).
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
 
-      // Require explicit return types on exported functions,
-      // but allow local helpers and inline callbacks to infer.
-      "@typescript-eslint/explicit-function-return-type": [
-        "warn",
-        {
-          allowExpressions: true,
-          allowHigherOrderFunctions: true,
-          allowTypedFunctionExpressions: true
-        }
-      ],
-
       // Discourage `any` — warn when used, but allow in rest args.
       "@typescript-eslint/no-explicit-any": ["warn", { ignoreRestArgs: true }],
 
