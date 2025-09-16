@@ -2,7 +2,7 @@
 // When the page loads, this is created and then is the thing that's
 // passed around, controls the state, etc.
 
-import { createStore, StoreApi } from "zustand/vanilla";
+import { createStore, type StoreApi } from "zustand/vanilla";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -29,7 +29,7 @@ type OrchestratorStore = OrchestratorState & OrchestratorActions;
 
 class Orchestrator {
   exerciseUuid: string;
-  private store: StoreApi<OrchestratorStore>;
+  private readonly store: StoreApi<OrchestratorStore>;
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
@@ -53,8 +53,8 @@ class Orchestrator {
             code: "",
             output: "",
             status: "idle",
-            error: null,
-          }),
+            error: null
+          })
       }))
     );
   }
@@ -76,6 +76,7 @@ class Orchestrator {
 
     try {
       // Simulate running code
+      // eslint-disable-next-line no-console
       console.log("Running code:", this.store.getState().code);
 
       // Simulate async execution
@@ -92,9 +93,7 @@ class Orchestrator {
 }
 
 // Hook to use with an orchestrator instance
-export function useOrchestratorStore(
-  orchestrator: Orchestrator
-): OrchestratorState {
+export function useOrchestratorStore(orchestrator: Orchestrator): OrchestratorState {
   return useStore(
     orchestrator.getStore(),
     useShallow((state) => ({
@@ -102,7 +101,7 @@ export function useOrchestratorStore(
       code: state.code,
       output: state.output,
       status: state.status,
-      error: state.error,
+      error: state.error
     }))
   );
 }

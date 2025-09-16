@@ -1,4 +1,4 @@
-import Orchestrator, { useOrchestratorStore } from "./Orchestrator";
+import { type default as Orchestrator, useOrchestratorStore } from "./orchestrator";
 
 interface CodeEditorProps {
   orchestrator: Orchestrator;

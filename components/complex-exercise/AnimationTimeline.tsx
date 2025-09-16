@@ -1,57 +1,57 @@
-import anime from "animejs";
-import type { AnimeCSSProperties } from "./types";
+import { createTimeline } from "animejs";
+import {
+  type Timeline,
+  type AnimationParams,
+  type DefaultsParams,
+  type TargetsParam,
+  type TimelinePosition
+} from "animejs";
 import type { Frame } from "./stubs";
 
 export type Animation =
-  | anime.AnimeParams
+  | (AnimationParams & { targets?: TargetsParam })
   | {
-      targets: anime.AnimeParams["targets"];
-      offset: string | number | undefined;
-      transformations: AnimeCSSProperties;
+      targets: TargetsParam;
+      offset?: TimelinePosition;
+      transformations: Partial<AnimationParams>;
     };
 
 export class AnimationTimeline {
-  private animationTimeline: anime.AnimeTimelineInstance;
+  private animationTimeline: Timeline;
   private currentIndex: number = 0;
   public currentFrame?: Frame;
   public previousFrame?: Frame | null;
   public nextFrame?: Frame | null;
   public progress: number = 0;
-  private updateCallbacks: ((anim: anime.AnimeTimelineInstance) => void)[] = [];
-  private playCallbacks: ((anim: anime.AnimeTimelineInstance) => void)[] = [];
-  private stopCallbacks: ((anim: anime.AnimeTimelineInstance) => void)[] = [];
+  private updateCallbacks: ((anim: Timeline) => void)[] = [];
+  private readonly playCallbacks: ((anim: Timeline) => void)[] = [];
+  private readonly stopCallbacks: ((anim: Timeline) => void)[] = [];
   public hasPlayedOrScrubbed = false;
   public showPlayButton = true;
 
   constructor(
-    initialOptions: Partial<anime.AnimeParams>,
-    private frames: Frame[] = []
+    initialOptions: DefaultsParams,
+    private readonly frames: Frame[] = []
   ) {
-    this.animationTimeline = anime.timeline({
-      easing: "linear",
-      ...initialOptions,
+    this.animationTimeline = createTimeline({
+      defaults: {
+        ease: "linear",
+        ...initialOptions
+      },
       autoplay: false,
-      update: (anim: anime.AnimeInstance) => {
-        this.updateScrubber(anim as anime.AnimeTimelineInstance);
-        this.updateCallbacks.forEach((cb) =>
-          cb(anim as anime.AnimeTimelineInstance)
-        );
+      onUpdate: (anim: Timeline) => {
+        this.updateScrubber(anim);
+        this.updateCallbacks.forEach((cb) => cb(anim));
       },
-      begin: (anim: anime.AnimeInstance) => {
-        this.playCallbacks.forEach((cb) =>
-          cb(anim as anime.AnimeTimelineInstance)
-        );
+      onBegin: (anim: Timeline) => {
+        this.playCallbacks.forEach((cb) => cb(anim));
       },
-      complete: (anim: anime.AnimeInstance) => {
-        this.stopCallbacks.forEach((cb) =>
-          cb(anim as anime.AnimeTimelineInstance)
-        );
+      onComplete: (anim: Timeline) => {
+        this.stopCallbacks.forEach((cb) => cb(anim));
       },
-      pause: (anim: anime.AnimeInstance) => {
-        this.stopCallbacks.forEach((cb) =>
-          cb(anim as anime.AnimeTimelineInstance)
-        );
-      },
+      onPause: (anim: Timeline) => {
+        this.stopCallbacks.forEach((cb) => cb(anim));
+      }
     });
   }
 
@@ -61,24 +61,20 @@ export class AnimationTimeline {
     this.animationTimeline = null;
   }
 
-  public onUpdate(callback: (anim: anime.AnimeTimelineInstance) => void) {
+  public onUpdate(callback: (anim: Timeline) => void) {
     this.updateCallbacks.push(callback);
 
-    if (this.animationTimeline) {
-      callback(this.animationTimeline);
-      setTimeout(() => this.updateScrubber(this.animationTimeline), 1);
-    }
+    callback(this.animationTimeline);
+    setTimeout(() => this.updateScrubber(this.animationTimeline), 1);
   }
-  public onPlay(callback: (anim: anime.AnimeTimelineInstance) => void) {
+  public onPlay(callback: (anim: Timeline) => void) {
     this.playCallbacks.push(callback);
   }
-  public onStop(callback: (anim: anime.AnimeTimelineInstance) => void) {
+  public onStop(callback: (anim: Timeline) => void) {
     this.stopCallbacks.push(callback);
   }
 
-  public removeUpdateCallback(
-    callback: (anim: anime.AnimeTimelineInstance) => void
-  ) {
+  public removeUpdateCallback(callback: (anim: Timeline) => void) {
     this.updateCallbacks = this.updateCallbacks.filter((cb) => cb !== callback);
   }
 
@@ -86,35 +82,30 @@ export class AnimationTimeline {
     this.showPlayButton = !placeholder;
     animations.forEach((animation: Animation) => {
       const { targets, offset, transformations, ...rest } = animation;
-      this.animationTimeline.add(
-        targets,
-        { ...rest, ...transformations },
-        offset
-      );
+      // Using Object.assign instead of spread operator to avoid TypeScript compile-time error
+      // about spreading Partial<AnimationParams> which could theoretically contain non-object types.
+      // At runtime, spread would work fine, but TypeScript's type checker is overly cautious here.
+      const params = Object.assign({}, rest, transformations || {}) as AnimationParams;
+      this.animationTimeline.add(targets as TargetsParam, params, offset as TimelinePosition);
     });
 
     /*
-     ensure the last frame is included in the timeline duration, even if it's not an animation.
+     Ensure the last frame is included in the timeline duration, even if it's not an animation.
      anime timeline only cares about animations when calculating duration
      and if the last frame is not an animation, it will not be included in the duration.
 
-     example:
+     For example:
      - the total animation duration is 60ms
      - a new frame is added after the animation, incrementing time by 1ms (see Executor.addFrame - executor.ts#L868).
      - the last frame is now at time 61ms, but the timeline duration remains 60ms because the last frame is not animated.
      - this discrepancy prevents seeking to the last frame (time 61ms) as the timeline caps at 60ms.
-    */
 
-    /*
-      on the other hand ensure the full duration of the last animation is present. hence the max function. 
-      */
+     On the other hand ensure the full duration of the last animation is present. hence the max function. 
+    */
 
     const animationDurationAfterAnimations = this.animationTimeline.duration;
     const lastFrame = this.frames[this.frames.length - 1];
-    this.animationTimeline.duration = Math.max(
-      animationDurationAfterAnimations,
-      lastFrame ? lastFrame.time : 0
-    );
+    this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrame ? lastFrame.time : 0);
     return this;
   }
 
@@ -126,37 +117,28 @@ export class AnimationTimeline {
     return this.animationTimeline.duration;
   }
 
-  private updateScrubber(anim: anime.AnimeTimelineInstance) {
-    if (!anim) return;
+  private updateScrubber(anim: Timeline) {
     this.progress = anim.currentTime;
 
     const reversedIndex = this.frames
       .slice()
       .reverse()
-      .findIndex((frame) => {
-        return frame.time <= this.progress;
-      });
+      .findIndex((frame) => frame.time <= this.progress);
 
     this.currentIndex = this.frames.length - 1 - reversedIndex;
 
     this.currentFrame = this.frames[this.currentIndex];
 
-    this.previousFrame =
-      this.currentIndex > 0 ? this.frames[this.currentIndex - 1] : null;
+    this.previousFrame = this.currentIndex > 0 ? this.frames[this.currentIndex - 1] : null;
 
-    this.nextFrame =
-      this.currentIndex < this.frames.length - 1
-        ? this.frames[this.currentIndex + 1]
-        : null;
+    this.nextFrame = this.currentIndex < this.frames.length - 1 ? this.frames[this.currentIndex + 1] : null;
   }
 
   public frameAtTime(time: number) {
     const reversedIndex = this.frames
       .slice()
       .reverse()
-      .findIndex((frame) => {
-        return frame.time <= time;
-      });
+      .findIndex((frame) => frame.time <= time);
 
     const index = this.frames.length - 1 - reversedIndex;
 
@@ -204,13 +186,17 @@ export class AnimationTimeline {
     if (this.completed) {
       this.animationTimeline.seek(0);
     }
-    if (cb) cb();
+    if (cb) {
+      cb();
+    }
     this.animationTimeline.play();
   }
 
   public pause(cb?: () => void) {
     this.animationTimeline.pause();
-    if (cb) cb();
+    if (cb) {
+      cb();
+    }
   }
 
   public get paused(): boolean {

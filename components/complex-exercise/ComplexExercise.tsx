@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Orchestrator, { useOrchestratorStore } from "./Orchestrator";
+import Orchestrator, { useOrchestratorStore } from "./orchestrator";
 import CodeEditor from "./CodeEditor";
 import RunButton from "./RunButton";
 
@@ -21,12 +21,8 @@ export default function ComplexExercise() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Complex Exercise Editor
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Exercise ID: {orchestrator.exerciseUuid}
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Complex Exercise Editor</h1>
+        <p className="text-sm text-gray-600 mt-1">Exercise ID: {orchestrator.exerciseUuid}</p>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
@@ -46,13 +42,9 @@ export default function ComplexExercise() {
           <div className="flex-1 p-4 overflow-auto">
             <div className="bg-gray-100 rounded-lg p-4 min-h-[200px]">
               {output ? (
-                <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                  {output}
-                </pre>
+                <pre className="text-sm text-gray-800 whitespace-pre-wrap">{output}</pre>
               ) : (
-                <p className="text-sm text-gray-600">
-                  Output will appear here...
-                </p>
+                <p className="text-sm text-gray-600">Output will appear here...</p>
               )}
             </div>
           </div>
@@ -63,12 +55,8 @@ export default function ComplexExercise() {
         <div className="flex items-center gap-4">
           <div className="text-sm">
             {status === "idle" && <span className="text-gray-600">Ready</span>}
-            {status === "running" && (
-              <span className="text-blue-600">Running...</span>
-            )}
-            {status === "success" && (
-              <span className="text-green-600">Success</span>
-            )}
+            {status === "running" && <span className="text-blue-600">Running...</span>}
+            {status === "success" && <span className="text-green-600">Success</span>}
             {status === "error" && <span className="text-red-600">Error</span>}
           </div>
           {error && <div className="text-sm text-red-600">{error}</div>}
