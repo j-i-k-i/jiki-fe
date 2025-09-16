@@ -20,7 +20,6 @@ import {
   getCurrentTestFrames,
   getCurrentTestAnimationTimeline,
   getCurrentTestTimelineValue,
-  getFramesAndFoldedLines,
   hasValidTest
 } from "./orchestrator/methods/stateAccessors";
 
@@ -192,7 +191,6 @@ class Orchestrator {
   protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
   protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
   protected getCurrentTestTimelineValue = getCurrentTestTimelineValue.bind(this);
-  protected getFramesAndFoldedLines = getFramesAndFoldedLines.bind(this);
   protected hasValidTest = hasValidTest.bind(this);
 
   // Methods from frameMethods.ts

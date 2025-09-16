@@ -80,21 +80,6 @@ export function getCurrentTestTimelineValue(this: Orchestrator): number | null {
 // ========================================
 
 /**
- * Gets frames and foldedLines together, which is a common pattern.
- * Returns null if no current test.
- */
-export function getFramesAndFoldedLines(this: Orchestrator): { frames: Frame[]; foldedLines: number[] } | null {
-  const currentTest = this.store.getState().currentTest;
-  if (!currentTest) {
-    return null;
-  }
-  return {
-    frames: currentTest.frames,
-    foldedLines: this.store.getState().foldedLines
-  };
-}
-
-/**
  * Checks if we have a valid test with frames.
  */
 export function hasValidTest(this: Orchestrator): boolean {

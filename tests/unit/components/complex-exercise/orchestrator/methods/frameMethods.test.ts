@@ -55,16 +55,6 @@ function createMockOrchestrator(currentTest: any = null, foldedLines: number[] =
       const currentTest = store.getState().currentTest;
       return currentTest ? currentTest.frames : null;
     },
-    getFramesAndFoldedLines: function () {
-      const currentTest = store.getState().currentTest;
-      if (!currentTest) {
-        return null;
-      }
-      return {
-        frames: currentTest.frames,
-        foldedLines: store.getState().foldedLines
-      };
-    },
     getFoldedLines: function () {
       return store.getState().foldedLines;
     },

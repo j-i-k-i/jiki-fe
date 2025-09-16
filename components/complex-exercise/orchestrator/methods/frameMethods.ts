@@ -80,12 +80,12 @@ function findFrameNearestTimelineTime(this: Orchestrator, timelineTime: number):
  * Uses frames and foldedLines from orchestrator state.
  */
 function findFrameIdxNearestTimelineTime(this: Orchestrator, timelineTime: number): number | undefined {
-  const data = this.getFramesAndFoldedLines();
-  if (!data?.frames.length) {
+  const frames = this.getCurrentTestFrames();
+  if (!frames?.length) {
     return undefined;
   }
 
-  const { frames, foldedLines } = data;
+  const foldedLines = this.getFoldedLines();
 
   // If we've not started playing yet, return the first frame
   if (timelineTime < 0) {
@@ -130,12 +130,12 @@ function findFrameIdxNearestTimelineTime(this: Orchestrator, timelineTime: numbe
  * Uses frames and foldedLines from orchestrator state.
  */
 function findPrevFrameIdx(this: Orchestrator, startIdx: number): number | undefined {
-  const data = this.getFramesAndFoldedLines();
-  if (!data) {
+  const frames = this.getCurrentTestFrames();
+  if (!frames) {
     return undefined;
   }
 
-  const { frames, foldedLines } = data;
+  const foldedLines = this.getFoldedLines();
 
   // Go through all the frames from startIdx to the first,
   // and return the first one that isn't folded.
@@ -157,12 +157,12 @@ function findPrevFrameIdx(this: Orchestrator, startIdx: number): number | undefi
  * @returns The next non-folded frame, or undefined if none found
  */
 export function findNextFrame(this: Orchestrator, currentIdx: number): Frame | undefined {
-  const data = this.getFramesAndFoldedLines();
-  if (!data) {
+  const frames = this.getCurrentTestFrames();
+  if (!frames) {
     return undefined;
   }
 
-  const { frames, foldedLines } = data;
+  const foldedLines = this.getFoldedLines();
 
   // Go through all the frames from the next one to the length
   // of the frames, and return the first one that isn't folded.
