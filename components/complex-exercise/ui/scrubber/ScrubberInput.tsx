@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef, useImperativeHandle } from "react";
+import React, { forwardRef } from "react";
 import type { Frame, AnimationTimeline } from "../../lib/stubs";
 import type { Orchestrator } from "../../lib/Orchestrator";
 
@@ -12,11 +12,6 @@ interface ScrubberInputProps {
 
 const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
   ({ orchestrator, frames, animationTimeline, timelineTime, disabled }, ref) => {
-    const rangeRef = useRef<HTMLInputElement>(null);
-
-    // Allow parent to access the input ref
-    useImperativeHandle(ref, () => rangeRef.current!);
-
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = Number(event.target.value);
       orchestrator.setCurrentTestTimelineTime(newValue);
@@ -66,7 +61,7 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
         onKeyDown={(event) => handleOnKeyDown(event, animationTimeline, frames)}
         min={calculateMinInputValue(frames)}
         max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
-        ref={rangeRef}
+        ref={ref}
         onInput={updateInputBackground}
         value={timelineTime}
         onChange={(event) => {
