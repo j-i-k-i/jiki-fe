@@ -26,8 +26,7 @@ const eslintConfig = [
       "no-restricted-syntax": [
         "error",
         {
-          selector:
-            "Program > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
+          selector: "Program > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
           message: "Use a function declaration for top-level APIs (e.g., `function name(){}`)"
         }
       ],
@@ -62,8 +61,7 @@ const eslintConfig = [
       "no-restricted-syntax": [
         "error",
         {
-          selector:
-            "Program > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
+          selector: "Program > VariableDeclaration > VariableDeclarator[init.type='ArrowFunctionExpression']",
           message: "Use a function declaration for top-level APIs (e.g., `function name(){}`)"
         }
       ],
@@ -121,10 +119,7 @@ const eslintConfig = [
       ],
 
       // Warn on conditions that are always truthy/falsey.
-      "@typescript-eslint/no-unnecessary-condition": [
-        "warn",
-        { allowConstantLoopConditions: true }
-      ],
+      "@typescript-eslint/no-unnecessary-condition": ["warn", { allowConstantLoopConditions: true }],
 
       // Warn if you assert types unnecessarily (e.g., value as string when already string).
       "@typescript-eslint/no-unnecessary-type-assertion": "warn",

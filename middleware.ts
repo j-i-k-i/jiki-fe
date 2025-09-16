@@ -5,8 +5,7 @@ export function middleware(request: NextRequest) {
   // Block access to /dev routes in production
   if (request.nextUrl.pathname.startsWith("/dev")) {
     // Only allow in development mode
-    const isDevelopment =
-      process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "development";
+    const isDevelopment = process.env.NODE_ENV === "development" || process.env.VERCEL_ENV === "development";
 
     if (!isDevelopment) {
       // Return 404 if not in development
