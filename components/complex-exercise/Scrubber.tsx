@@ -10,16 +10,10 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const { currentTest, hasCodeBeenEdited, isSpotlightActive } = useOrchestratorStore(orchestrator);
   const rangeRef = useRef<HTMLInputElement>(null);
 
-  // If no test, show disabled scrubber
-  if (!currentTest) {
-    return (
-      <div className="scrubber-container">
-        <input type="range" disabled min={0} max={100} value={0} className="scrubber-input" />
-      </div>
-    );
-  }
-
-  const { frames, animationTimeline, timelineValue } = currentTest;
+  // Default values when no test is available
+  const frames = currentTest?.frames || [];
+  const animationTimeline = currentTest?.animationTimeline || null;
+  const timelineValue = currentTest?.timelineValue || 0;
 
   // Get the nearest frame to the current timeline position
   const _currentFrame = orchestrator.getNearestCurrentFrame();
@@ -27,7 +21,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(event.target.value);
     orchestrator.setTimelineValue(newValue);
-    animationTimeline.seek(newValue / 100);
+    animationTimeline?.seek(newValue / 100);
     // updateInputBackground() - commented out
   };
 
@@ -47,8 +41,13 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
     // TODO: Implement if needed
   };
 
-  const shouldScrubberBeDisabled = (hasCodeBeenEdited: boolean, frames: any[], isSpotlightActive: boolean) => {
-    return hasCodeBeenEdited || isSpotlightActive || frames.length < 2;
+  const shouldScrubberBeDisabled = (
+    currentTest: any,
+    hasCodeBeenEdited: boolean,
+    frames: any[],
+    isSpotlightActive: boolean
+  ) => {
+    return !currentTest || hasCodeBeenEdited || isSpotlightActive || frames.length < 2;
   };
 
   return (
@@ -78,12 +77,12 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
       /> */}
       <input
         data-testid="scrubber-range-input"
-        disabled={shouldScrubberBeDisabled(hasCodeBeenEdited, frames, isSpotlightActive)}
+        disabled={shouldScrubberBeDisabled(currentTest, hasCodeBeenEdited, frames, isSpotlightActive)}
         type="range"
         onKeyUp={(event) => handleOnKeyUp(event, animationTimeline)}
         onKeyDown={(event) => handleOnKeyDown(event, animationTimeline, frames)}
         min={calculateMinInputValue(frames)}
-        max={calculateMaxInputValue(animationTimeline)}
+        max={calculateMaxInputValue(animationTimeline || { duration: 0 })}
         ref={rangeRef}
         onInput={updateInputBackground}
         value={timelineValue}

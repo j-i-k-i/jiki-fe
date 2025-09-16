@@ -80,7 +80,7 @@ describe("Scrubber Component", () => {
   });
 
   describe("when currentTest is null", () => {
-    it("should render a disabled scrubber", () => {
+    it("should render a disabled scrubber with default values", () => {
       const mockOrchestrator = createMockOrchestrator();
       (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
@@ -88,9 +88,19 @@ describe("Scrubber Component", () => {
 
       const input = screen.getByRole("slider");
       expect(input).toBeDisabled();
-      expect(input.min).toBe("0");
-      expect(input.max).toBe("100");
+      expect(input.min).toBe("-1"); // calculateMinInputValue([]) returns -1
+      expect(input.max).toBe("0"); // calculateMaxInputValue({ duration: 0 }) returns 0
       expect(input.value).toBe("0");
+    });
+
+    it("should still render the scrubber container with data-testid", () => {
+      const mockOrchestrator = createMockOrchestrator();
+      (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
+
+      render(<Scrubber orchestrator={mockOrchestrator} />);
+
+      const container = screen.getByTestId("scrubber");
+      expect(container).toBeInTheDocument();
     });
   });
 
