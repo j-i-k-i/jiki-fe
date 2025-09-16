@@ -9,13 +9,13 @@ module.exports = {
       "--no-first-run",
       "--no-zygote",
       "--single-process",
-      "--disable-gpu",
-    ],
+      "--disable-gpu"
+    ]
   },
   server: {
     command: "pnpm run dev",
     port: 3060,
     launchTimeout: 10000,
-    debug: true,
-  },
+    debug: true
+  }
 };

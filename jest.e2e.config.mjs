@@ -9,15 +9,15 @@ const config = {
         tsconfig: {
           jsx: "react",
           esModuleInterop: true,
-          moduleResolution: "node",
-        },
-      },
-    ],
+          moduleResolution: "node"
+        }
+      }
+    ]
   },
   testEnvironment: "jest-environment-puppeteer",
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",
-  },
+    "^@/(.*)$": "<rootDir>/$1"
+  }
 };
 
 export default config;

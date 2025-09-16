@@ -1,7 +1,7 @@
 describe("Home Page E2E", () => {
   beforeAll(async () => {
     await page.goto("http://localhost:3060", {
-      waitUntil: "networkidle2",
+      waitUntil: "networkidle2"
     });
   });
 
