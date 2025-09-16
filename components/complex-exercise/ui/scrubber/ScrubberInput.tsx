@@ -12,45 +12,6 @@ interface ScrubberInputProps {
 
 const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
   ({ orchestrator, frames, animationTimeline, timelineTime, disabled }, ref) => {
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = Number(event.target.value);
-      orchestrator.setCurrentTestTimelineTime(newValue);
-      // updateInputBackground() - commented out
-    };
-
-    const handleOnKeyUp = (
-      _event: React.KeyboardEvent<HTMLInputElement>,
-      _animationTimeline: AnimationTimeline | null
-    ) => {
-      // TODO: Implement keyboard shortcuts
-    };
-
-    const handleOnKeyDown = (
-      _event: React.KeyboardEvent<HTMLInputElement>,
-      _animationTimeline: AnimationTimeline | null,
-      _frames: Frame[]
-    ) => {
-      // TODO: Implement keyboard shortcuts
-    };
-
-    // When we're sliding along the scrubber, we can sort of sit in between two
-    // frames, and that's fine. It allows the user to watch the animation back.
-    // But when they let go of the mouse we need to lock onto a frame. So this
-    // does that. It grabs the nearest frame to the current scrub and moves to it.
-    const handleOnMouseUp = () => {
-      const nearestFrame = orchestrator.getNearestCurrentFrame();
-      if (!nearestFrame) {
-        return;
-      }
-
-      // Snap to the nearest frame's timeline position
-      orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
-    };
-
-    const updateInputBackground = () => {
-      // TODO: Implement if needed for visual feedback
-    };
-
     return (
       <input
         data-testid="scrubber-range-input"
@@ -65,10 +26,10 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
         onInput={updateInputBackground}
         value={timelineTime}
         onChange={(event) => {
-          handleChange(event);
+          handleChange(event, orchestrator);
           updateInputBackground();
         }}
-        onMouseUp={handleOnMouseUp}
+        onMouseUp={() => handleOnMouseUp(orchestrator)}
       />
     );
   }
@@ -77,6 +38,46 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
 ScrubberInput.displayName = "ScrubberInput";
 
 export default ScrubberInput;
+
+/* **************** */
+/* EVENT HANDLERS */
+/* **************** */
+
+function handleChange(event: React.ChangeEvent<HTMLInputElement>, orchestrator: Orchestrator) {
+  const newValue = Number(event.target.value);
+  orchestrator.setCurrentTestTimelineTime(newValue);
+  // updateInputBackground() - commented out
+}
+
+function handleOnKeyUp(_event: React.KeyboardEvent<HTMLInputElement>, _animationTimeline: AnimationTimeline | null) {
+  // TODO: Implement keyboard shortcuts
+}
+
+function handleOnKeyDown(
+  _event: React.KeyboardEvent<HTMLInputElement>,
+  _animationTimeline: AnimationTimeline | null,
+  _frames: Frame[]
+) {
+  // TODO: Implement keyboard shortcuts
+}
+
+// When we're sliding along the scrubber, we can sort of sit in between two
+// frames, and that's fine. It allows the user to watch the animation back.
+// But when they let go of the mouse we need to lock onto a frame. So this
+// does that. It grabs the nearest frame to the current scrub and moves to it.
+function handleOnMouseUp(orchestrator: Orchestrator) {
+  const nearestFrame = orchestrator.getNearestCurrentFrame();
+  if (!nearestFrame) {
+    return;
+  }
+
+  // Snap to the nearest frame's timeline position
+  orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
+}
+
+function updateInputBackground() {
+  // TODO: Implement if needed for visual feedback
+}
 
 /* **************** */
 /* HELPER FUNCTIONS */
