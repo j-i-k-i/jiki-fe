@@ -122,6 +122,8 @@ export const breakpointGutter = [
           `.cm-breakpoint-gutter .cm-gutterElement .cm-idle-marker`
         );
 
+        // Check if it's valid that it's always truthy
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (breakpointMarkerElement) {
           breakpointMarkerElement.forEach((el) => el.classList.remove("hovered-idle-marker"));
           return true;
