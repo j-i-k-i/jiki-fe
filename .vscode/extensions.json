@@ -9,9 +9,6 @@
     // Prettier for code formatting
     "esbenp.prettier-vscode",
 
-    // Tailwind CSS IntelliSense
-    "bradlc.vscode-tailwindcss",
-
     // React and Next.js development
     "ms-vscode.vscode-react-refactor",
     "styled-components.vscode-styled-components",
@@ -32,6 +29,7 @@
 
     // File and project navigation
     "formulahendry.auto-rename-tag",
+    // Tailwind CSS IntelliSense
     "bradlc.vscode-tailwindcss",
 
     // Color theme recommendations (optional)
