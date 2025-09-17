@@ -1,0 +1,234 @@
+// This is an orchestration class for the whole page.
+// When the page loads, this is created and then is the thing that's
+// passed around, controls the state, etc.
+
+import { createStore, type StoreApi } from "zustand/vanilla";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import { subscribeWithSelector } from "zustand/middleware";
+import type { Frame, AnimationTimeline } from "./stubs";
+import type { TestState, OrchestratorState } from "./types";
+import { getNearestCurrentFrame, findNextFrame } from "./orchestrator/frameMethods";
+import {
+  getCode,
+  getOutput,
+  getStatus,
+  getError,
+  getHasCodeBeenEdited,
+  getIsSpotlightActive,
+  getFoldedLines,
+  getCurrentTest,
+  getCurrentTestFrames,
+  getCurrentTestAnimationTimeline,
+  getCurrentTestTimelineTime,
+  hasValidTest
+} from "./orchestrator/stateAccessors";
+
+// Private actions only accessible within the orchestrator
+interface OrchestratorActions {
+  setCode: (code: string) => void;
+  setOutput: (output: string) => void;
+  setStatus: (status: OrchestratorState["status"]) => void;
+  setError: (error: string | null) => void;
+  setCurrentTest: (test: TestState | null) => void;
+  setCurrentTestTimelineTime: (time: number) => void;
+  setHasCodeBeenEdited: (value: boolean) => void;
+  setIsSpotlightActive: (value: boolean) => void;
+  setFoldedLines: (lines: number[]) => void;
+  reset: () => void;
+}
+
+type OrchestratorStore = OrchestratorState & OrchestratorActions;
+
+class Orchestrator {
+  exerciseUuid: string;
+  readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
+  protected _cachedCurrentFrame: Frame | null | undefined; // undefined means needs recalculation, not private so methods can access
+
+  constructor(exerciseUuid: string, initialCode: string) {
+    this.exerciseUuid = exerciseUuid;
+
+    // Temporary mock test data for testing the scrubber
+    const mockTest: TestState = {
+      frames: [
+        { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
+        { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
+        { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
+        { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
+        { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
+      ],
+      animationTimeline: {
+        duration: 5,
+        paused: true,
+        seek: (_time: number) => {},
+        play: () => {},
+        pause: () => {},
+        progress: 0,
+        currentTime: 0,
+        completed: false,
+        hasPlayedOrScrubbed: false,
+        seekEndOfTimeline: () => {},
+        onUpdate: () => {},
+        timeline: {
+          duration: 5,
+          currentTime: 0
+        }
+      } as AnimationTimeline,
+      timelineTime: 0
+    };
+
+    // Create instance-specific store
+    this.store = createStore<OrchestratorStore>()(
+      subscribeWithSelector((set, _get) => ({
+        exerciseUuid,
+        code: initialCode,
+        output: "",
+        status: "idle",
+        error: null,
+        currentTest: mockTest, // Temporary: using mock test instead of null
+        hasCodeBeenEdited: false,
+        isSpotlightActive: false,
+        foldedLines: [],
+
+        // Private actions - not exposed to components
+        setCode: (code) => set({ code, hasCodeBeenEdited: true }),
+        setOutput: (output) => set({ output }),
+        setStatus: (status) => set({ status }),
+        setError: (error) => set({ error }),
+        setCurrentTest: (test) => set({ currentTest: test }),
+        setCurrentTestTimelineTime: (time) =>
+          set((state) => {
+            if (!state.currentTest) {
+              return {};
+            }
+            return {
+              currentTest: {
+                ...state.currentTest,
+                timelineTime: time
+              }
+            };
+          }),
+        setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
+        setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
+        setFoldedLines: (lines) => {
+          this._cachedCurrentFrame = undefined; // Invalidate cache when folded lines change
+          set({ foldedLines: lines });
+        },
+        reset: () =>
+          set({
+            code: "",
+            output: "",
+            status: "idle",
+            error: null,
+            currentTest: mockTest, // Temporary: reset to mock test for testing
+            hasCodeBeenEdited: false,
+            isSpotlightActive: false,
+            foldedLines: []
+          })
+      }))
+    );
+  }
+
+  // Expose the store so a hook can use it
+  getStore() {
+    return this.store;
+  }
+
+  // Public methods that use the store actions
+  setCode(code: string) {
+    this.store.getState().setCode(code);
+  }
+
+  setCurrentTestTimelineTime(time: number) {
+    this._cachedCurrentFrame = undefined; // Invalidate cache
+    const state = this.store.getState();
+    state.setCurrentTestTimelineTime(time);
+    // Also seek the animation timeline if it exists
+    const animationTimeline = state.currentTest?.animationTimeline;
+    if (animationTimeline) {
+      animationTimeline.seek(time / 100);
+    }
+  }
+
+  setCurrentTestInterpreterTime(interpreterTime: number) {
+    this.setCurrentTestTimelineTime(interpreterTime * 100);
+  }
+
+  setCurrentTest(test: TestState | null) {
+    this._cachedCurrentFrame = undefined; // Invalidate cache when test changes
+    this.store.getState().setCurrentTest(test);
+  }
+
+  setHasCodeBeenEdited(value: boolean) {
+    this.store.getState().setHasCodeBeenEdited(value);
+  }
+
+  setIsSpotlightActive(value: boolean) {
+    this.store.getState().setIsSpotlightActive(value);
+  }
+
+  setFoldedLines(lines: number[]) {
+    this.store.getState().setFoldedLines(lines);
+  }
+
+  // Protected state accessor methods from stateAccessors.ts
+  protected getCode = getCode.bind(this);
+  protected getOutput = getOutput.bind(this);
+  protected getStatus = getStatus.bind(this);
+  protected getError = getError.bind(this);
+  protected getHasCodeBeenEdited = getHasCodeBeenEdited.bind(this);
+  protected getIsSpotlightActive = getIsSpotlightActive.bind(this);
+  protected getFoldedLines = getFoldedLines.bind(this);
+  protected getCurrentTest = getCurrentTest.bind(this);
+  protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
+  protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
+  protected getCurrentTestTimelineTime = getCurrentTestTimelineTime.bind(this);
+  protected hasValidTest = hasValidTest.bind(this);
+
+  // Methods from frameMethods.ts
+  getNearestCurrentFrame = getNearestCurrentFrame.bind(this);
+  findNextFrame = findNextFrame.bind(this);
+
+  async runCode() {
+    const state = this.store.getState();
+    state.setStatus("running");
+    state.setError(null);
+
+    try {
+      // Simulate running code
+      // eslint-disable-next-line no-console
+      console.log("Running code:", this.store.getState().code);
+
+      // Simulate async execution
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${this.store.getState().code}\n\nOutput: Hello, World!`;
+      state.setOutput(output);
+      state.setStatus("success");
+    } catch (error) {
+      state.setError(error instanceof Error ? error.message : "Unknown error");
+      state.setStatus("error");
+    }
+  }
+}
+
+// Hook to use with an orchestrator instance
+export function useOrchestratorStore(orchestrator: Orchestrator): OrchestratorState {
+  return useStore(
+    orchestrator.getStore(),
+    useShallow((state) => ({
+      exerciseUuid: state.exerciseUuid,
+      code: state.code,
+      output: state.output,
+      status: state.status,
+      error: state.error,
+      currentTest: state.currentTest,
+      hasCodeBeenEdited: state.hasCodeBeenEdited,
+      isSpotlightActive: state.isSpotlightActive,
+      foldedLines: state.foldedLines
+    }))
+  );
+}
+
+export default Orchestrator;
+export type { Orchestrator };

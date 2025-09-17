@@ -9,7 +9,18 @@ The project uses two testing approaches:
 
 ## Test Structure
 
-### Unit/Integration Tests
+### Unit Tests
+
+- **Location**: `tests/unit/`
+- **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`
+- **Examples**:
+  - `tests/unit/AnimationTimeline.test.ts`
+  - `tests/unit/components/complex-exercise/Scrubber.test.tsx`
+  - `tests/unit/components/complex-exercise/scrubber/ScrubberInput.test.tsx`
+- **Important**: All unit tests MUST be placed in the `tests/unit/` directory, not alongside source files
+- **Directory Structure**: Match the source directory structure within `tests/unit/`
+
+### Integration Tests
 
 - **Location**: `tests/integration/`
 - **Naming Convention**: `[feature].test.tsx` or `[feature].test.ts`
@@ -44,6 +55,16 @@ The project uses two testing approaches:
 - Full TypeScript support in all test files
 
 ## Running Tests
+
+### Important: Always Check TypeScript After Tests
+
+**After running tests, ALWAYS check for TypeScript errors by running:**
+
+```bash
+npx tsc --noEmit
+```
+
+**Note**: Do NOT use `pnpm run build` during development as it can cause Turbopack cache conflicts and ENOENT errors. Use `npx tsc --noEmit` for type checking only.
 
 ### Unit/Integration Tests
 
@@ -104,12 +125,22 @@ describe("Feature E2E", () => {
 ### Best Practices
 
 1. **Test user behavior, not implementation details**
-2. **Use semantic queries** (getByRole, getByLabelText) over test IDs
-3. **Group related tests** using `describe` blocks
-4. **Keep tests focused** - one assertion per test when possible
-5. **Use descriptive test names** that explain what is being tested
-6. **E2E tests should test critical user journeys**
-7. **Keep E2E tests independent** - each test should be able to run in isolation
+2. **Use semantic queries** (getByRole, getByLabelText) over test IDs when possible
+3. **Use `data-testid` attributes for test selectors** when semantic queries aren't sufficient
+   - Example: `<div data-testid="scrubber">` can be queried with `screen.getByTestId('scrubber')`
+4. **Group related tests** using `describe` blocks
+5. **Keep tests focused** - one assertion per test when possible
+6. **Use descriptive test names** that explain what is being tested
+7. **E2E tests should test critical user journeys**
+8. **Keep E2E tests independent** - each test should be able to run in isolation
+9. **Component test organization**:
+   - Test parent components for integration behavior
+   - Test child components for specific functionality
+   - Use helper functions to create mock data consistently
+10. **Mock external dependencies** properly:
+    - Use `jest.mock()` for module mocking
+    - Create reusable mock factories for complex objects
+11. **Test component event handlers** to ensure functions are called with correct arguments
 
 ## CI/CD Integration
 
