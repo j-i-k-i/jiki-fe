@@ -1,0 +1,46 @@
+{
+  "recommendations": [
+    // Essential for TypeScript development
+    "ms-vscode.vscode-typescript-next",
+
+    // ESLint for code linting
+    "dbaeumer.vscode-eslint",
+
+    // Prettier for code formatting
+    "esbenp.prettier-vscode",
+
+    // React and Next.js development
+    "ms-vscode.vscode-react-refactor",
+    "styled-components.vscode-styled-components",
+
+    // Git integration and history
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    // Auto import and path intellisense
+    "christian-kohler.path-intellisense",
+    "steoates.autoimport-es6-ts",
+
+    // Testing support
+    "orta.vscode-jest",
+
+    // Markdown support for documentation
+    "yzhang.markdown-all-in-one",
+
+    // File and project navigation
+    "formulahendry.auto-rename-tag",
+    // Tailwind CSS IntelliSense
+    "bradlc.vscode-tailwindcss",
+
+    // Color theme recommendations (optional)
+    "github.github-vscode-theme",
+    "vercel.next-js"
+  ],
+  "unwantedRecommendations": [
+    // These extensions can conflict with our setup
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "ms-vscode.vscode-css",
+    "bradlc.vscode-tailwindcss-duplicate"
+  ]
+}
