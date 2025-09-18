@@ -15,7 +15,6 @@ export interface Handler {
 
 export function useEditorSetup(
   orchestrator: Orchestrator,
-  textarea: HTMLDivElement | null,
   value: string,
   readonly: boolean,
   highlightedLine: number,
@@ -50,8 +49,8 @@ export function useEditorSetup(
     return editorView?.state.doc.toString() || "";
   }, [getEditorView]);
 
-  useEffect(() => {
-    if (!textarea || getEditorView()) {
+  const editorRef = (textarea: HTMLDivElement | null) => {
+    if (!textarea || orchestrator.getEditorView()) {
       return;
     }
 
@@ -102,8 +101,10 @@ export function useEditorSetup(
         })
       );
     }
+  };
 
-    // Cleanup: save immediately when component unmounts
+  // Cleanup effect for component unmount
+  useEffect(() => {
     return () => {
       const editorView = orchestrator.getEditorView();
       if (editorView) {
@@ -113,7 +114,7 @@ export function useEditorSetup(
         orchestrator.setEditorView(null);
       }
     };
-  }, [textarea, value, readonly, highlightedLine, shouldAutoRunCode, orchestrator, getEditorView, getValue, setValue]);
+  }, [orchestrator]);
 
-  return { setValue, getValue };
+  return { setValue, getValue, editorRef };
 }
