@@ -1,6 +1,6 @@
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 import type { Orchestrator } from "../../../lib/Orchestrator";
 import { readOnlyRangesStateField } from "../extensions/read-only-ranges/readOnlyRanges";
@@ -50,7 +50,20 @@ export function useEditorSetup(
   }, [getEditorView]);
 
   const editorRef = (textarea: HTMLDivElement | null) => {
-    if (!textarea || orchestrator.getEditorView()) {
+    if (!textarea) {
+      // Cleanup when element is removed (textarea becomes null)
+      const editorView = orchestrator.getEditorView();
+      if (editorView) {
+        const code = editorView.state.doc.toString();
+        const readonlyRanges = getCodeMirrorFieldValue(editorView, readOnlyRangesStateField);
+        orchestrator.saveImmediately(code, readonlyRanges);
+        orchestrator.setEditorView(null);
+      }
+      return;
+    }
+
+    // Don't initialize if editor already exists
+    if (orchestrator.getEditorView()) {
       return;
     }
 
@@ -102,19 +115,6 @@ export function useEditorSetup(
       );
     }
   };
-
-  // Cleanup effect for component unmount
-  useEffect(() => {
-    return () => {
-      const editorView = orchestrator.getEditorView();
-      if (editorView) {
-        const code = editorView.state.doc.toString();
-        const readonlyRanges = getCodeMirrorFieldValue(editorView, readOnlyRangesStateField);
-        orchestrator.saveImmediately(code, readonlyRanges);
-        orchestrator.setEditorView(null);
-      }
-    };
-  }, [orchestrator]);
 
   return { setValue, getValue, editorRef };
 }

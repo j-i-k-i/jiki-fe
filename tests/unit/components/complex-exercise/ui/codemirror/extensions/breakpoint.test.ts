@@ -401,7 +401,7 @@ describe("breakpoint extension", () => {
       ];
 
       expect(testScenarios).toHaveLength(5);
-      testScenarios.forEach((scenario, index) => {
+      testScenarios.forEach((scenario, _index) => {
         expect(scenario.description).toBeDefined();
         expect(scenario.content).toBeDefined();
         expect(scenario.instructions.length).toBeGreaterThan(0);

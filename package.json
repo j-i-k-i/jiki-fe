@@ -55,6 +55,7 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "@welldone-software/why-did-you-render": "^10.0.1",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",

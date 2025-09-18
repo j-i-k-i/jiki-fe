@@ -25,3 +25,8 @@ export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
     </div>
   );
 }
+
+// Enable why-did-you-render tracking for this component
+if (process.env.NODE_ENV === "development") {
+  CodeMirror.whyDidYouRender = true;
+}
