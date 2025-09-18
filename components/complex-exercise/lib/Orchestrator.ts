@@ -3,8 +3,10 @@
 // When the page loads, this is created and then is the thing that's
 // passed around, controls the state, etc.
 
-import type { EditorView } from "@codemirror/view";
+import type { EditorView, ViewUpdate } from "@codemirror/view";
 import { EditorView as EditorViewClass } from "@codemirror/view";
+import { foldEffect, unfoldEffect } from "@codemirror/language";
+import type { StateEffectType, Extension } from "@codemirror/state";
 import { debounce } from "lodash";
 import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -12,9 +14,16 @@ import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { readonlyCompartment } from "../ui/codemirror/CodeMirror";
 import { informationWidgetDataEffect, showInfoWidgetEffect } from "../ui/codemirror/extensions";
-import { changeColorEffect, changeLineEffect } from "../ui/codemirror/extensions/lineHighlighter";
-import { updateReadOnlyRangesEffect } from "../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
+import { breakpointEffect } from "../ui/codemirror/extensions/breakpoint";
+import { INFO_HIGHLIGHT_COLOR, changeColorEffect, changeLineEffect } from "../ui/codemirror/extensions/lineHighlighter";
+import {
+  readOnlyRangesStateField,
+  updateReadOnlyRangesEffect
+} from "../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
 import { addUnderlineEffect } from "../ui/codemirror/extensions/underlineRange";
+import { getBreakpointLines } from "../ui/codemirror/getBreakpointLines";
+import { getCodeMirrorFieldValue } from "../ui/codemirror/getCodeMirrorFieldValue";
+import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/getFoldedLines";
 import { updateUnfoldableFunctions } from "../ui/codemirror/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
 import { findNextFrame, getNearestCurrentFrame } from "./orchestrator/frameMethods";
@@ -699,6 +708,122 @@ class Orchestrator {
         effects: updateReadOnlyRangesEffect.of(readonlyRanges)
       });
     }
+  }
+
+  // =====================================================
+  // CodeMirror Event Handler Methods
+  // =====================================================
+
+  // Low-level event factories
+  private onEditorChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
+    return EditorViewClass.updateListener.of((update) => {
+      if (update.docChanged) {
+        cb.forEach((fn) => fn(update));
+      }
+    });
+  }
+
+  private onBreakpointChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
+    return this.onViewChange([breakpointEffect], ...cb);
+  }
+
+  private onFoldChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
+    return this.onViewChange([foldEffect, unfoldEffect], ...cb);
+  }
+
+  private onViewChange(effectTypes: StateEffectType<any>[], ...cb: Array<(update: ViewUpdate) => void>): Extension {
+    return EditorViewClass.updateListener.of((update) => {
+      const changed = update.transactions.some((transaction) =>
+        transaction.effects.some((effect) => effectTypes.some((effectType) => effect.is(effectType)))
+      );
+      if (changed) {
+        cb.forEach((fn) => fn(update));
+      }
+    });
+  }
+
+  // High-level orchestrator-specific event handlers
+  createEditorChangeHandlers(shouldAutoRunCode: boolean): Extension {
+    return this.onEditorChange(
+      // Reset information widget
+      () =>
+        this.setInformationWidgetData({
+          html: "",
+          line: 0,
+          status: "SUCCESS"
+        }),
+
+      // Reset highlighted line
+      () => this.setHighlightedLine(0),
+
+      // Auto-save content with readonly ranges
+      (e) => {
+        const code = e.state.doc.toString();
+        const readonlyRanges = getCodeMirrorFieldValue(e.view, readOnlyRangesStateField);
+        this.autoSaveContent(code, readonlyRanges);
+      },
+
+      // Set highlight color
+      () => this.setHighlightedLineColor(INFO_HIGHLIGHT_COLOR),
+
+      // Hide information widget
+      () => this.setShouldShowInformationWidget(false),
+
+      // Mark code as edited
+      () => this.setHasCodeBeenEdited(true),
+
+      // Clear underline range
+      () => this.setUnderlineRange(undefined),
+
+      // Update breakpoints
+      () => {
+        const view = this.getEditorView();
+        if (view) {
+          this.setBreakpoints(getBreakpointLines(view));
+        }
+      },
+
+      // Update folded lines
+      () => {
+        const view = this.getEditorView();
+        if (view) {
+          this.setFoldedLines(getCodeMirrorFoldedLines(view));
+        }
+      },
+
+      // Auto-run code if enabled
+      () => {
+        if (shouldAutoRunCode) {
+          this.handleRunCode();
+        }
+      },
+
+      // Trigger custom callback
+      () => {
+        const view = this.getEditorView();
+        if (view) {
+          this.callOnEditorChangeCallback(view);
+        }
+      }
+    );
+  }
+
+  createBreakpointChangeHandler(): Extension {
+    return this.onBreakpointChange(() => {
+      const view = this.getEditorView();
+      if (view) {
+        this.setBreakpoints(getBreakpointLines(view));
+      }
+    });
+  }
+
+  createFoldChangeHandler(): Extension {
+    return this.onFoldChange(() => {
+      const view = this.getEditorView();
+      if (view) {
+        this.setFoldedLines(getCodeMirrorFoldedLines(view));
+      }
+    });
   }
 }
 

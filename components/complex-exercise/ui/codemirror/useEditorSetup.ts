@@ -6,11 +6,6 @@ import type { Orchestrator } from "../../lib/Orchestrator";
 import { readOnlyRangesStateField } from "./extensions/read-only-ranges/readOnlyRanges";
 import { getCodeMirrorFieldValue } from "./getCodeMirrorFieldValue";
 import { createEditorExtensions } from "./editorExtensions";
-import {
-  createBreakpointChangeHandler,
-  createEditorChangeHandlers,
-  createFoldChangeHandler
-} from "./editorEventHandlers";
 
 export interface Handler {
   setValue: (value: string) => void;
@@ -60,10 +55,10 @@ export function useEditorSetup(
       return;
     }
 
-    // Create event handlers
-    const onBreakpointChange = createBreakpointChangeHandler(orchestrator);
-    const onFoldChange = createFoldChangeHandler(orchestrator);
-    const onEditorChange = createEditorChangeHandlers(orchestrator, shouldAutoRunCode);
+    // Create event handlers using orchestrator methods
+    const onBreakpointChange = orchestrator.createBreakpointChangeHandler();
+    const onFoldChange = orchestrator.createFoldChangeHandler();
+    const onEditorChange = orchestrator.createEditorChangeHandlers(shouldAutoRunCode);
 
     // Create extensions
     const extensions = createEditorExtensions({
