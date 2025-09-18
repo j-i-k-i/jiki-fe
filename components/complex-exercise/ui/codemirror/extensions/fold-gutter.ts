@@ -2,7 +2,7 @@ import { foldGutter, foldService, syntaxTree } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 import type { SyntaxNode } from "@lezer/common";
 import { isEqual } from "lodash";
-import { unfoldableFunctionsField } from "../unfoldableFunctionNames";
+import { unfoldableFunctionsField } from "../utils/unfoldableFunctionNames";
 
 const functionFolding = foldService.of((state, _lineStart, lineEnd) => {
   const tree = syntaxTree(state);

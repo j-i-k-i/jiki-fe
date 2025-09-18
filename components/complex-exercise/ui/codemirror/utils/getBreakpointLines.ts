@@ -1,5 +1,5 @@
 import type { EditorView } from "@codemirror/view";
-import { breakpointState } from "./extensions/breakpoint";
+import { breakpointState } from "../extensions/breakpoint";
 
 export function getBreakpointLines(view: EditorView | null): number[] {
   if (!view) {

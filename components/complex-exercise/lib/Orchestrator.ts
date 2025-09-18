@@ -21,10 +21,10 @@ import {
   updateReadOnlyRangesEffect
 } from "../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
 import { addUnderlineEffect } from "../ui/codemirror/extensions/underlineRange";
-import { getBreakpointLines } from "../ui/codemirror/getBreakpointLines";
-import { getCodeMirrorFieldValue } from "../ui/codemirror/getCodeMirrorFieldValue";
-import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/getFoldedLines";
-import { updateUnfoldableFunctions } from "../ui/codemirror/unfoldableFunctionNames";
+import { getBreakpointLines } from "../ui/codemirror/utils/getBreakpointLines";
+import { getCodeMirrorFieldValue } from "../ui/codemirror/utils/getCodeMirrorFieldValue";
+import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/utils/getFoldedLines";
+import { updateUnfoldableFunctions } from "../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
 import { findNextFrame, getNearestCurrentFrame } from "./orchestrator/frameMethods";
 import {

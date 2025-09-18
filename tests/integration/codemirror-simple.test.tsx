@@ -105,19 +105,19 @@ jest.mock("@/components/complex-exercise/ui/codemirror/extensions", () => ({
 }));
 
 // Mock utility functions
-jest.mock("@/components/complex-exercise/ui/codemirror/getBreakpointLines", () => ({
+jest.mock("@/components/complex-exercise/ui/codemirror/utils/getBreakpointLines", () => ({
   getBreakpointLines: jest.fn(() => [])
 }));
 
-jest.mock("@/components/complex-exercise/ui/codemirror/getFoldedLines", () => ({
+jest.mock("@/components/complex-exercise/ui/codemirror/utils/getFoldedLines", () => ({
   getFoldedLines: jest.fn(() => [])
 }));
 
-jest.mock("@/components/complex-exercise/ui/codemirror/getCodeMirrorFieldValue", () => ({
+jest.mock("@/components/complex-exercise/ui/codemirror/utils/getCodeMirrorFieldValue", () => ({
   getCodeMirrorFieldValue: jest.fn(() => [])
 }));
 
-jest.mock("@/components/complex-exercise/ui/codemirror/unfoldableFunctionNames", () => ({
+jest.mock("@/components/complex-exercise/ui/codemirror/utils/unfoldableFunctionNames", () => ({
   unfoldableFunctionsField: jest.fn()
 }));
 

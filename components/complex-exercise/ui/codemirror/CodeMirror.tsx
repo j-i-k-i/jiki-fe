@@ -3,8 +3,8 @@ import type { EditorView } from "@codemirror/view";
 
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
-import { readonlyCompartment } from "./editorCompartments";
-import { useEditorSetup, type Handler } from "./useEditorSetup";
+import { readonlyCompartment } from "./setup/editorCompartments";
+import { useEditorSetup, type Handler } from "./setup/useEditorSetup";
 
 export { readonlyCompartment };
 export type { Handler };

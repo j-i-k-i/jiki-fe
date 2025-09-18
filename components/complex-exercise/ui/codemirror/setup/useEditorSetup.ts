@@ -2,9 +2,9 @@ import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { useCallback, useEffect } from "react";
 
-import type { Orchestrator } from "../../lib/Orchestrator";
-import { readOnlyRangesStateField } from "./extensions/read-only-ranges/readOnlyRanges";
-import { getCodeMirrorFieldValue } from "./getCodeMirrorFieldValue";
+import type { Orchestrator } from "../../../lib/Orchestrator";
+import { readOnlyRangesStateField } from "../extensions/read-only-ranges/readOnlyRanges";
+import { getCodeMirrorFieldValue } from "../utils/getCodeMirrorFieldValue";
 import { createEditorExtensions } from "./editorExtensions";
 
 export interface Handler {

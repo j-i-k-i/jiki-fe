@@ -15,10 +15,10 @@ import {
 } from "@codemirror/view";
 import { minimalSetup } from "codemirror";
 
-import type { Orchestrator } from "../../lib/Orchestrator";
-import * as Ext from "./extensions";
-import { moveCursorByPasteLength } from "./extensions/move-cursor-by-paste-length";
-import { unfoldableFunctionsField } from "./unfoldableFunctionNames";
+import type { Orchestrator } from "../../../lib/Orchestrator";
+import * as Ext from "../extensions";
+import { moveCursorByPasteLength } from "../extensions/move-cursor-by-paste-length";
+import { unfoldableFunctionsField } from "../utils/unfoldableFunctionNames";
 import { readonlyCompartment } from "./editorCompartments";
 
 import type { Extension } from "@codemirror/state";
