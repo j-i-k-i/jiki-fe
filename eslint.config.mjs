@@ -143,13 +143,6 @@ const eslintConfig = [
       // Warn if async functions don't use `await` inside.
       "@typescript-eslint/require-await": "warn",
 
-      // === Modern TypeScript ergonomics ===
-      // Prefer `??` over `||` when checking null/undefined.
-      "@typescript-eslint/prefer-nullish-coalescing": [
-        "warn",
-        { ignoreConditionalTests: true, ignorePrimitives: true }
-      ],
-
       // Prefer optional chaining (`?.`) over nested && checks.
       "@typescript-eslint/prefer-optional-chain": "warn",
 

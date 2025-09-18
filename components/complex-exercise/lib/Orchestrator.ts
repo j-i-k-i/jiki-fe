@@ -1,13 +1,20 @@
+/* eslint-disable no-console */
 // This is an orchestration class for the whole page.
 // When the page loads, this is created and then is the thing that's
 // passed around, controls the state, etc.
 
 import type { EditorView } from "@codemirror/view";
+import { EditorView as EditorViewClass } from "@codemirror/view";
+import { debounce } from "lodash";
 import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { readonlyCompartment } from "../ui/codemirror/CodeMirror";
+import { informationWidgetDataEffect, showInfoWidgetEffect } from "../ui/codemirror/extensions";
+import { changeColorEffect, changeLineEffect } from "../ui/codemirror/extensions/lineHighlighter";
 import { updateReadOnlyRangesEffect } from "../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
+import { addUnderlineEffect } from "../ui/codemirror/extensions/underlineRange";
 import { updateUnfoldableFunctions } from "../ui/codemirror/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
 import { findNextFrame, getNearestCurrentFrame } from "./orchestrator/frameMethods";
@@ -81,9 +88,16 @@ class Orchestrator {
   protected _cachedCurrentFrame: Frame | null | undefined; // undefined means needs recalculation, not private so methods can access
   private editorView: EditorView | null = null;
   private editorHandler: any = null; // Handler from CodeMirror component
+  private onEditorChangeCallback?: (view: EditorView) => void;
+  private handleRunCodeCallback?: () => void;
+  private isSaving = false;
+  private saveDebounced: ReturnType<typeof debounce> | null = null;
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
+
+    // Initialize debounced save function
+    this.initializeAutoSave();
 
     // Temporary mock test data for testing the scrubber
     const mockTest: TestState = {
@@ -218,6 +232,46 @@ class Orchestrator {
           })
       }))
     );
+
+    // Subscribe to state changes to automatically apply editor effects
+    let previousInformationWidgetData = this.store.getState().informationWidgetData;
+    let previousShouldShowInformationWidget = this.store.getState().shouldShowInformationWidget;
+    let previousReadonly = this.store.getState().readonly;
+    let previousHighlightedLine = this.store.getState().highlightedLine;
+    let previousHighlightedLineColor = this.store.getState().highlightedLineColor;
+    let previousUnderlineRange = this.store.getState().underlineRange;
+
+    this.store.subscribe((state) => {
+      if (state.informationWidgetData !== previousInformationWidgetData) {
+        this.applyInformationWidgetData(state.informationWidgetData);
+        previousInformationWidgetData = state.informationWidgetData;
+      }
+
+      if (state.shouldShowInformationWidget !== previousShouldShowInformationWidget) {
+        this.applyShouldShowInformationWidget(state.shouldShowInformationWidget);
+        previousShouldShowInformationWidget = state.shouldShowInformationWidget;
+      }
+
+      if (state.readonly !== previousReadonly) {
+        this.applyReadonlyCompartment(state.readonly);
+        previousReadonly = state.readonly;
+      }
+
+      if (state.highlightedLine !== previousHighlightedLine) {
+        this.applyHighlightLine(state.highlightedLine);
+        previousHighlightedLine = state.highlightedLine;
+      }
+
+      if (state.highlightedLineColor !== previousHighlightedLineColor) {
+        this.applyHighlightLineColor(state.highlightedLineColor);
+        previousHighlightedLineColor = state.highlightedLineColor;
+      }
+
+      if (state.underlineRange !== previousUnderlineRange) {
+        this.applyUnderlineRange(state.underlineRange);
+        previousUnderlineRange = state.underlineRange;
+      }
+    });
   }
 
   // Expose the store so a hook can use it
@@ -238,6 +292,100 @@ class Orchestrator {
   handleEditorDidMount(handler: any) {
     this.editorHandler = handler;
     // Editor is now ready - initialization should be called separately by the component
+  }
+
+  // Editor change callback management
+  setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
+    this.onEditorChangeCallback = callback;
+  }
+
+  // Run code callback management
+  setHandleRunCodeCallback(callback?: () => void) {
+    this.handleRunCodeCallback = callback;
+  }
+
+  // Call the run code callback if set, otherwise use orchestrator's runCode
+  handleRunCode() {
+    if (this.handleRunCodeCallback) {
+      this.handleRunCodeCallback();
+    } else {
+      this.runCode().catch((error) => {
+        console.error("Unexpected error in runCode:", error);
+        const state = this.store.getState();
+        state.setError(error instanceof Error ? error.message : "Unexpected error occurred");
+        state.setStatus("error");
+      });
+    }
+  }
+
+  // Call the editor change callback if set
+  callOnEditorChangeCallback(view: EditorView) {
+    if (this.onEditorChangeCallback) {
+      this.onEditorChangeCallback(view);
+    }
+  }
+
+  // Initialize auto-save functionality
+  private initializeAutoSave() {
+    const saveNow = (code: string, readonlyRanges?: { from: number; to: number }[]) => {
+      if (this.isSaving) {
+        return; // Prevent concurrent saves
+      }
+
+      this.isSaving = true;
+
+      try {
+        const result = saveCodeMirrorContent(this.exerciseUuid, code, readonlyRanges);
+
+        if (result.success) {
+          console.log("CodeMirror content saved successfully", result);
+        } else {
+          console.error("Failed to save CodeMirror content:", result.error);
+        }
+      } catch (error) {
+        console.error(`Error saving exercise ${this.exerciseUuid}:`, error);
+      } finally {
+        this.isSaving = false;
+      }
+    };
+
+    this.saveDebounced = debounce((code: string, readonlyRanges?: { from: number; to: number }[]) => {
+      saveNow(code, readonlyRanges);
+    }, 500);
+  }
+
+  // Auto-save the current editor content
+  autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
+    if (this.saveDebounced) {
+      this.saveDebounced(code, readonlyRanges);
+    }
+  }
+
+  // Save immediately (for cleanup)
+  saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
+    if (this.saveDebounced) {
+      this.saveDebounced.cancel();
+    }
+
+    if (this.isSaving) {
+      return;
+    }
+
+    this.isSaving = true;
+
+    try {
+      const result = saveCodeMirrorContent(this.exerciseUuid, code, readonlyRanges);
+
+      if (result.success) {
+        console.log("CodeMirror content saved successfully", result);
+      } else {
+        console.error("Failed to save CodeMirror content:", result.error);
+      }
+    } catch (error) {
+      console.error(`Error saving exercise ${this.exerciseUuid}:`, error);
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   getEditorHandler() {
@@ -328,6 +476,86 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
+  // Methods to apply editor effects directly through the orchestrator
+  applyInformationWidgetData(data: InformationWidgetData) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    editorView.dispatch({
+      effects: informationWidgetDataEffect.of(data)
+    });
+  }
+
+  applyShouldShowInformationWidget(show: boolean) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    editorView.dispatch({
+      effects: showInfoWidgetEffect.of(show)
+    });
+  }
+
+  applyReadonlyCompartment(readonly: boolean) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    editorView.dispatch({
+      effects: readonlyCompartment.reconfigure([EditorViewClass.editable.of(!readonly)])
+    });
+  }
+
+  applyHighlightLine(highlightedLine: number) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    if (highlightedLine) {
+      editorView.dispatch({
+        effects: changeLineEffect.of(highlightedLine)
+      });
+    }
+  }
+
+  applyHighlightLineColor(highlightedLineColor: string) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    if (highlightedLineColor) {
+      editorView.dispatch({
+        effects: changeColorEffect.of(highlightedLineColor)
+      });
+    }
+  }
+
+  applyUnderlineRange(range: UnderlineRange | undefined) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    if (range !== undefined) {
+      editorView.dispatch({
+        effects: addUnderlineEffect.of(range)
+      });
+      const line = document.querySelector(".cm-underline");
+      if (line) {
+        line.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }
+    }
+  }
+
   // Error store public methods
   setHasUnhandledError(hasError: boolean) {
     this.store.getState().setHasUnhandledError(hasError);
@@ -361,14 +589,17 @@ class Orchestrator {
     state.setError(null);
 
     try {
+      // Get the current code from the editor
+      const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
+
       // Simulate running code
-      // eslint-disable-next-line no-console
-      console.log("Running code:", this.store.getState().code);
+
+      console.log("Running code:", currentCode);
 
       // Simulate async execution
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${this.store.getState().code}\n\nOutput: Hello, World!`;
+      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${currentCode}\n\nOutput: Hello, World!`;
       state.setOutput(output);
       state.setStatus("success");
     } catch (error) {
