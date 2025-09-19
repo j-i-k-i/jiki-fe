@@ -50,34 +50,75 @@ export default function TestingPage({
         Test and interact with CodeMirror extensions using the controls below.
       </p>
 
-      <div style={{ marginBottom: "32px" }}>
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: "500",
-            marginBottom: "12px",
-            color: "#333"
-          }}
-        >
-          Code Editor
-        </h2>
-        <CodeMirror orchestrator={orchestrator} />
-      </div>
-
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-          gap: "24px"
+          display: "flex",
+          gap: "24px",
+          height: "calc(100vh - 180px)", // Adjust for header space
+          minHeight: "600px"
         }}
       >
-        <LineHighlighterTest orchestrator={orchestrator} />
-        <UnderlineRangeTest orchestrator={orchestrator} />
-        <ReadOnlyRangesTest orchestrator={orchestrator} />
-        <InformationWidgetTest orchestrator={orchestrator} />
-        <BreakpointTest orchestrator={orchestrator} />
-        <MultiLineHighlighterTest orchestrator={orchestrator} />
-        <EditEditorTest orchestrator={orchestrator} />
+        {/* Left side - Fixed Editor */}
+        <div
+          style={{
+            flex: "0 0 50%",
+            display: "flex",
+            flexDirection: "column"
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "20px",
+              fontWeight: "500",
+              marginBottom: "12px",
+              color: "#333"
+            }}
+          >
+            Code Editor
+          </h2>
+          <div style={{ flex: "1", minHeight: "0" }}>
+            <CodeMirror orchestrator={orchestrator} />
+          </div>
+        </div>
+
+        {/* Right side - Scrollable Testing Components */}
+        <div
+          style={{
+            flex: "1",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden"
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "20px",
+              fontWeight: "500",
+              marginBottom: "12px",
+              color: "#333"
+            }}
+          >
+            Testing Controls
+          </h2>
+          <div
+            style={{
+              flex: "1",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
+              paddingRight: "8px"
+            }}
+          >
+            <LineHighlighterTest orchestrator={orchestrator} />
+            <UnderlineRangeTest orchestrator={orchestrator} />
+            <ReadOnlyRangesTest orchestrator={orchestrator} />
+            <InformationWidgetTest orchestrator={orchestrator} />
+            <BreakpointTest orchestrator={orchestrator} />
+            <MultiLineHighlighterTest orchestrator={orchestrator} />
+            <EditEditorTest orchestrator={orchestrator} />
+          </div>
+        </div>
       </div>
     </div>
   );

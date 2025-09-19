@@ -518,6 +518,47 @@ class Orchestrator {
 
   setBreakpoints(breakpoints: number[]) {
     this.store.getState().setBreakpoints(breakpoints);
+    this.applyBreakpoints(breakpoints);
+  }
+
+  // Apply breakpoints to the editor
+  applyBreakpoints(breakpoints: number[]) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    // Get current breakpoints from the editor
+    const currentBreakpoints = getBreakpointLines(editorView);
+
+    // Remove breakpoints that are no longer needed
+    const effects = [];
+    for (const line of currentBreakpoints) {
+      if (!breakpoints.includes(line)) {
+        try {
+          const pos = editorView.state.doc.line(line).from;
+          effects.push(breakpointEffect.of({ pos, on: false }));
+        } catch (error) {
+          console.warn(`Failed to remove breakpoint at line ${line}:`, error);
+        }
+      }
+    }
+
+    // Add new breakpoints
+    for (const line of breakpoints) {
+      if (!currentBreakpoints.includes(line) && line >= 1 && line <= editorView.state.doc.lines) {
+        try {
+          const pos = editorView.state.doc.line(line).from;
+          effects.push(breakpointEffect.of({ pos, on: true }));
+        } catch (error) {
+          console.warn(`Failed to add breakpoint at line ${line}:`, error);
+        }
+      }
+    }
+
+    if (effects.length > 0) {
+      editorView.dispatch({ effects });
+    }
   }
 
   setShouldAutoRunCode(shouldAutoRun: boolean) {

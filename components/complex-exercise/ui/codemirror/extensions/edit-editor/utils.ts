@@ -5,9 +5,32 @@ import { updateReadOnlyRangesEffect } from "../read-only-ranges/readOnlyRanges";
 import { showTutorTooltip } from "./customCursor";
 import { addHighlight, removeAllHighlightEffect } from "./highlightRange";
 
+// Helper function to safely get a line, creating it if it doesn't exist
+function safeGetLine(view: EditorView, lineNumber: number) {
+  const doc = view.state.doc;
+  const totalLines = doc.lines;
+
+  if (lineNumber <= totalLines) {
+    return doc.line(lineNumber);
+  }
+
+  // Line doesn't exist, create empty lines up to the requested line
+  const newLines = Array(lineNumber - totalLines)
+    .fill("")
+    .join("\n");
+  const insertPos = doc.length;
+
+  view.dispatch({
+    changes: { from: insertPos, insert: "\n" + newLines }
+  });
+
+  // Return the newly created line
+  return view.state.doc.line(lineNumber);
+}
+
 export function addCodeToEndOfLine(view: EditorView, { line, code }: { line: number; code: string }): Promise<void> {
   return new Promise((resolve) => {
-    const lineObj = view.state.doc.line(line);
+    const lineObj = safeGetLine(view, line);
     const pos = lineObj.to;
     view.dispatch({
       changes: { from: pos, insert: code }
@@ -21,7 +44,7 @@ function randomNumberBetween(min: number, max: number): number {
 }
 export function typeOutCode(view: EditorView, { line, code }: { line: number; code: string }): Promise<void> {
   return new Promise((resolve) => {
-    const lineObj = view.state.doc.line(line);
+    const lineObj = safeGetLine(view, line);
     let pos = lineObj.to;
     let index = 0;
 
@@ -58,8 +81,8 @@ export function typeOutCode(view: EditorView, { line, code }: { line: number; co
 
 export function backspaceLines(view: EditorView, { from, to }: { from: number; to: number }): Promise<void> {
   return new Promise((resolve) => {
-    const startPosObj = view.state.doc.line(from);
-    const endPosObj = view.state.doc.line(to);
+    const startPosObj = safeGetLine(view, from);
+    const endPosObj = safeGetLine(view, to);
     const posStart = startPosObj.from;
     let posEnd = endPosObj.to;
 
@@ -125,8 +148,8 @@ export function highlightCodeSelection(
       return;
     }
 
-    const fromChar = lines ? view.state.doc.line(lines.from).from : 0;
-    const toChar = lines ? view.state.doc.line(lines.to).to : view.state.doc.length;
+    const fromChar = lines ? safeGetLine(view, lines.from).from : 0;
+    const toChar = lines ? safeGetLine(view, lines.to).to : view.state.doc.length;
 
     const cursor = new RegExpCursor(
       view.state.doc,
@@ -159,7 +182,7 @@ export function removeAllHighlights(view: EditorView): Promise<void> {
 
 export function removeLine(view: EditorView, { line }: { line: number }): Promise<void> {
   return new Promise((resolve) => {
-    const lineObj = view.state.doc.line(line);
+    const lineObj = safeGetLine(view, line);
     const from = lineObj.from;
     let to = lineObj.to;
     if (line < view.state.doc.lines) {
@@ -176,10 +199,11 @@ export function removeLine(view: EditorView, { line }: { line: number }): Promis
 export function placeCursor(view: EditorView, options: { line: number; char: number }): Promise<void> {
   return new Promise((resolve) => {
     view.focus();
+    const lineObj = safeGetLine(view, options.line);
     view.dispatch({
       selection: {
-        anchor: view.state.doc.line(options.line).from + options.char,
-        head: view.state.doc.line(options.line).from + options.char
+        anchor: lineObj.from + options.char,
+        head: lineObj.from + options.char
       },
       effects: showTutorTooltip.of(true)
     });
@@ -238,7 +262,7 @@ export function deleteEditorContent(view: EditorView): Promise<void> {
 export function highlightAndRemoveLines(view: EditorView, range: { from: number; to: number }) {
   // return new Promise((resolve) => {
   for (let currentLine = range.from; currentLine <= range.to; currentLine++) {
-    const lineInDocument = view.state.doc.line(currentLine);
+    const lineInDocument = safeGetLine(view, currentLine);
 
     if (lineInDocument.from === lineInDocument.to) {
       continue;
@@ -251,10 +275,10 @@ export function highlightAndRemoveLines(view: EditorView, range: { from: number;
     });
   }
 
-  const startingPosition = view.state.doc.line(range.from).from;
+  const startingPosition = safeGetLine(view, range.from).from;
   setTimeout(() => {
     for (let currentLine = range.from; currentLine <= range.to; currentLine++) {
-      const lineInDocument = view.state.doc.line(currentLine);
+      const lineInDocument = safeGetLine(view, currentLine);
 
       // console.log("LINEFROM TO", lineInDocument.from, lineInDocument.to);
       view.dispatch({
@@ -272,7 +296,7 @@ export function highlightAndRemoveLines(view: EditorView, range: { from: number;
 
 export function removeLineContent(view: EditorView, { line }: { line: number }): Promise<void> {
   return new Promise((resolve) => {
-    const lineObj = view.state.doc.line(line);
+    const lineObj = safeGetLine(view, line);
     const from = lineObj.from;
     let to = lineObj.to;
 
