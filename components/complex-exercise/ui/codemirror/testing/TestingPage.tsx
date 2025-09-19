@@ -22,7 +22,7 @@ export default function TestingPage({
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "60vh",
         backgroundColor: "white",
         padding: "24px",
         fontFamily: "system-ui, -apple-system, sans-serif",
@@ -60,16 +60,7 @@ export default function TestingPage({
         >
           Code Editor
         </h2>
-        <div
-          style={{
-            border: "1px solid #e0e0e0",
-            borderRadius: "8px",
-            overflow: "hidden",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
-          }}
-        >
-          <CodeMirror orchestrator={orchestrator} />
-        </div>
+        <CodeMirror orchestrator={orchestrator} />
       </div>
 
       <div

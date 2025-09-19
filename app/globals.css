@@ -8,6 +8,10 @@
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
+    --color-thick-border-blue: #f4f6ff;
+    --color-primary-blue: rgb(46 87 232);
+    --color-text-color-1: #130b43;
+    --color-dark-red: #d03b3b;
     --font-sans: var(--font-geist-sans);
     --font-mono: var(--font-geist-mono);
 
@@ -15,17 +19,68 @@
     --color-orange: #ff8c00;
     --color-bootcamp-light-purple: #e6e6fa;
 
-    /* ✅ correct namespaces */
-    --text-16: 16px; /* was --font-size-16 */
-    --text-20: 20px; /* was --font-size-20 */
-    --leading-100: 1; /* was --line-height-100 */
+    --text-16: 16px;
+    --text-20: 20px;
+    --leading-100: 1;
+    --padding-10: 10px;
+    --padding-20: 20px;
 
-    /* these are fine */
     --border-width-1: 1px;
     --border-width-2: 2px;
     --radius-5: 5px;
+    --radius-6: 6px;
+    --radius-8: 8px;
     --spacing-8: 8px;
     --spacing-12: 12px;
+    --z-index-tooltip: 80;
+    --z-index-tooltip-content: 81;
+    /* spacing tokens */
+    --spacing-auto: auto;
+    --spacing-0: 0px;
+    --spacing-2: 2px;
+    --spacing-4: 4px;
+    --spacing-6: 6px;
+    --spacing-8: 8px;
+    --spacing-10: 10px;
+    --spacing-12: 12px;
+    --spacing-16: 16px;
+    --spacing-20: 20px;
+    --spacing-24: 24px;
+    --spacing-28: 28px;
+    --spacing-32: 32px;
+    --spacing-36: 36px;
+    --spacing-40: 40px;
+    --spacing-44: 44px;
+    --spacing-48: 48px;
+    --spacing-52: 52px;
+    --spacing-56: 56px;
+    --spacing-60: 60px;
+    --spacing-64: 64px;
+    --spacing-72: 72px;
+    --spacing-80: 80px;
+    --spacing-84: 84px;
+    --spacing-88: 88px;
+    --spacing-96: 96px;
+    --spacing-128: 128px;
+    --spacing-140: 140px;
+
+    --leading-none: 1;
+    --leading-tight: 125%;
+    --leading-regular: 138%;
+    --leading-paragraph: 150%;
+    --leading-code: 160%;
+    --leading-huge: 170%;
+
+    --leading-100: 100%;
+    --leading-120: 120%;
+    --leading-130: 130%;
+    --leading-140: 140%;
+    --leading-150: 150%;
+    --leading-160: 160%;
+    --leading-170: 170%;
+    --leading-180: 180%;
+    --leading-190: 190%;
+    --leading-200: 200%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -80,6 +135,7 @@ body {
 }
 
 .editor-wrapper {
+    width: 800px;
     overflow: hidden;
     @apply h-[60%] flex-grow-0;
     @apply rounded-5;
@@ -87,7 +143,7 @@ body {
 }
 
 .editor {
-  width: 800px;
+    width: 800px;
     height: 100%;
     background: #fff;
     overflow-y: auto;
@@ -155,7 +211,7 @@ body {
     font-size: 16px;
 
     .cm-cursor {
-        border-color: var(--textColor1);
+        border-color: var(--text-color-1);
     }
 
     .cm-scroller {
@@ -211,5 +267,120 @@ body {
     padding-left: 2px !important;
     &.cm-activeLine {
         background-color: #d6ecfa80;
+    }
+}
+
+.information-tooltip {
+    max-width: 450px;
+    max-height: 80vh;
+    transition: opacity 0.3s;
+    @apply z-tooltip;
+    /* pointer-events: none; */
+    @apply text-16 leading-150;
+    @apply absolute rounded-8 opacity-0 flex;
+
+    /* Needed to stop scroll bar from killing the border */
+    @apply py-2 pr-2;
+
+    .content {
+        @apply py-16 px-20;
+        @apply overflow-auto;
+    }
+
+    code {
+        overflow-wrap: break-word;
+        &[data-hl-from] {
+            cursor: help;
+        }
+    }
+
+    & :not(pre) > code {
+        @apply bg-thick-border-blue px-[6px] py-[1px] rounded-5;
+    }
+
+    pre + p {
+        @apply mt-6;
+    }
+    pre {
+        @apply mt-2;
+    }
+
+    p:not(:last-child) {
+        @apply mb-10;
+    }
+    ul {
+        @apply list-disc ml-20;
+        li {
+        }
+    }
+
+    .tooltip-arrow {
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        border-right: 10px solid;
+
+        content: "";
+        position: absolute;
+        top: 6px;
+        left: -10px;
+    }
+
+    &.description {
+        @apply bg-white text-primary-blue border-2 border-blue-500;
+
+        filter: drop-shadow(0px 4px 8px rgba(79, 114, 205, 0.5));
+
+        .tooltip-arrow {
+            border-right-color: rgb(59 130 246);
+        }
+
+        hr {
+            @apply my-12 opacity-[0.5];
+        }
+        h3 {
+            @apply font-medium mb-4;
+        }
+    }
+
+    &.error {
+        @apply bg-white border-2 border-red-500;
+
+        @apply p-0;
+
+        filter: drop-shadow(0px 4px 8px rgba(79, 114, 205, 0.5));
+
+        h2 {
+            @apply text-dark-red;
+            @apply font-semibold;
+            @apply py-8 px-20;
+            @apply relative z-tooltip-content bg-red-100;
+            @apply rounded-t-[6px];
+
+            .tooltip-close {
+                @apply float-right -mr-10;
+            }
+        }
+        .content {
+            @apply rounded-6;
+            @apply text-text-color-1;
+            @apply pt-10 px-20 pb-12;
+            @apply relative z-tooltip-content bg-white;
+            @apply rounded-b-8;
+            & > *:first-child {
+                margin-top: 0;
+            }
+            & > *:last-child {
+                margin-bottom: 0;
+            }
+        }
+        & > .content {
+            @apply p-0;
+        }
+
+        .tooltip-arrow {
+            border-right-color: rgb(239 68 68);
+        }
     }
 }
