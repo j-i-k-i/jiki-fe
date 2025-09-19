@@ -47,6 +47,11 @@ export const preventModifyTargetRanges = (
         const targetToBeforeTransaction =
           readOnlyRangesBeforeTransaction[i].to ?? tr.startState.doc.line(tr.startState.doc.lines).to;
 
+        // Check if the corresponding range exists in the after transaction
+        if (i >= readOnlyRangesAfterTransaction.length) {
+          return false; // Range was removed, prevent the change
+        }
+
         const targetFromAfterTransaction = readOnlyRangesAfterTransaction[i].from ?? 0;
         const targetToAfterTransaction =
           readOnlyRangesAfterTransaction[i].to ?? tr.state.doc.line(tr.state.doc.lines).to;
