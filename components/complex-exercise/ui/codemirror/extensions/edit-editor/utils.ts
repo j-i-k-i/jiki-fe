@@ -195,10 +195,9 @@ export function highlightEditorContent(view: EditorView): Promise<void> {
       selection: { anchor: pos, head: pos },
       effects: [
         showTutorTooltip.of(true),
-        changeMultiLineHighlightEffect.of({
-          from: 1,
-          to: view.state.doc.lineAt(view.state.doc.length).number
-        })
+        changeMultiLineHighlightEffect.of(
+          Array.from({ length: view.state.doc.lineAt(view.state.doc.length).number }, (_, i) => i + 1)
+        )
       ]
     });
 
@@ -214,10 +213,9 @@ export function deleteEditorContent(view: EditorView): Promise<void> {
       selection: { anchor: pos, head: pos },
       effects: [
         showTutorTooltip.of(true),
-        changeMultiLineHighlightEffect.of({
-          from: 1,
-          to: view.state.doc.lineAt(view.state.doc.length).number
-        })
+        changeMultiLineHighlightEffect.of(
+          Array.from({ length: view.state.doc.lineAt(view.state.doc.length).number }, (_, i) => i + 1)
+        )
       ],
       scrollIntoView: true
     });
@@ -229,10 +227,7 @@ export function deleteEditorContent(view: EditorView): Promise<void> {
           to: view.state.doc.length,
           insert: ""
         },
-        effects: changeMultiLineHighlightEffect.of({
-          from: 0,
-          to: 0
-        })
+        effects: changeMultiLineHighlightEffect.of([])
       });
       resolve();
     }, 1000);

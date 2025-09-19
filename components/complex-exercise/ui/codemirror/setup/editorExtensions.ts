@@ -34,8 +34,8 @@ export interface EditorExtensionsConfig {
 
 export function createEditorExtensions({
   orchestrator,
-  highlightedLine,
-  readonly,
+  highlightedLine: _highlightedLine,
+  readonly: _readonly,
   onBreakpointChange,
   onFoldChange,
   onEditorChange
@@ -66,20 +66,20 @@ export function createEditorExtensions({
     unfoldableFunctionsField,
     moveCursorByPasteLength,
 
-    // Dynamic extensions
-    Ext.highlightLine(highlightedLine),
+    // Dynamic extensions - start with no highlight, orchestrator will control it
+    Ext.highlightLine(0),
     Ext.showInfoWidgetField,
     Ext.informationWidgetDataField,
     Ext.lineInformationExtension({
       onClose: () => orchestrator.setShouldShowInformationWidget(false)
     }),
-    Ext.multiHighlightLine({ from: 0, to: 0 }),
+    Ext.multiHighlightLine([]),
     Ext.cursorTooltip(),
     Ext.highlightedCodeBlock(),
     Ext.initReadOnlyRangesExtension(),
 
-    // State management
-    readonlyCompartment.of([EditorView.editable.of(!readonly)]),
+    // State management - start editable, orchestrator will control readonly state
+    readonlyCompartment.of([EditorView.editable.of(true)]),
 
     // Keymaps
     keymap.of([...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...lintKeymap, indentWithTab]),

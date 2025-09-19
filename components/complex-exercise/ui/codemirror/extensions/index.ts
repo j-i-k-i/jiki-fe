@@ -12,6 +12,6 @@ export { highlightedCodeBlock } from "./edit-editor/highlightRange";
 export { initReadOnlyRangesExtension } from "./read-only-ranges/readOnlyRanges";
 export { readOnlyRangeDecoration } from "./read-only-ranges/readOnlyLineDeco";
 export { underlineExtension } from "./underlineRange";
-export { multiHighlightLine } from "./multiLineHighlighter";
+export { multiHighlightLine, changeMultiLineHighlightEffect, multiHighlightColorField } from "./multiLineHighlighter";
 export { breakpointGutter } from "./breakpoint";
 export { foldGutterExtension as foldGutter } from "./fold-gutter";
