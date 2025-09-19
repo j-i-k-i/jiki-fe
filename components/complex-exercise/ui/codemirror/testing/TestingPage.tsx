@@ -111,11 +111,11 @@ export default function TestingPage({
             }}
           >
             <LineHighlighterTest orchestrator={orchestrator} />
+            <MultiLineHighlighterTest orchestrator={orchestrator} />
             <UnderlineRangeTest orchestrator={orchestrator} />
             <ReadOnlyRangesTest orchestrator={orchestrator} />
             <InformationWidgetTest orchestrator={orchestrator} />
             <BreakpointTest orchestrator={orchestrator} />
-            <MultiLineHighlighterTest orchestrator={orchestrator} />
             <EditEditorTest orchestrator={orchestrator} />
           </div>
         </div>
