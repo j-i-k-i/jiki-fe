@@ -34,8 +34,8 @@ export interface EditorExtensionsConfig {
 
 export function createEditorExtensions({
   orchestrator,
-  highlightedLine,
-  readonly,
+  highlightedLine: _highlightedLine,
+  readonly: _readonly,
   onBreakpointChange,
   onFoldChange,
   onEditorChange
@@ -73,7 +73,7 @@ export function createEditorExtensions({
     Ext.lineInformationExtension({
       onClose: () => orchestrator.setShouldShowInformationWidget(false)
     }),
-    Ext.multiHighlightLine({ from: 0, to: 0 }),
+    Ext.multiHighlightLine([]),
     Ext.cursorTooltip(),
     Ext.highlightedCodeBlock(),
     Ext.initReadOnlyRangesExtension(),

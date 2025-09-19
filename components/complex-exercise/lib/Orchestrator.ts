@@ -13,7 +13,11 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { readonlyCompartment } from "../ui/codemirror/CodeMirror";
-import { informationWidgetDataEffect, showInfoWidgetEffect } from "../ui/codemirror/extensions";
+import {
+  informationWidgetDataEffect,
+  showInfoWidgetEffect,
+  changeMultiLineHighlightEffect
+} from "../ui/codemirror/extensions";
 import { breakpointEffect } from "../ui/codemirror/extensions/breakpoint";
 import { INFO_HIGHLIGHT_COLOR, changeColorEffect, changeLineEffect } from "../ui/codemirror/extensions/lineHighlighter";
 import {
@@ -473,6 +477,41 @@ class Orchestrator {
     this.store.getState().setHighlightedLine(line);
   }
 
+  setMultiLineHighlight(fromLine: number, toLine: number) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    // Convert range to array of lines
+    if (fromLine === 0 && toLine === 0) {
+      // Clear highlights
+      editorView.dispatch({
+        effects: changeMultiLineHighlightEffect.of([])
+      });
+    } else {
+      const lines = [];
+      for (let i = fromLine; i <= toLine; i++) {
+        lines.push(i);
+      }
+      editorView.dispatch({
+        effects: changeMultiLineHighlightEffect.of(lines)
+      });
+    }
+  }
+
+  setMultipleLineHighlights(lines: number[]) {
+    const editorView = this.getEditorView();
+    if (!editorView) {
+      return;
+    }
+
+    // Now we can directly pass the array of lines
+    editorView.dispatch({
+      effects: changeMultiLineHighlightEffect.of(lines)
+    });
+  }
+
   setInformationWidgetData(data: InformationWidgetData) {
     this.store.getState().setInformationWidgetData(data);
   }
@@ -525,11 +564,10 @@ class Orchestrator {
       return;
     }
 
-    if (highlightedLine) {
-      editorView.dispatch({
-        effects: changeLineEffect.of(highlightedLine)
-      });
-    }
+    // Always dispatch the effect, even for 0 (clear)
+    editorView.dispatch({
+      effects: changeLineEffect.of(highlightedLine)
+    });
   }
 
   applyHighlightLineColor(highlightedLineColor: string) {
@@ -551,10 +589,14 @@ class Orchestrator {
       return;
     }
 
-    if (range !== undefined) {
-      editorView.dispatch({
-        effects: addUnderlineEffect.of(range)
-      });
+    // Always dispatch the effect - for clearing, pass {from: 0, to: 0}
+    const effectRange = range || { from: 0, to: 0 };
+    editorView.dispatch({
+      effects: addUnderlineEffect.of(effectRange)
+    });
+
+    // Only scroll if we're adding an underline (not clearing)
+    if (range) {
       const line = document.querySelector(".cm-underline");
       if (line) {
         line.scrollIntoView({

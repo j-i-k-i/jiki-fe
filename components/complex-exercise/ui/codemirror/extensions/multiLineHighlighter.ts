@@ -1,19 +1,13 @@
 import { type Extension, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
 import { Decoration, type DecorationSet, EditorView, ViewPlugin } from "@codemirror/view";
-import { highlightColorField, INFO_HIGHLIGHT_COLOR } from "./lineHighlighter";
+import { changeColorEffect } from "./lineHighlighter";
 
-export const changeMultiLineHighlightEffect = StateEffect.define<{
-  from: number;
-  to: number;
-}>();
+export const changeMultiLineHighlightEffect = StateEffect.define<number[]>();
 
-export const multiHighlightedLineField = StateField.define<{
-  from: number;
-  to: number;
-}>({
+export const multiHighlightedLineField = StateField.define<number[]>({
   create() {
-    return { from: 0, to: 0 };
+    return [];
   },
   update(value, tr) {
     for (const effect of tr.effects) {
@@ -25,15 +19,31 @@ export const multiHighlightedLineField = StateField.define<{
   }
 });
 
+export const multiHighlightColorField = StateField.define<string>({
+  create() {
+    return MULTI_HIGHLIGHT_COLOR;
+  },
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(changeColorEffect)) {
+        return effect.value;
+      }
+    }
+    return value;
+  }
+});
+
+const MULTI_HIGHLIGHT_COLOR = "#ffeb3b44"; // Yellow with transparency
+
 const baseTheme = EditorView.baseTheme({
-  "&light .cm-highlightedLine": { backgroundColor: INFO_HIGHLIGHT_COLOR },
-  "&dark .cm-highlightedLine": { backgroundColor: "#1a272788" }
+  "&light .cm-multiHighlightedLine": { backgroundColor: MULTI_HIGHLIGHT_COLOR },
+  "&dark .cm-multiHighlightedLine": { backgroundColor: "#ffeb3b22" }
 });
 
 function stripe(color: string) {
   return Decoration.line({
     attributes: {
-      class: "cm-highlightedLine",
+      class: "cm-multiHighlightedLine",
       style: `background-color: ${color}`
     }
   });
@@ -41,22 +51,27 @@ function stripe(color: string) {
 
 function stripeDeco(view: EditorView) {
   const builder = new RangeSetBuilder<Decoration>();
-  const lineNumberRange = view.state.field(multiHighlightedLineField);
-  const color = view.state.field(highlightColorField);
+  const highlightedLines = view.state.field(multiHighlightedLineField);
+  const color = view.state.field(multiHighlightColorField);
 
-  let { to } = lineNumberRange;
-  const { from } = lineNumberRange;
-  if (from === 0) {
+  // Don't highlight if array is empty
+  if (highlightedLines.length === 0) {
     return builder.finish();
   }
-  to = to > view.state.doc.lines ? view.state.doc.lines : to;
-  // console.log("from", from, "to", to, "color", color);
-  if (from === to) {
-    builder.add(from, from, stripe(color));
-  } else {
-    for (let i = lineNumberRange.from; i <= lineNumberRange.to; i++) {
-      const line = view.state.doc.line(i);
+
+  // Sort lines to ensure decorations are added in order
+  const validLines = highlightedLines
+    .filter((lineNumber) => lineNumber > 0 && lineNumber <= view.state.doc.lines)
+    .sort((a, b) => a - b);
+
+  // Highlight each specified line
+  for (const lineNumber of validLines) {
+    try {
+      const line = view.state.doc.line(lineNumber);
       builder.add(line.from, line.from, stripe(color));
+    } catch {
+      // Skip invalid lines
+      continue;
     }
   }
 
@@ -80,14 +95,11 @@ const showStripes = ViewPlugin.fromClass(
   }
 );
 
-export function multiHighlightLine({ from, to }: Record<"from" | "to", number>): Extension {
+export function multiHighlightLine(initialLines: number[] = []): Extension {
   return [
     baseTheme,
-    multiHighlightedLineField.init(() => ({
-      from,
-      to
-    })),
-    highlightColorField.init(() => INFO_HIGHLIGHT_COLOR),
+    multiHighlightedLineField.init(() => initialLines),
+    multiHighlightColorField.init(() => MULTI_HIGHLIGHT_COLOR),
     showStripes
   ];
 }
