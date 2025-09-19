@@ -7,22 +7,16 @@ interface MultiLineHighlighterTestProps {
 
 export default function MultiLineHighlighterTest({ orchestrator }: MultiLineHighlighterTestProps) {
   const handleHighlightMultipleLines = (lines: number[]) => {
-    // Apply highlighting to multiple lines
-    lines.forEach((line) => {
-      orchestrator.setHighlightedLine(line);
-    });
+    // Now we can highlight non-contiguous lines directly
+    orchestrator.setMultipleLineHighlights(lines);
   };
 
   const handleHighlightRange = (startLine: number, endLine: number) => {
-    const lines = [];
-    for (let i = startLine; i <= endLine; i++) {
-      lines.push(i);
-    }
-    handleHighlightMultipleLines(lines);
+    orchestrator.setMultiLineHighlight(startLine, endLine);
   };
 
   const handleClear = () => {
-    orchestrator.setHighlightedLine(0);
+    orchestrator.setMultipleLineHighlights([]);
   };
 
   return (
@@ -67,7 +61,7 @@ export default function MultiLineHighlighterTest({ orchestrator }: MultiLineHigh
       </div>
 
       <p style={testStyles.helpText}>
-        Note: This currently highlights one line at a time. Multi-line support depends on the extension implementation.
+        Highlights specific lines (can be non-contiguous like 1, 3, 5) or ranges with a different background color.
       </p>
     </div>
   );

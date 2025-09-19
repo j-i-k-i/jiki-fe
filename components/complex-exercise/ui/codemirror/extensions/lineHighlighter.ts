@@ -62,13 +62,16 @@ function stripeDeco(view: EditorView) {
   const lineNumber = view.state.field(highlightedLineField);
   const color = view.state.field(highlightColorField);
 
-  for (const { from, to } of view.visibleRanges) {
-    for (let pos = from; pos <= to; ) {
-      const line = view.state.doc.lineAt(pos);
-      if (line.number === lineNumber) {
-        builder.add(line.from, line.from, stripe(color));
+  // Only highlight if lineNumber is valid (> 0)
+  if (lineNumber > 0) {
+    for (const { from, to } of view.visibleRanges) {
+      for (let pos = from; pos <= to; ) {
+        const line = view.state.doc.lineAt(pos);
+        if (line.number === lineNumber) {
+          builder.add(line.from, line.from, stripe(color));
+        }
+        pos = line.to + 1;
       }
-      pos = line.to + 1;
     }
   }
 
