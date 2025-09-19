@@ -3,6 +3,7 @@ import { useRef } from "react";
 import Orchestrator from "../../../lib/Orchestrator";
 import { CodeMirror } from "../CodeMirror";
 import BreakpointTest from "./BreakpointTest";
+import EditEditorTest from "./EditEditorTest";
 import InformationWidgetTest from "./InformationWidgetTest";
 import LineHighlighterTest from "./LineHighlighterTest";
 import MultiLineHighlighterTest from "./MultiLineHighlighterTest";
@@ -76,6 +77,7 @@ export default function TestingPage({
         <InformationWidgetTest orchestrator={orchestrator} />
         <BreakpointTest orchestrator={orchestrator} />
         <MultiLineHighlighterTest orchestrator={orchestrator} />
+        <EditEditorTest orchestrator={orchestrator} />
       </div>
     </div>
   );
