@@ -11,13 +11,13 @@ export type { Handler };
 export type ViewRef = React.MutableRefObject<EditorView | null>;
 
 export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
-  const { readonly, defaultCode, highlightedLine, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
+  const { defaultCode, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
 
   // Use defaultCode as initial value
   const value = defaultCode;
 
-  // Set up the editor using the custom hook
-  const { editorRef } = useEditorSetup(orchestrator, value, readonly, highlightedLine, shouldAutoRunCode);
+  // Set up the editor using the custom hook - remove reactive values that cause re-renders
+  const { editorRef } = useEditorSetup(orchestrator, value, false, 0, shouldAutoRunCode);
 
   return (
     <div className="editor-wrapper">

@@ -66,8 +66,8 @@ export function createEditorExtensions({
     unfoldableFunctionsField,
     moveCursorByPasteLength,
 
-    // Dynamic extensions
-    Ext.highlightLine(highlightedLine),
+    // Dynamic extensions - start with no highlight, orchestrator will control it
+    Ext.highlightLine(0),
     Ext.showInfoWidgetField,
     Ext.informationWidgetDataField,
     Ext.lineInformationExtension({
@@ -78,8 +78,8 @@ export function createEditorExtensions({
     Ext.highlightedCodeBlock(),
     Ext.initReadOnlyRangesExtension(),
 
-    // State management
-    readonlyCompartment.of([EditorView.editable.of(!readonly)]),
+    // State management - start editable, orchestrator will control readonly state
+    readonlyCompartment.of([EditorView.editable.of(true)]),
 
     // Keymaps
     keymap.of([...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...lintKeymap, indentWithTab]),

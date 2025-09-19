@@ -1,4 +1,5 @@
 import type Orchestrator from "../../../lib/Orchestrator";
+import { testStyles } from "./styles";
 
 interface ReadOnlyRangesTestProps {
   orchestrator: Orchestrator;
@@ -27,24 +28,26 @@ export default function ReadOnlyRangesTest({ orchestrator }: ReadOnlyRangesTestP
   };
 
   return (
-    <div style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "4px" }}>
-      <h3>Read-Only Ranges</h3>
+    <div style={testStyles.container}>
+      <h3 style={testStyles.title}>Read-Only Ranges</h3>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>
-          <input type="checkbox" onChange={(e) => handleSetReadOnly(e.target.checked)} />
+      <div style={testStyles.inputGroup}>
+        <label style={testStyles.label}>
+          <input type="checkbox" onChange={(e) => handleSetReadOnly(e.target.checked)} style={testStyles.checkbox} />
           Make entire editor read-only
         </label>
       </div>
 
-      <div>
-        <button onClick={handleSetReadOnlyRanges}>Set ReadOnly Ranges</button>
-        <button onClick={() => handleSetReadOnly(false)}>Clear All ReadOnly</button>
+      <div style={testStyles.buttonGroup}>
+        <button onClick={handleSetReadOnlyRanges} style={testStyles.button}>
+          Set ReadOnly Ranges
+        </button>
+        <button onClick={() => handleSetReadOnly(false)} style={testStyles.dangerButton}>
+          Clear All ReadOnly
+        </button>
       </div>
 
-      <p style={{ fontSize: "12px", color: "#666", marginTop: "10px" }}>
-        ReadOnly ranges protect specific parts of code from editing.
-      </p>
+      <p style={testStyles.helpText}>ReadOnly ranges protect specific parts of code from editing.</p>
     </div>
   );
 }

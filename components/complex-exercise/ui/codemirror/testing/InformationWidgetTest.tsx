@@ -1,4 +1,5 @@
 import type Orchestrator from "../../../lib/Orchestrator";
+import { testStyles } from "./styles";
 
 interface InformationWidgetTestProps {
   orchestrator: Orchestrator;
@@ -15,22 +16,27 @@ export default function InformationWidgetTest({ orchestrator }: InformationWidge
   };
 
   return (
-    <div style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "4px" }}>
-      <h3>Information Widget</h3>
+    <div style={testStyles.container}>
+      <h3 style={testStyles.title}>Information Widget</h3>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>Line Number: </label>
-        <input type="number" min="1" placeholder="Line number" id="widget-line" />
-        <label style={{ marginLeft: "10px" }}>Status: </label>
-        <select id="widget-status">
+      <div style={testStyles.inputGroup}>
+        <label style={testStyles.label}>Line Number:</label>
+        <input type="number" min="1" placeholder="Line number" id="widget-line" style={testStyles.input} />
+        <label style={testStyles.label}>Status:</label>
+        <select id="widget-status" style={testStyles.select}>
           <option value="SUCCESS">Success</option>
           <option value="ERROR">Error</option>
         </select>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>Message: </label>
-        <input type="text" placeholder="Widget message" id="widget-message" style={{ width: "200px" }} />
+      <div style={testStyles.inputGroup}>
+        <label style={testStyles.label}>Message:</label>
+        <input
+          type="text"
+          placeholder="Widget message"
+          id="widget-message"
+          style={{ ...testStyles.input, width: "200px" }}
+        />
         <button
           onClick={() => {
             const lineInput = document.getElementById("widget-line") as HTMLInputElement;
@@ -43,16 +49,22 @@ export default function InformationWidgetTest({ orchestrator }: InformationWidge
 
             handleShowWidget(line, status, html);
           }}
-          style={{ marginLeft: "10px" }}
+          style={testStyles.button}
         >
           Show Widget
         </button>
       </div>
 
-      <div>
-        <button onClick={() => handleShowWidget(2, "SUCCESS", "✅ Success message")}>Success on Line 2</button>
-        <button onClick={() => handleShowWidget(4, "ERROR", "❌ Error message")}>Error on Line 4</button>
-        <button onClick={handleHideWidget}>Hide Widget</button>
+      <div style={testStyles.buttonGroup}>
+        <button onClick={() => handleShowWidget(2, "SUCCESS", "✅ Success message")} style={testStyles.button}>
+          Success on Line 2
+        </button>
+        <button onClick={() => handleShowWidget(4, "ERROR", "❌ Error message")} style={testStyles.button}>
+          Error on Line 4
+        </button>
+        <button onClick={handleHideWidget} style={testStyles.secondaryButton}>
+          Hide Widget
+        </button>
       </div>
     </div>
   );

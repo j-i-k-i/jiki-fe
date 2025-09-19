@@ -1,4 +1,5 @@
 import type Orchestrator from "../../../lib/Orchestrator";
+import { testStyles } from "./styles";
 
 interface UnderlineRangeTestProps {
   orchestrator: Orchestrator;
@@ -14,14 +15,14 @@ export default function UnderlineRangeTest({ orchestrator }: UnderlineRangeTestP
   };
 
   return (
-    <div style={{ border: "1px solid #ddd", padding: "15px", borderRadius: "4px" }}>
-      <h3>Underline Range</h3>
+    <div style={testStyles.container}>
+      <h3 style={testStyles.title}>Underline Range</h3>
 
-      <div style={{ marginBottom: "10px" }}>
-        <label>From Position: </label>
-        <input type="number" min="0" placeholder="Start position" id="underline-from" />
-        <label style={{ marginLeft: "10px" }}>To Position: </label>
-        <input type="number" min="0" placeholder="End position" id="underline-to" />
+      <div style={testStyles.inputGroup}>
+        <label style={testStyles.label}>From Position:</label>
+        <input type="number" min="0" placeholder="Start position" id="underline-from" style={testStyles.input} />
+        <label style={testStyles.label}>To Position:</label>
+        <input type="number" min="0" placeholder="End position" id="underline-to" style={testStyles.input} />
         <button
           onClick={() => {
             const fromInput = document.getElementById("underline-from") as HTMLInputElement;
@@ -30,16 +31,22 @@ export default function UnderlineRangeTest({ orchestrator }: UnderlineRangeTestP
             const to = parseInt(toInput.value) || 10;
             handleUnderlineRange(from, to);
           }}
-          style={{ marginLeft: "10px" }}
+          style={testStyles.button}
         >
           Apply
         </button>
       </div>
 
-      <div>
-        <button onClick={() => handleUnderlineRange(0, 10)}>Underline 0-10</button>
-        <button onClick={() => handleUnderlineRange(20, 30)}>Underline 20-30</button>
-        <button onClick={handleClear}>Clear Underline</button>
+      <div style={testStyles.buttonGroup}>
+        <button onClick={() => handleUnderlineRange(0, 10)} style={testStyles.button}>
+          Underline 0-10
+        </button>
+        <button onClick={() => handleUnderlineRange(20, 30)} style={testStyles.button}>
+          Underline 20-30
+        </button>
+        <button onClick={handleClear} style={testStyles.dangerButton}>
+          Clear Underline
+        </button>
       </div>
     </div>
   );
