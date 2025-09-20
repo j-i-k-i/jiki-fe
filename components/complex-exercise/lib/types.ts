@@ -1,5 +1,16 @@
 import type { Frame, AnimationTimeline } from "./stubs";
-import type { UnderlineRange, InformationWidgetData } from "./Orchestrator";
+
+// CodeMirror editor types
+export interface UnderlineRange {
+  from: number;
+  to: number;
+}
+
+export interface InformationWidgetData {
+  html: string;
+  line: number;
+  status: "SUCCESS" | "ERROR";
+}
 
 // Actual types for the orchestrator pattern
 export interface TestState {
@@ -39,3 +50,39 @@ export interface OrchestratorState {
   // Editor handler state
   latestValueSnapshot: string | undefined;
 }
+
+// Private actions only accessible within the orchestrator
+export interface OrchestratorActions {
+  setCode: (code: string) => void;
+  setOutput: (output: string) => void;
+  setStatus: (status: OrchestratorState["status"]) => void;
+  setError: (error: string | null) => void;
+  setCurrentTest: (test: TestState | null) => void;
+  setCurrentTestTimelineTime: (time: number) => void;
+  setHasCodeBeenEdited: (value: boolean) => void;
+  setIsSpotlightActive: (value: boolean) => void;
+  setFoldedLines: (lines: number[]) => void;
+
+  // Editor store actions
+  setDefaultCode: (code: string) => void;
+  setReadonly: (readonly: boolean) => void;
+  setShouldShowInformationWidget: (show: boolean) => void;
+  setUnderlineRange: (range: UnderlineRange | undefined) => void;
+  setHighlightedLineColor: (color: string) => void;
+  setHighlightedLine: (line: number) => void;
+  setInformationWidgetData: (data: InformationWidgetData) => void;
+  setBreakpoints: (breakpoints: number[]) => void;
+  setShouldAutoRunCode: (shouldAutoRun: boolean) => void;
+
+  // Error store actions
+  setHasUnhandledError: (hasError: boolean) => void;
+  setUnhandledErrorBase64: (errorData: string) => void;
+
+  // Editor handler actions
+  setLatestValueSnapshot: (value: string | undefined) => void;
+
+  reset: () => void;
+}
+
+// Combined store type
+export type OrchestratorStore = OrchestratorState & OrchestratorActions;
