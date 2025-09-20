@@ -3,30 +3,10 @@
 // When the page loads, this is created and then is the thing that's
 // passed around, controls the state, etc.
 
-import type { EditorView, ViewUpdate } from "@codemirror/view";
-import { EditorView as EditorViewClass } from "@codemirror/view";
-import { foldEffect, unfoldEffect } from "@codemirror/language";
-import type { StateEffectType, Extension } from "@codemirror/state";
-import { debounce } from "lodash";
+import type { EditorView } from "@codemirror/view";
+import type { Extension } from "@codemirror/state";
 import type { StoreApi } from "zustand/vanilla";
-import { readonlyCompartment } from "../ui/codemirror/CodeMirror";
-import {
-  informationWidgetDataEffect,
-  showInfoWidgetEffect,
-  changeMultiLineHighlightEffect
-} from "../ui/codemirror/extensions";
-import { breakpointEffect } from "../ui/codemirror/extensions/breakpoint";
-import { INFO_HIGHLIGHT_COLOR, changeColorEffect, changeLineEffect } from "../ui/codemirror/extensions/lineHighlighter";
-import {
-  readOnlyRangesStateField,
-  updateReadOnlyRangesEffect
-} from "../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
-import { addUnderlineEffect } from "../ui/codemirror/extensions/underlineRange";
-import { getBreakpointLines } from "../ui/codemirror/utils/getBreakpointLines";
-import { getCodeMirrorFieldValue } from "../ui/codemirror/utils/getCodeMirrorFieldValue";
-import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/utils/getFoldedLines";
-import { updateUnfoldableFunctions } from "../ui/codemirror/utils/unfoldableFunctionNames";
-import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
+import { EditorManager } from "./orchestrator/EditorManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import {
@@ -49,64 +29,18 @@ class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
-  private editorView: EditorView | null = null;
-  private editorHandler: any = null; // Handler from CodeMirror component
-  private onEditorChangeCallback?: (view: EditorView) => void;
+  private readonly editorManager: EditorManager;
   private handleRunCodeCallback?: () => void;
-  private isSaving = false;
-  private saveDebounced: ReturnType<typeof debounce> | null = null;
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
 
-    // Initialize debounced save function
-    this.initializeAutoSave();
-
     // Create instance-specific store
     this.store = createOrchestratorStore(exerciseUuid, initialCode);
 
-    // Initialize TimelineManager
+    // Initialize managers
     this.timelineManager = new TimelineManager(this.store);
-
-    // Subscribe to state changes to automatically apply editor effects
-    let previousInformationWidgetData = this.store.getState().informationWidgetData;
-    let previousShouldShowInformationWidget = this.store.getState().shouldShowInformationWidget;
-    let previousReadonly = this.store.getState().readonly;
-    let previousHighlightedLine = this.store.getState().highlightedLine;
-    let previousHighlightedLineColor = this.store.getState().highlightedLineColor;
-    let previousUnderlineRange = this.store.getState().underlineRange;
-
-    this.store.subscribe((state) => {
-      if (state.informationWidgetData !== previousInformationWidgetData) {
-        this.applyInformationWidgetData(state.informationWidgetData);
-        previousInformationWidgetData = state.informationWidgetData;
-      }
-
-      if (state.shouldShowInformationWidget !== previousShouldShowInformationWidget) {
-        this.applyShouldShowInformationWidget(state.shouldShowInformationWidget);
-        previousShouldShowInformationWidget = state.shouldShowInformationWidget;
-      }
-
-      if (state.readonly !== previousReadonly) {
-        this.applyReadonlyCompartment(state.readonly);
-        previousReadonly = state.readonly;
-      }
-
-      if (state.highlightedLine !== previousHighlightedLine) {
-        this.applyHighlightLine(state.highlightedLine);
-        previousHighlightedLine = state.highlightedLine;
-      }
-
-      if (state.highlightedLineColor !== previousHighlightedLineColor) {
-        this.applyHighlightLineColor(state.highlightedLineColor);
-        previousHighlightedLineColor = state.highlightedLineColor;
-      }
-
-      if (state.underlineRange !== previousUnderlineRange) {
-        this.applyUnderlineRange(state.underlineRange);
-        previousUnderlineRange = state.underlineRange;
-      }
-    });
+    this.editorManager = new EditorManager(this.store, exerciseUuid);
   }
 
   // Expose the store so a hook can use it
@@ -114,24 +48,23 @@ class Orchestrator {
     return this.store;
   }
 
-  // EditorView management
+  // EditorView management - delegate to EditorManager
   setEditorView(view: EditorView | null) {
-    this.editorView = view;
+    this.editorManager.setEditorView(view);
   }
 
   getEditorView(): EditorView | null {
-    return this.editorView;
+    return this.editorManager.getEditorView();
   }
 
-  // Editor handler management
+  // Editor handler management - delegate to EditorManager
   handleEditorDidMount(handler: any) {
-    this.editorHandler = handler;
-    // Editor is now ready - initialization should be called separately by the component
+    this.editorManager.handleEditorDidMount(handler);
   }
 
-  // Editor change callback management
+  // Editor change callback management - delegate to EditorManager
   setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
-    this.onEditorChangeCallback = callback;
+    this.editorManager.setOnEditorChangeCallback(callback);
   }
 
   // Run code callback management
@@ -153,88 +86,28 @@ class Orchestrator {
     }
   }
 
-  // Call the editor change callback if set
+  // Call the editor change callback if set - delegate to EditorManager
   callOnEditorChangeCallback(view: EditorView) {
-    if (this.onEditorChangeCallback) {
-      this.onEditorChangeCallback(view);
-    }
+    this.editorManager.callOnEditorChangeCallback(view);
   }
 
-  // Initialize auto-save functionality
-  private initializeAutoSave() {
-    const saveNow = (code: string, readonlyRanges?: { from: number; to: number }[]) => {
-      if (this.isSaving) {
-        return; // Prevent concurrent saves
-      }
-
-      this.isSaving = true;
-
-      try {
-        const result = saveCodeMirrorContent(this.exerciseUuid, code, readonlyRanges);
-
-        if (result.success) {
-          console.log("CodeMirror content saved successfully", result);
-        } else {
-          console.error("Failed to save CodeMirror content:", result.error);
-        }
-      } catch (error) {
-        console.error(`Error saving exercise ${this.exerciseUuid}:`, error);
-      } finally {
-        this.isSaving = false;
-      }
-    };
-
-    this.saveDebounced = debounce((code: string, readonlyRanges?: { from: number; to: number }[]) => {
-      saveNow(code, readonlyRanges);
-    }, 500);
-  }
-
-  // Auto-save the current editor content
+  // Auto-save the current editor content - delegate to EditorManager
   autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    if (this.saveDebounced) {
-      this.saveDebounced(code, readonlyRanges);
-    }
+    this.editorManager.autoSaveContent(code, readonlyRanges);
   }
 
-  // Save immediately (for cleanup)
+  // Save immediately (for cleanup) - delegate to EditorManager
   saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    if (this.saveDebounced) {
-      this.saveDebounced.cancel();
-    }
-
-    if (this.isSaving) {
-      return;
-    }
-
-    this.isSaving = true;
-
-    try {
-      const result = saveCodeMirrorContent(this.exerciseUuid, code, readonlyRanges);
-
-      if (result.success) {
-        console.log("CodeMirror content saved successfully", result);
-      } else {
-        console.error("Failed to save CodeMirror content:", result.error);
-      }
-    } catch (error) {
-      console.error(`Error saving exercise ${this.exerciseUuid}:`, error);
-    } finally {
-      this.isSaving = false;
-    }
+    this.editorManager.saveImmediately(code, readonlyRanges);
   }
 
   getEditorHandler() {
-    return this.editorHandler;
+    return this.editorManager.getEditorHandler();
   }
 
-  // Get current editor value and update snapshot
+  // Get current editor value and update snapshot - delegate to EditorManager
   getCurrentEditorValue(): string | undefined {
-    if (this.editorHandler?.getValue) {
-      const value = this.editorHandler.getValue();
-      this.store.getState().setLatestValueSnapshot(value);
-      return value;
-    }
-    return undefined;
+    return this.editorManager.getCurrentEditorValue();
   }
 
   // Public methods that use the store actions
@@ -299,38 +172,11 @@ class Orchestrator {
   }
 
   setMultiLineHighlight(fromLine: number, toLine: number) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    // Convert range to array of lines
-    if (fromLine === 0 && toLine === 0) {
-      // Clear highlights
-      editorView.dispatch({
-        effects: changeMultiLineHighlightEffect.of([])
-      });
-    } else {
-      const lines = [];
-      for (let i = fromLine; i <= toLine; i++) {
-        lines.push(i);
-      }
-      editorView.dispatch({
-        effects: changeMultiLineHighlightEffect.of(lines)
-      });
-    }
+    this.editorManager.setMultiLineHighlight(fromLine, toLine);
   }
 
   setMultipleLineHighlights(lines: number[]) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    // Now we can directly pass the array of lines
-    editorView.dispatch({
-      effects: changeMultiLineHighlightEffect.of(lines)
-    });
+    this.editorManager.setMultipleLineHighlights(lines);
   }
 
   setInformationWidgetData(data: InformationWidgetData) {
@@ -339,134 +185,11 @@ class Orchestrator {
 
   setBreakpoints(breakpoints: number[]) {
     this.store.getState().setBreakpoints(breakpoints);
-    this.applyBreakpoints(breakpoints);
-  }
-
-  // Apply breakpoints to the editor
-  applyBreakpoints(breakpoints: number[]) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    // Get current breakpoints from the editor
-    const currentBreakpoints = getBreakpointLines(editorView);
-
-    // Remove breakpoints that are no longer needed
-    const effects = [];
-    for (const line of currentBreakpoints) {
-      if (!breakpoints.includes(line)) {
-        try {
-          const pos = editorView.state.doc.line(line).from;
-          effects.push(breakpointEffect.of({ pos, on: false }));
-        } catch (error) {
-          console.warn(`Failed to remove breakpoint at line ${line}:`, error);
-        }
-      }
-    }
-
-    // Add new breakpoints
-    for (const line of breakpoints) {
-      if (!currentBreakpoints.includes(line) && line >= 1 && line <= editorView.state.doc.lines) {
-        try {
-          const pos = editorView.state.doc.line(line).from;
-          effects.push(breakpointEffect.of({ pos, on: true }));
-        } catch (error) {
-          console.warn(`Failed to add breakpoint at line ${line}:`, error);
-        }
-      }
-    }
-
-    if (effects.length > 0) {
-      editorView.dispatch({ effects });
-    }
+    this.editorManager.applyBreakpoints(breakpoints);
   }
 
   setShouldAutoRunCode(shouldAutoRun: boolean) {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
-  }
-
-  // Methods to apply editor effects directly through the orchestrator
-  applyInformationWidgetData(data: InformationWidgetData) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    editorView.dispatch({
-      effects: informationWidgetDataEffect.of(data)
-    });
-  }
-
-  applyShouldShowInformationWidget(show: boolean) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    editorView.dispatch({
-      effects: showInfoWidgetEffect.of(show)
-    });
-  }
-
-  applyReadonlyCompartment(readonly: boolean) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    editorView.dispatch({
-      effects: readonlyCompartment.reconfigure([EditorViewClass.editable.of(!readonly)])
-    });
-  }
-
-  applyHighlightLine(highlightedLine: number) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    // Always dispatch the effect, even for 0 (clear)
-    editorView.dispatch({
-      effects: changeLineEffect.of(highlightedLine)
-    });
-  }
-
-  applyHighlightLineColor(highlightedLineColor: string) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    if (highlightedLineColor) {
-      editorView.dispatch({
-        effects: changeColorEffect.of(highlightedLineColor)
-      });
-    }
-  }
-
-  applyUnderlineRange(range: UnderlineRange | undefined) {
-    const editorView = this.getEditorView();
-    if (!editorView) {
-      return;
-    }
-
-    // Always dispatch the effect - for clearing, pass {from: 0, to: 0}
-    const effectRange = range || { from: 0, to: 0 };
-    editorView.dispatch({
-      effects: addUnderlineEffect.of(effectRange)
-    });
-
-    // Only scroll if we're adding an underline (not clearing)
-    if (range) {
-      const line = document.querySelector(".cm-underline");
-      if (line) {
-        line.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
-      }
-    }
   }
 
   // Error store public methods
@@ -526,213 +249,34 @@ class Orchestrator {
     }
   }
 
-  // Initialize editor with code, exercise data, and localStorage synchronization
+  // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
   initializeEditor(code: any, exercise: any, unfoldableFunctionNames: string[]) {
-    // Load from localStorage first
-    const localStorageResult = loadCodeMirrorContent(this.exerciseUuid);
-
-    if (
-      localStorageResult.success &&
-      localStorageResult.data &&
-      code.storedAt &&
-      // If the code on the server is newer than in localStorage, use server code
-      // Code on the server must be newer by at least a minute
-      new Date(localStorageResult.data.storedAt).getTime() < new Date(code.storedAt).getTime() - 60000
-    ) {
-      // Use server code and save to localStorage
-      this.setDefaultCode(code.code);
-      this.setupEditor(unfoldableFunctionNames, {
-        code: code.code,
-        readonlyRanges: code.readonlyRanges
-      });
-
-      // Save the newer server code to localStorage
-      saveCodeMirrorContent(this.exerciseUuid, code.code, code.readonlyRanges);
-    } else if (localStorageResult.success && localStorageResult.data) {
-      // Use localStorage code
-      this.setDefaultCode(localStorageResult.data.code);
-      this.setupEditor(unfoldableFunctionNames, {
-        code: localStorageResult.data.code,
-        readonlyRanges: localStorageResult.data.readonlyRanges ?? []
-      });
-    } else {
-      // No localStorage data, use provided code
-      this.setDefaultCode(code.code || "");
-      this.setupEditor(unfoldableFunctionNames, {
-        code: code.code || "",
-        readonlyRanges: code.readonlyRanges || []
-      });
-    }
+    this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
   }
 
-  // Reset editor to stub code and save to localStorage
+  // Reset editor to stub code and save to localStorage - delegate to EditorManager
   resetEditorToStub(
     stubCode: string,
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    if (!this.editorHandler) {
-      return;
-    }
-
-    // Save reset to localStorage
-    saveCodeMirrorContent(this.exerciseUuid, stubCode, defaultReadonlyRanges);
-
-    // Clear editor first
-    this.setupEditor(unfoldableFunctionNames, {
-      code: "",
-      readonlyRanges: []
-    });
-
-    // Then set the stub code
-    this.setupEditor(unfoldableFunctionNames, {
-      code: stubCode,
-      readonlyRanges: defaultReadonlyRanges
-    });
-  }
-
-  // Private method for setting up the editor with code and readonly ranges
-  private setupEditor(
-    unfoldableFunctionNames: string[],
-    { readonlyRanges, code }: { readonlyRanges?: { from: number; to: number }[]; code: string }
-  ) {
-    if (!this.editorView) {
-      return;
-    }
-
-    // This needs to happen before the code is added.
-    updateUnfoldableFunctions(this.editorView, unfoldableFunctionNames);
-
-    if (code) {
-      this.editorView.dispatch({
-        changes: {
-          from: 0,
-          to: this.editorView.state.doc.length,
-          insert: code
-        }
-      });
-    }
-    if (readonlyRanges) {
-      this.editorView.dispatch({
-        effects: updateReadOnlyRangesEffect.of(readonlyRanges)
-      });
-    }
+    this.editorManager.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
   }
 
   // =====================================================
-  // CodeMirror Event Handler Methods
+  // CodeMirror Event Handler Methods - delegate to EditorManager
   // =====================================================
 
-  // Low-level event factories
-  private onEditorChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return EditorViewClass.updateListener.of((update) => {
-      if (update.docChanged) {
-        cb.forEach((fn) => fn(update));
-      }
-    });
-  }
-
-  private onBreakpointChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return this.onViewChange([breakpointEffect], ...cb);
-  }
-
-  private onFoldChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return this.onViewChange([foldEffect, unfoldEffect], ...cb);
-  }
-
-  private onViewChange(effectTypes: StateEffectType<any>[], ...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return EditorViewClass.updateListener.of((update) => {
-      const changed = update.transactions.some((transaction) =>
-        transaction.effects.some((effect) => effectTypes.some((effectType) => effect.is(effectType)))
-      );
-      if (changed) {
-        cb.forEach((fn) => fn(update));
-      }
-    });
-  }
-
-  // High-level orchestrator-specific event handlers
   createEditorChangeHandlers(shouldAutoRunCode: boolean): Extension {
-    return this.onEditorChange(
-      // Reset information widget
-      () =>
-        this.setInformationWidgetData({
-          html: "",
-          line: 0,
-          status: "SUCCESS"
-        }),
-
-      // Reset highlighted line
-      () => this.setHighlightedLine(0),
-
-      // Auto-save content with readonly ranges
-      (e) => {
-        const code = e.state.doc.toString();
-        const readonlyRanges = getCodeMirrorFieldValue(e.view, readOnlyRangesStateField);
-        this.autoSaveContent(code, readonlyRanges);
-      },
-
-      // Set highlight color
-      () => this.setHighlightedLineColor(INFO_HIGHLIGHT_COLOR),
-
-      // Hide information widget
-      () => this.setShouldShowInformationWidget(false),
-
-      // Mark code as edited
-      () => this.setHasCodeBeenEdited(true),
-
-      // Clear underline range
-      () => this.setUnderlineRange(undefined),
-
-      // Update breakpoints
-      () => {
-        const view = this.getEditorView();
-        if (view) {
-          this.setBreakpoints(getBreakpointLines(view));
-        }
-      },
-
-      // Update folded lines
-      () => {
-        const view = this.getEditorView();
-        if (view) {
-          this.setFoldedLines(getCodeMirrorFoldedLines(view));
-        }
-      },
-
-      // Auto-run code if enabled
-      () => {
-        if (shouldAutoRunCode) {
-          this.handleRunCode();
-        }
-      },
-
-      // Trigger custom callback
-      () => {
-        const view = this.getEditorView();
-        if (view) {
-          this.callOnEditorChangeCallback(view);
-        }
-      }
-    );
+    return this.editorManager.createEditorChangeHandlers(shouldAutoRunCode, () => this.handleRunCode());
   }
 
   createBreakpointChangeHandler(): Extension {
-    return this.onBreakpointChange(() => {
-      const view = this.getEditorView();
-      if (view) {
-        this.setBreakpoints(getBreakpointLines(view));
-      }
-    });
+    return this.editorManager.createBreakpointChangeHandler();
   }
 
   createFoldChangeHandler(): Extension {
-    return this.onFoldChange(() => {
-      const view = this.getEditorView();
-      if (view) {
-        this.setFoldedLines(getCodeMirrorFoldedLines(view));
-      }
-    });
+    return this.editorManager.createFoldChangeHandler();
   }
 }
 
