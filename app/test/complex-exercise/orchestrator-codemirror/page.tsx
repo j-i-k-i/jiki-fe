@@ -15,7 +15,6 @@ export default function OrchestratorCodeMirrorTestPage() {
     (window as any).testOrchestrator = orch;
 
     return () => {
-      orch.cleanup();
       delete (window as any).testOrchestrator;
     };
   }, []);
