@@ -31,6 +31,7 @@ import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/uti
 import { updateUnfoldableFunctions } from "../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
 import { TimelineManager } from "./orchestrator/TimelineManager";
+import { mockTest } from "./orchestrator/mocks";
 import {
   getCode,
   getCurrentTest,
@@ -45,7 +46,6 @@ import {
   getStatus,
   hasValidTest
 } from "./orchestrator/stateAccessors";
-import type { AnimationTimeline, Frame } from "./stubs";
 import type { OrchestratorState, TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
 
 class Orchestrator {
@@ -64,38 +64,6 @@ class Orchestrator {
 
     // Initialize debounced save function
     this.initializeAutoSave();
-
-    // Temporary mock test data for testing the scrubber
-    const mockFrames = [
-      { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
-      { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
-      { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
-      { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
-      { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
-    ];
-
-    const mockTest: TestState = {
-      frames: mockFrames,
-      animationTimeline: {
-        duration: 5,
-        paused: true,
-        seek: (_time: number) => {},
-        play: () => {},
-        pause: () => {},
-        progress: 0,
-        currentTime: 0,
-        completed: false,
-        hasPlayedOrScrubbed: false,
-        seekEndOfTimeline: () => {},
-        onUpdate: () => {},
-        timeline: {
-          duration: 5,
-          currentTime: 0
-        }
-      } as AnimationTimeline,
-      timelineTime: 0,
-      currentFrame: mockFrames[0] // Initialize with first frame
-    };
 
     // Create instance-specific store
     this.store = createStore<OrchestratorStore>()(
