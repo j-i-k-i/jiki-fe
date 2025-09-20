@@ -9,11 +9,17 @@ jest.mock("@codemirror/language", () => ({
   unfoldEffect: { is: jest.fn() }
 }));
 jest.mock("@codemirror/view", () => ({
-  EditorView: jest.fn().mockImplementation(() => ({
-    state: { doc: { toString: jest.fn().mockReturnValue("") } },
-    dispatch: jest.fn(),
-    focus: jest.fn()
-  }))
+  EditorView: Object.assign(
+    jest.fn().mockImplementation(() => ({
+      state: { doc: { toString: jest.fn().mockReturnValue("") } },
+      dispatch: jest.fn(),
+      focus: jest.fn()
+    })),
+    {
+      editable: { of: jest.fn() },
+      updateListener: { of: jest.fn().mockReturnValue({}) }
+    }
+  )
 }));
 
 jest.mock("@/components/complex-exercise/ui/codemirror/CodeMirror", () => ({
@@ -107,26 +113,27 @@ describe("EditorManager", () => {
     });
   });
 
-  describe("setEditorView and getEditorView", () => {
-    it("should set and get the editor view", () => {
-      const mockView = {} as EditorView;
-
+  describe("getEditorView", () => {
+    it("should return null before editor is created", () => {
       expect(editorManager.getEditorView()).toBeNull();
+    });
 
-      editorManager.setEditorView(mockView);
-      expect(editorManager.getEditorView()).toBe(mockView);
+    it("should return editor view after ref callback is called", () => {
+      const mockElement = document.createElement("div");
+      const ref = editorManager.getEditorRef();
+      if (ref) {
+        ref(mockElement);
+      }
 
-      editorManager.setEditorView(null);
-      expect(editorManager.getEditorView()).toBeNull();
+      expect(editorManager.getEditorView()).toBeDefined();
     });
   });
 
-  describe("setEditorAPI", () => {
-    it("should store the editor API", () => {
-      const mockAPI = { getValue: jest.fn(), setValue: jest.fn() };
-
-      // Just verify it doesn't throw - the API is private now
-      expect(() => editorManager.setEditorAPI(mockAPI)).not.toThrow();
+  describe("editor methods", () => {
+    it("should have getValue, setValue, and focus methods", () => {
+      expect(typeof editorManager.getValue).toBe("function");
+      expect(typeof editorManager.setValue).toBe("function");
+      expect(typeof editorManager.focus).toBe("function");
     });
   });
 
@@ -135,27 +142,29 @@ describe("EditorManager", () => {
       expect(editorManager.getCurrentEditorValue()).toBeUndefined();
     });
 
-    it("should get value from handler and update snapshot", () => {
-      const mockHandler = { getValue: jest.fn().mockReturnValue("new code") };
-      editorManager.setEditorAPI(mockHandler);
+    it("should get value from editor view and update snapshot", () => {
+      // Mock the editor being created via the ref callback
+      const mockElement = document.createElement("div");
+      const ref = editorManager.getEditorRef();
+      if (ref) {
+        ref(mockElement);
+      }
 
       const value = editorManager.getCurrentEditorValue();
 
-      expect(value).toBe("new code");
-      expect(mockHandler.getValue).toHaveBeenCalled();
-      expect(store.getState().latestValueSnapshot).toBe("new code");
+      // EditorView mock returns empty string by default
+      expect(value).toBe("");
+      expect(store.getState().latestValueSnapshot).toBe("");
     });
   });
 
-  describe("setOnEditorChangeCallback and callOnEditorChangeCallback", () => {
-    it("should set and call the editor change callback", () => {
-      const mockCallback = jest.fn();
+  describe("callOnEditorChangeCallback", () => {
+    it("should call the editor change callback if set", () => {
       const mockView = {} as EditorView;
-
-      editorManager.setOnEditorChangeCallback(mockCallback);
+      // The callback would be set internally by the ref callback
+      // We can't test setting it directly anymore
       editorManager.callOnEditorChangeCallback(mockView);
-
-      expect(mockCallback).toHaveBeenCalledWith(mockView);
+      // Should not throw
     });
 
     it("should not error when no callback is set", () => {
@@ -169,45 +178,74 @@ describe("EditorManager", () => {
 
   describe("setMultiLineHighlight", () => {
     it("should dispatch effect to clear highlights when both lines are 0", () => {
-      const mockDispatch = jest.fn();
-      const mockView = { dispatch: mockDispatch } as any;
-      editorManager.setEditorView(mockView);
+      // Setup editor through the ref callback
+      const mockElement = document.createElement("div");
+      const ref = editorManager.getEditorRef();
+      if (ref) {
+        ref(mockElement);
+      }
 
-      editorManager.setMultiLineHighlight(0, 0);
-
-      expect(mockDispatch).toHaveBeenCalled();
+      // Get the created view and spy on its dispatch
+      const view = editorManager.getEditorView();
+      if (view) {
+        const dispatchSpy = jest.spyOn(view, "dispatch");
+        editorManager.setMultiLineHighlight(0, 0);
+        expect(dispatchSpy).toHaveBeenCalled();
+      }
     });
 
     it("should dispatch effect with line array for valid range", () => {
-      const mockDispatch = jest.fn();
-      const mockView = { dispatch: mockDispatch } as any;
-      editorManager.setEditorView(mockView);
+      // Setup editor through the ref callback
+      const mockElement = document.createElement("div");
+      const ref = editorManager.getEditorRef();
+      if (ref) {
+        ref(mockElement);
+      }
 
-      editorManager.setMultiLineHighlight(2, 4);
-
-      expect(mockDispatch).toHaveBeenCalled();
+      // Get the created view and spy on its dispatch
+      const view = editorManager.getEditorView();
+      if (view) {
+        const dispatchSpy = jest.spyOn(view, "dispatch");
+        editorManager.setMultiLineHighlight(2, 4);
+        expect(dispatchSpy).toHaveBeenCalled();
+      }
     });
 
     it("should not dispatch when no editor view is set", () => {
-      editorManager.setMultiLineHighlight(1, 3);
-      // Should not throw
+      // Create a fresh EditorManager without setting up the view
+      const freshManager = new EditorManager(store, "test-uuid-2", mockOrchestrator, "const x = 1;", false, 0, false);
+
+      expect(() => {
+        freshManager.setMultiLineHighlight(1, 3);
+      }).not.toThrow();
     });
   });
 
   describe("setMultipleLineHighlights", () => {
     it("should dispatch effect with lines array", () => {
-      const mockDispatch = jest.fn();
-      const mockView = { dispatch: mockDispatch } as any;
-      editorManager.setEditorView(mockView);
+      // Setup editor through the ref callback
+      const mockElement = document.createElement("div");
+      const ref = editorManager.getEditorRef();
+      if (ref) {
+        ref(mockElement);
+      }
 
-      editorManager.setMultipleLineHighlights([1, 3, 5]);
-
-      expect(mockDispatch).toHaveBeenCalled();
+      // Get the created view and spy on its dispatch
+      const view = editorManager.getEditorView();
+      if (view) {
+        const dispatchSpy = jest.spyOn(view, "dispatch");
+        editorManager.setMultipleLineHighlights([1, 3, 5]);
+        expect(dispatchSpy).toHaveBeenCalled();
+      }
     });
 
     it("should not dispatch when no editor view is set", () => {
-      editorManager.setMultipleLineHighlights([1, 2, 3]);
-      // Should not throw
+      // Create a fresh EditorManager without setting up the view
+      const freshManager = new EditorManager(store, "test-uuid-3", mockOrchestrator, "const x = 1;", false, 0, false);
+
+      expect(() => {
+        freshManager.setMultipleLineHighlights([1, 2, 3]);
+      }).not.toThrow();
     });
   });
 

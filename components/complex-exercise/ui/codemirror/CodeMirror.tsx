@@ -11,7 +11,7 @@ export type ViewRef = React.MutableRefObject<EditorView | null>;
 export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
   const { defaultCode, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
 
-  // Set up the editor - returns a ref callback
+  // Set up the editor - orchestrator ensures ref stability
   const editorRef = orchestrator.setupEditor(defaultCode, false, 0, shouldAutoRunCode);
 
   return (

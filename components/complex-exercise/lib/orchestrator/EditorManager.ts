@@ -34,8 +34,6 @@ import type { Orchestrator } from "../Orchestrator";
 
 export class EditorManager {
   private editorView: EditorView | null = null;
-  private editorAPI: any = null;
-  private onEditorChangeCallback?: (view: EditorView) => void;
   private isSaving = false;
   private saveDebounced: ReturnType<typeof debounce> | null = null;
   private editorRef: ((element: HTMLDivElement | null) => void) | null = null;
@@ -62,7 +60,7 @@ export class EditorManager {
           const code = this.editorView.state.doc.toString();
           const readonlyRanges = getCodeMirrorFieldValue(this.editorView, readOnlyRangesStateField);
           this.saveImmediately(code, readonlyRanges);
-          this.setEditorView(null);
+          this.editorView = null;
         }
         return;
       }
@@ -89,8 +87,8 @@ export class EditorManager {
         onEditorChange
       });
 
-      // Create editor view
-      const view = new EditorView({
+      // Create editor view directly
+      this.editorView = new EditorView({
         state: EditorState.create({
           doc: value,
           extensions
@@ -98,35 +96,12 @@ export class EditorManager {
         parent: element
       });
 
-      this.setEditorView(view);
+      // Editor is now ready - methods can be called directly
 
-      // Create and store editor API
-      const setValue = (text: string) => {
-        if (!this.editorView) {
-          return;
-        }
-
-        const transaction = this.editorView.state.update({
-          changes: {
-            from: 0,
-            to: this.editorView.state.doc.length,
-            insert: text
-          }
-        });
-
-        this.editorView.dispatch(transaction);
-      };
-
-      const getValue = () => {
-        return this.editorView?.state.doc.toString() || "";
-      };
-
+      // Update snapshot after editor is created
       try {
-        this.setEditorAPI({
-          setValue,
-          getValue,
-          focus: view.focus.bind(view)
-        });
+        const currentCode = this.getValue();
+        this.store.getState().setLatestValueSnapshot(currentCode);
       } catch (e: unknown) {
         if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
           throw e;
@@ -213,35 +188,46 @@ export class EditorManager {
     }, 500);
   }
 
-  setEditorView(view: EditorView | null) {
-    this.editorView = view;
-  }
-
   getEditorView(): EditorView | null {
     return this.editorView;
   }
 
-  setEditorAPI(api: any) {
-    this.editorAPI = api;
-  }
-
-  setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
-    this.onEditorChangeCallback = callback;
-  }
-
-  callOnEditorChangeCallback(view: EditorView) {
-    if (this.onEditorChangeCallback) {
-      this.onEditorChangeCallback(view);
+  setValue(text: string): void {
+    if (!this.editorView) {
+      return;
     }
+
+    const transaction = this.editorView.state.update({
+      changes: {
+        from: 0,
+        to: this.editorView.state.doc.length,
+        insert: text
+      }
+    });
+    this.editorView.dispatch(transaction);
+  }
+
+  getValue(): string {
+    return this.editorView?.state.doc.toString() || "";
+  }
+
+  focus(): void {
+    this.editorView?.focus();
+  }
+
+  // UNUSED: This function is currently not called.
+  callOnEditorChangeCallback(_view: EditorView) {
+    // No-op - callback mechanism removed
   }
 
   getCurrentEditorValue(): string | undefined {
-    if (this.editorAPI?.getValue) {
-      const value = this.editorAPI.getValue();
-      this.store.getState().setLatestValueSnapshot(value);
-      return value;
+    if (!this.editorView) {
+      return undefined;
     }
-    return undefined;
+
+    const value = this.getValue();
+    this.store.getState().setLatestValueSnapshot(value);
+    return value;
   }
 
   autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
@@ -456,7 +442,7 @@ export class EditorManager {
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    if (!this.editorAPI) {
+    if (!this.editorView) {
       return;
     }
 

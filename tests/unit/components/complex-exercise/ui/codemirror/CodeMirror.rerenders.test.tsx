@@ -18,7 +18,6 @@ import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirr
 
 const mockOrchestrator = {
   getEditorView: jest.fn(() => null),
-  setEditorView: jest.fn(),
   setHighlightedLine: jest.fn(),
   setReadonly: jest.fn(),
   setupEditor: jest.fn(() => jest.fn())
@@ -55,6 +54,10 @@ describe("CodeMirror Re-render Tests", () => {
   });
 
   it("should not re-initialize editor on multiple renders", () => {
+    // Create a stable ref callback that setupEditor returns
+    const stableRefCallback = jest.fn();
+    mockOrchestrator.setupEditor.mockReturnValue(stableRefCallback);
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     const { rerender } = renderWithCounter(<CodeMirror orchestrator={mockOrchestrator as any} />);
 
@@ -64,9 +67,12 @@ describe("CodeMirror Re-render Tests", () => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     rerender(<CodeMirror orchestrator={mockOrchestrator as any} />);
 
-    // Our mocked hook should be stable across re-renders
-    // This test demonstrates that we're not causing unnecessary re-initializations
-    expect(mockOrchestrator.setEditorView).toHaveBeenCalledTimes(0); // No DOM element in test
+    // setupEditor will be called on each render
+    expect(mockOrchestrator.setupEditor).toHaveBeenCalledTimes(3);
+
+    // But it should return the same ref callback each time (the orchestrator handles stability)
+    // This is what prevents editor re-initialization
+    expect(mockOrchestrator.setupEditor).toHaveReturnedWith(stableRefCallback);
   });
 
   it("should demonstrate the ref callback pattern works", () => {

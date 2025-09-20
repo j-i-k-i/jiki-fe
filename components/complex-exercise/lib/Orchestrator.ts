@@ -46,32 +46,13 @@ class Orchestrator {
         shouldAutoRunCode
       );
     }
+    // Always return the existing ref - it's stable once created
     return this.editorManager.getEditorRef();
   }
 
-  // EditorView management - delegate to EditorManager
-  setEditorView(view: EditorView | null) {
-    if (this.editorManager) {
-      this.editorManager.setEditorView(view);
-    }
-  }
-
+  // Get the editor view if it exists
   getEditorView(): EditorView | null {
     return this.editorManager?.getEditorView() ?? null;
-  }
-
-  // Editor API management - delegate to EditorManager
-  setEditorAPI(api: any) {
-    if (this.editorManager) {
-      this.editorManager.setEditorAPI(api);
-    }
-  }
-
-  // Editor change callback management - delegate to EditorManager
-  setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
-    if (this.editorManager) {
-      this.editorManager.setOnEditorChangeCallback(callback);
-    }
   }
 
   // Run code callback management
