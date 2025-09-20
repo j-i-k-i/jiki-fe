@@ -225,7 +225,7 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
     expect(typeof orchestrator.setReadonly).toBe("function");
     expect(typeof orchestrator.setHighlightedLine).toBe("function");
     expect(typeof orchestrator.setShouldAutoRunCode).toBe("function");
-    expect(typeof orchestrator.handleRunCode).toBe("function");
+    expect(typeof orchestrator.runCode).toBe("function");
 
     // Test calling methods doesn't throw
     expect(() => {

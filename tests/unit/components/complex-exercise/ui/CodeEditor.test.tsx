@@ -30,8 +30,6 @@ function createMockOrchestrator(exerciseUuid = "test-uuid"): Orchestrator {
     setCode: jest.fn(),
     runCode: jest.fn(),
     getEditorView: jest.fn(),
-    setHandleRunCodeCallback: jest.fn(),
-    handleRunCode: jest.fn(),
     callOnEditorChangeCallback: jest.fn(),
     setupEditor: jest.fn(() => jest.fn())
   } as unknown as Orchestrator;

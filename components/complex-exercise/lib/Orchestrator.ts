@@ -15,7 +15,6 @@ class Orchestrator {
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
   private editorManager: EditorManager | null = null;
-  private handleRunCodeCallback?: () => void;
   private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
   constructor(exerciseUuid: string, initialCode: string) {
@@ -70,26 +69,6 @@ class Orchestrator {
   // Production code should use the orchestrator's methods instead of direct view access
   getEditorView(): EditorView | null {
     return this.editorManager?.editorView ?? null;
-  }
-
-  // Run code callback management
-  // UNUSED: This function is currently not called.
-  setHandleRunCodeCallback(callback?: () => void) {
-    this.handleRunCodeCallback = callback;
-  }
-
-  // Call the run code callback if set, otherwise use orchestrator's runCode
-  handleRunCode() {
-    if (this.handleRunCodeCallback) {
-      this.handleRunCodeCallback();
-    } else {
-      this.runCode().catch((error) => {
-        console.error("Unexpected error in runCode:", error);
-        const state = this.store.getState();
-        state.setError(error instanceof Error ? error.message : "Unexpected error occurred");
-        state.setStatus("error");
-      });
-    }
   }
 
   // Call the editor change callback if set - delegate to EditorManager

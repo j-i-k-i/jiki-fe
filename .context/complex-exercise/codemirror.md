@@ -279,7 +279,7 @@ Located in `components/complex-exercise/ui/codemirror/testing/`:
 ### Running Code
 
 1. User clicks run or auto-run is enabled
-2. Orchestrator's `handleRunCode()` is called
+2. Orchestrator's `runCode()` is called
 3. Code is retrieved from editor
 4. Execution results update orchestrator state
 5. Visual feedback shown via extensions

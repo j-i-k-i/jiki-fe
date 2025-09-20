@@ -94,7 +94,7 @@ describe("EditorManager", () => {
   beforeEach(() => {
     store = createOrchestratorStore("test-uuid", "const x = 1;");
     mockOrchestrator = {
-      handleRunCode: jest.fn()
+      runCode: jest.fn()
     };
     const mockElement = document.createElement("div");
     editorManager = new EditorManager(

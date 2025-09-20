@@ -53,16 +53,17 @@ export class EditorManager {
     // Create event handlers
     const onBreakpointChange = this.createBreakpointChangeHandler();
     const onFoldChange = this.createFoldChangeHandler();
-    const onEditorChange = this.createEditorChangeHandlers(shouldAutoRunCode, () => this.orchestrator.handleRunCode());
+    const onEditorChange = this.createEditorChangeHandlers(shouldAutoRunCode);
+    const onCloseInfoWidget = this.createCloseInfoWidgetHandler();
 
     // Create extensions
     const extensions = createEditorExtensions({
-      orchestrator: this.orchestrator,
       highlightedLine,
       readonly,
       onBreakpointChange,
       onFoldChange,
-      onEditorChange
+      onEditorChange,
+      onCloseInfoWidget
     });
 
     // Create editor view directly with the element
@@ -440,7 +441,7 @@ export class EditorManager {
     });
   }
 
-  createEditorChangeHandlers(shouldAutoRunCode: boolean, handleRunCode: () => void): Extension {
+  createEditorChangeHandlers(shouldAutoRunCode: boolean): Extension {
     return this.onEditorChange(
       () =>
         this.store.getState().setInformationWidgetData({
@@ -475,7 +476,7 @@ export class EditorManager {
 
       () => {
         if (shouldAutoRunCode) {
-          handleRunCode();
+          void this.orchestrator.runCode();
         }
       },
 
@@ -495,5 +496,9 @@ export class EditorManager {
     return this.onFoldChange(() => {
       this.store.getState().setFoldedLines(getCodeMirrorFoldedLines(this.editorView));
     });
+  }
+
+  createCloseInfoWidgetHandler(): () => void {
+    return () => this.orchestrator.setShouldShowInformationWidget(false);
   }
 }

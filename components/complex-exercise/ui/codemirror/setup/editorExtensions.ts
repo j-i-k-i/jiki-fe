@@ -15,7 +15,6 @@ import {
 } from "@codemirror/view";
 import { minimalSetup } from "codemirror";
 
-import type { Orchestrator } from "../../../lib/Orchestrator";
 import * as Ext from "../extensions";
 import { moveCursorByPasteLength } from "../extensions/move-cursor-by-paste-length";
 import { unfoldableFunctionsField } from "../utils/unfoldableFunctionNames";
@@ -24,21 +23,21 @@ import { readonlyCompartment } from "./editorCompartments";
 import type { Extension } from "@codemirror/state";
 
 export interface EditorExtensionsConfig {
-  orchestrator: Orchestrator;
   highlightedLine: number;
   readonly: boolean;
   onBreakpointChange: Extension;
   onFoldChange: Extension;
   onEditorChange: Extension;
+  onCloseInfoWidget: () => void;
 }
 
 export function createEditorExtensions({
-  orchestrator,
   highlightedLine: _highlightedLine,
   readonly: _readonly,
   onBreakpointChange,
   onFoldChange,
-  onEditorChange
+  onEditorChange,
+  onCloseInfoWidget
 }: EditorExtensionsConfig) {
   return [
     // Core CodeMirror extensions
@@ -71,7 +70,7 @@ export function createEditorExtensions({
     Ext.showInfoWidgetField,
     Ext.informationWidgetDataField,
     Ext.lineInformationExtension({
-      onClose: () => orchestrator.setShouldShowInformationWidget(false)
+      onClose: onCloseInfoWidget
     }),
     Ext.multiHighlightLine([]),
     Ext.cursorTooltip(),
