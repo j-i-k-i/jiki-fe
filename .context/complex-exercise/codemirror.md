@@ -23,33 +23,34 @@ CodeMirror 6 is the code editor used in the complex exercise component. It provi
 
 The main React component that:
 
-- Creates and manages the CodeMirror editor instance
+- Renders the editor DOM element
 - Connects to the Orchestrator for state management
-- Uses the `useEditorSetup` hook to initialize the editor with proper extensions
+- Uses `orchestrator.setupEditor()` to get a stable ref callback
 
 Key responsibilities:
 
 - Receives orchestrator instance as prop
 - Reads initial state from orchestrator store (defaultCode, shouldAutoRunCode)
-- Creates editor DOM element with ref callback
-- Handles component lifecycle (mount/unmount)
+- Calls `orchestrator.setupEditor()` which returns a ref callback
+- The ref callback manages EditorManager lifecycle based on DOM element availability
 
-#### 2. Editor Setup Hook (`useEditorSetup.ts`)
+#### 2. EditorManager (`components/complex-exercise/lib/orchestrator/EditorManager.ts`)
 
-Central hook that manages editor initialization and lifecycle:
+Class that manages the CodeMirror editor instance:
 
-- Creates the EditorView instance
-- Configures all extensions
+- Created when DOM element becomes available
+- Maintains a readonly `editorView` property that's guaranteed to exist
+- Configures all extensions during construction
 - Sets up event handlers for editor changes
-- Manages cleanup on unmount
-- Saves content to localStorage on unmount
+- Manages cleanup including saving content to localStorage
 
 Key features:
 
-- Creates event handlers using orchestrator methods
+- Takes DOM element in constructor, ensuring editor always exists
+- Creates event handlers that update orchestrator state
 - Initializes editor with all extensions
-- Stores EditorView reference in orchestrator
-- Handles error boundaries for editor mounting
+- Handles auto-save and immediate save on cleanup
+- No null checks needed since editorView is guaranteed
 
 #### 3. Editor Extensions (`editorExtensions.ts`)
 
@@ -59,7 +60,9 @@ Configures all CodeMirror extensions in a specific order:
 - Editor behavior (multi-selection, auto-indent, bracket matching)
 - Visual enhancements (line highlights, drop cursor, etc.)
 - Custom extensions (breakpoints, folding, readonly ranges, etc.)
-- Event listeners from orchestrator
+- Event listeners passed as callbacks
+
+Key improvement: Extensions receive specific callbacks (like `onCloseInfoWidget`) rather than the entire orchestrator, improving encapsulation.
 
 ## Orchestrator Integration
 
@@ -93,6 +96,8 @@ unhandledErrorBase64: string
 
 The orchestrator provides factory methods for creating CodeMirror event handlers:
 
+These methods are now in EditorManager:
+
 1. **`createEditorChangeHandlers()`**: Returns extensions that respond to document changes
    - Resets information widget
    - Resets highlighted line
@@ -102,22 +107,28 @@ The orchestrator provides factory methods for creating CodeMirror event handlers
    - Marks code as edited
    - Clears underline range
    - Updates breakpoints and folded lines
-   - Auto-runs code if enabled
-   - Triggers custom callbacks
+   - Auto-runs code if enabled (calls `orchestrator.runCode()` directly)
 
 2. **`createBreakpointChangeHandler()`**: Updates breakpoint state when toggled
 
 3. **`createFoldChangeHandler()`**: Updates folded lines when code is folded/unfolded
 
-### Editor Reference Management
+4. **`createCloseInfoWidgetHandler()`**: Returns callback for closing information widget
 
-The orchestrator maintains a reference to the EditorView instance:
+### Editor Lifecycle Management
+
+The orchestrator manages EditorManager lifecycle through a ref callback pattern:
 
 ```typescript
-- setEditorView(view: EditorView | null): Stores the editor reference
-- getEditorView(): Returns the current editor instance
-- handleEditorDidMount(handler): Called when editor is mounted
+setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+  // Returns a stable ref callback that:
+  // - Creates EditorManager when element is available
+  // - Cleans up EditorManager when element is removed
+  // - Ensures ref callback stability across React renders
+}
 ```
+
+The EditorManager is created lazily when the DOM element becomes available, and its `editorView` property is guaranteed to exist.
 
 ### State Synchronization
 
@@ -279,7 +290,7 @@ Located in `components/complex-exercise/ui/codemirror/testing/`:
 ### Running Code
 
 1. User clicks run or auto-run is enabled
-2. Orchestrator's `runCode()` is called
+2. EditorManager calls `orchestrator.runCode()` directly (no callback indirection)
 3. Code is retrieved from editor
 4. Execution results update orchestrator state
 5. Visual feedback shown via extensions

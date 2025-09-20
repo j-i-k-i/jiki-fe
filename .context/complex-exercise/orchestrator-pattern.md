@@ -29,36 +29,61 @@ The orchestrator uses a **facade pattern** with internal composition. It maintai
 
 ```typescript
 class Orchestrator {
-  // Internal composed managers - not exposed
-  private stateStore: StateStore;
-  private editorManager: EditorManager;
-  private timelineManager: TimelineManager;
-  private testRunner: TestRunner;
+  // Internal composed managers
+  private readonly store: StoreApi<OrchestratorStore>;
+  private readonly timelineManager: TimelineManager;
+  private editorManager: EditorManager | null = null;
+  private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
-  constructor(id: string, initialData: any) {
-    // Create internal managers
-    this.stateStore = new StateStore(id, initialData);
-    this.editorManager = new EditorManager(this.stateStore);
-    this.timelineManager = new TimelineManager(this.stateStore);
-    this.testRunner = new TestRunner(this.stateStore);
+  constructor(id: string, initialCode: string) {
+    // Create store and managers
+    this.store = createOrchestratorStore(id, initialCode);
+    this.timelineManager = new TimelineManager(this.store);
+    // EditorManager created lazily when DOM element is available
+  }
+
+  // Setup editor with ref callback pattern for lifecycle management
+  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+    // Create stable ref callback only once
+    if (!this.editorRefCallback) {
+      this.editorRefCallback = (element: HTMLDivElement | null) => {
+        if (element) {
+          // Create EditorManager when element is mounted
+          if (!this.editorManager) {
+            this.editorManager = new EditorManager(
+              element,
+              this.store,
+              this.exerciseUuid,
+              this,
+              value,
+              readonly,
+              highlightedLine,
+              shouldAutoRunCode
+            );
+          }
+        } else {
+          // Cleanup when element is unmounted
+          if (this.editorManager) {
+            this.editorManager.cleanup();
+            this.editorManager = null;
+          }
+        }
+      };
+    }
+    return this.editorRefCallback;
   }
 
   // Public API - delegates to internal managers
-  setCode(code: string) {
-    this.stateStore.setCode(code);
-  }
-
-  runCode() {
-    return this.testRunner.runCode();
-  }
-
-  setEditorView(view: EditorView) {
-    this.editorManager.setEditorView(view);
+  async runCode() {
+    // Direct implementation, no callback indirection
+    const state = this.store.getState();
+    state.setStatus("running");
+    // ... run code logic
   }
 
   // Expose store for hooks - the only internal exposure
   getStore() {
-    return this.stateStore.getStore();
+    return this.store;
   }
 }
 ```
@@ -70,6 +95,9 @@ class Orchestrator {
 - **Internal delegation** to specialized managers for implementation
 - **No direct access** to internal managers from components
 - **Maintains backwards compatibility** when refactoring internals
+- **Lazy instantiation** of EditorManager when DOM element becomes available
+- **Stable ref callbacks** for React lifecycle management
+- **Direct method calls** instead of callback indirection for cleaner architecture
 
 ### 2. React Hook
 
@@ -132,16 +160,43 @@ Each manager is a private class that handles a specific domain:
 ```typescript
 // EditorManager.ts - Handles all CodeMirror interactions
 class EditorManager {
-  private editorView: EditorView | null = null;
+  readonly editorView: EditorView; // Guaranteed to exist
 
-  constructor(private store: StateStore) {}
+  constructor(
+    element: HTMLDivElement, // Requires DOM element upfront
+    private readonly store: StoreApi<OrchestratorStore>,
+    private readonly exerciseUuid: string,
+    private readonly orchestrator: Orchestrator,
+    value: string,
+    readonly: boolean,
+    highlightedLine: number,
+    shouldAutoRunCode: boolean
+  ) {
+    // Create editor immediately with element
+    this.editorView = new EditorView({
+      state: EditorState.create({
+        doc: value,
+        extensions: createEditorExtensions({
+          highlightedLine,
+          readonly,
+          onBreakpointChange,
+          onFoldChange,
+          onEditorChange,
+          onCloseInfoWidget // Only pass needed callback, not whole orchestrator
+        })
+      }),
+      parent: element
+    });
+  }
 
-  setEditorView(view: EditorView | null) {
-    this.editorView = view;
+  cleanup() {
+    // Save content before cleanup
+    const code = this.editorView.state.doc.toString();
+    this.saveImmediately(code);
   }
 
   applyHighlightLine(line: number) {
-    if (!this.editorView) return;
+    // No null check needed - editorView always exists
     this.editorView.dispatch({
       effects: changeLineEffect.of(line)
     });
@@ -169,17 +224,42 @@ The orchestrator maintains the public API and delegates:
 ```typescript
 class Orchestrator {
   // All managers are private
-  private editorManager: EditorManager;
+  private editorManager: EditorManager | null = null; // Created lazily
   private timelineManager: TimelineManager;
+  private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
   constructor(...) {
-    this.editorManager = new EditorManager(this.stateStore);
     this.timelineManager = new TimelineManager(this.stateStore);
+    // EditorManager created when DOM element available
   }
 
-  // Public API delegates but doesn't expose managers
-  setEditorView(view: EditorView | null) {
-    this.editorManager.setEditorView(view);
+  // Returns stable ref callback for React
+  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+    // Create ref callback only once to ensure stability across renders
+    if (!this.editorRefCallback) {
+      this.editorRefCallback = (element: HTMLDivElement | null) => {
+        if (element) {
+          // Create EditorManager when element is available
+          if (!this.editorManager) {
+            this.editorManager = new EditorManager(element, ...);
+          }
+        } else {
+          // Cleanup when element is removed
+          if (this.editorManager) {
+            this.editorManager.cleanup();
+            this.editorManager = null;
+          }
+        }
+      };
+    }
+    return this.editorRefCallback;
+  }
+
+  // Direct method implementation - no callback indirection
+  async runCode() {
+    const state = this.store.getState();
+    state.setStatus("running");
+    // ... implementation
   }
 
   setCurrentTestTimelineTime(time: number) {
