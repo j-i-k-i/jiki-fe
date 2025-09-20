@@ -68,6 +68,7 @@ class Orchestrator {
   }
 
   // Run code callback management
+  // UNUSED: This function is currently not called.
   setHandleRunCodeCallback(callback?: () => void) {
     this.handleRunCodeCallback = callback;
   }
@@ -92,6 +93,7 @@ class Orchestrator {
   }
 
   // Auto-save the current editor content - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
     this.editorManager.autoSaveContent(code, readonlyRanges);
   }
@@ -119,18 +121,22 @@ class Orchestrator {
     this.timelineManager.setTimelineTime(time);
   }
 
+  // UNUSED: This function is currently not called.
   setCurrentTestInterpreterTime(interpreterTime: number) {
     this.timelineManager.setInterpreterTime(interpreterTime);
   }
 
+  // UNUSED: This function is currently not called.
   setCurrentTest(test: TestState | null) {
     this.store.getState().setCurrentTest(test);
   }
 
+  // UNUSED: This function is currently not called.
   setHasCodeBeenEdited(value: boolean) {
     this.store.getState().setHasCodeBeenEdited(value);
   }
 
+  // UNUSED: This function is currently not called.
   setIsSpotlightActive(value: boolean) {
     this.store.getState().setIsSpotlightActive(value);
   }
@@ -147,6 +153,7 @@ class Orchestrator {
   }
 
   // Editor store public methods
+  // UNUSED: This function is currently not called.
   setDefaultCode(code: string) {
     this.store.getState().setDefaultCode(code);
   }
@@ -202,17 +209,29 @@ class Orchestrator {
   }
 
   // Protected state accessor methods from stateAccessors.ts
+  // UNUSED: This function is currently not called.
   protected getCode = getCode.bind(this);
+  // UNUSED: This function is currently not called.
   protected getOutput = getOutput.bind(this);
+  // UNUSED: This function is currently not called.
   protected getStatus = getStatus.bind(this);
+  // UNUSED: This function is currently not called.
   protected getError = getError.bind(this);
+  // UNUSED: This function is currently not called.
   protected getHasCodeBeenEdited = getHasCodeBeenEdited.bind(this);
+  // UNUSED: This function is currently not called.
   protected getIsSpotlightActive = getIsSpotlightActive.bind(this);
+  // UNUSED: This function is currently not called.
   protected getFoldedLines = getFoldedLines.bind(this);
+  // UNUSED: This function is currently not called.
   protected getCurrentTest = getCurrentTest.bind(this);
+  // UNUSED: This function is currently not called.
   protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
+  // UNUSED: This function is currently not called.
   protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
+  // UNUSED: This function is currently not called.
   protected getCurrentTestTimelineTime = getCurrentTestTimelineTime.bind(this);
+  // UNUSED: This function is currently not called.
   protected hasValidTest = hasValidTest.bind(this);
 
   // Delegate frame methods to TimelineManager
@@ -250,11 +269,13 @@ class Orchestrator {
   }
 
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   initializeEditor(code: any, exercise: any, unfoldableFunctionNames: string[]) {
     this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
   }
 
   // Reset editor to stub code and save to localStorage - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   resetEditorToStub(
     stubCode: string,
     defaultReadonlyRanges: { from: number; to: number }[],

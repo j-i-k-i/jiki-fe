@@ -245,6 +245,7 @@ export class EditorManager {
     }
   }
 
+  // UNUSED: This function is currently not called.
   applyInformationWidgetData(data: InformationWidgetData) {
     if (!this.editorView) {
       return;
@@ -255,6 +256,7 @@ export class EditorManager {
     });
   }
 
+  // UNUSED: This function is currently not called.
   applyShouldShowInformationWidget(show: boolean) {
     if (!this.editorView) {
       return;
@@ -265,6 +267,7 @@ export class EditorManager {
     });
   }
 
+  // UNUSED: This function is currently not called.
   applyReadonlyCompartment(readonly: boolean) {
     if (!this.editorView) {
       return;
@@ -275,6 +278,7 @@ export class EditorManager {
     });
   }
 
+  // UNUSED: This function is currently not called.
   applyHighlightLine(highlightedLine: number) {
     if (!this.editorView) {
       return;
@@ -285,6 +289,7 @@ export class EditorManager {
     });
   }
 
+  // UNUSED: This function is currently not called.
   applyHighlightLineColor(highlightedLineColor: string) {
     if (!this.editorView) {
       return;
@@ -297,6 +302,7 @@ export class EditorManager {
     }
   }
 
+  // UNUSED: This function is currently not called.
   applyUnderlineRange(range: UnderlineRange | undefined) {
     if (!this.editorView) {
       return;

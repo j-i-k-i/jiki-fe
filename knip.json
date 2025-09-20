@@ -11,5 +11,19 @@
     "@welldone-software/why-did-you-render",
     "postcss"
   ],
-  "ignoreExportsUsedInFile": true
+  "ignoreExportsUsedInFile": true,
+  "include": [
+    "files",
+    "dependencies",
+    "unlisted",
+    "binaries",
+    "unresolved",
+    "exports",
+    "nsExports",
+    "classMembers",
+    "types",
+    "nsTypes",
+    "enumMembers",
+    "duplicates"
+  ]
 }
