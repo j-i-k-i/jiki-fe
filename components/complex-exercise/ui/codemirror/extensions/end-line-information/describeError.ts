@@ -13,7 +13,7 @@ import type { StaticError } from "../../../../lib/stubs";
 export function describeError(error: StaticError, language: "jikiscript" | "javascript", context?: string) {
   const who = language === "jikiscript" ? "Jiki" : "We";
   let errorHeading;
-  if (error instanceof SyntaxError) {
+  if (error.type === "SyntaxError") {
     errorHeading = `${who} couldn't understand your code`;
   } else if (error.type === "LogicError") {
     errorHeading = "Something didn't go as expected!";
