@@ -46,14 +46,7 @@ import {
   hasValidTest
 } from "./orchestrator/stateAccessors";
 import type { AnimationTimeline, Frame } from "./stubs";
-import type {
-  OrchestratorState,
-  TestState,
-  UnderlineRange,
-  InformationWidgetData,
-  OrchestratorActions,
-  OrchestratorStore
-} from "./types";
+import type { OrchestratorState, TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;

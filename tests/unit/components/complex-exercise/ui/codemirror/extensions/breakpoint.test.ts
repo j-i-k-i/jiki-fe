@@ -536,7 +536,7 @@ describe("breakpoint extension", () => {
       // Test the performance scenario setup
       // TypeScript fix: Use non-null assertions (!) for array access and function call
       // TypeScript can't guarantee array elements exist at runtime, so we assert they do
-      const heavyState = performanceScenarios[0]!.setup!();
+      const heavyState = performanceScenarios[0].setup();
       expect(heavyState.doc.lines).toBe(100);
 
       const positions: number[] = [];
