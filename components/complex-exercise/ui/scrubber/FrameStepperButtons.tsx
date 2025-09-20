@@ -9,15 +9,15 @@ interface FrameStepperButtonsProps {
 }
 
 export default function FrameStepperButtons({ orchestrator, enabled }: FrameStepperButtonsProps) {
-  const { currentTest } = useOrchestratorStore(orchestrator);
+  const { currentTest, foldedLines } = useOrchestratorStore(orchestrator);
   const [prevFrame, setPrevFrame] = useState<Frame | undefined>(undefined);
   const [nextFrame, setNextFrame] = useState<Frame | undefined>(undefined);
 
   useEffect(() => {
-    // Update prev/next frames whenever the current frame changes
+    // Update prev/next frames whenever relevant state changes
     setPrevFrame(orchestrator.findPrevFrame());
     setNextFrame(orchestrator.findNextFrame());
-  }, [orchestrator, currentTest?.currentFrame, currentTest?.timelineTime]);
+  }, [orchestrator, currentTest, currentTest?.frames, currentTest?.timelineTime, foldedLines]);
 
   return (
     <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">

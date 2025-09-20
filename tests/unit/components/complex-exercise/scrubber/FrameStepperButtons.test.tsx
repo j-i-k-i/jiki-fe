@@ -47,7 +47,8 @@ function createMockOrchestrator(
 // Helper to setup store mock
 function setupStoreMock(currentFrame: Frame | null = null, timelineTime: number = 0) {
   (useOrchestratorStore as jest.Mock).mockReturnValue({
-    currentTest: currentFrame ? { currentFrame, timelineTime } : null
+    currentTest: currentFrame ? { currentFrame, timelineTime } : null,
+    foldedLines: []
   });
 }
 
