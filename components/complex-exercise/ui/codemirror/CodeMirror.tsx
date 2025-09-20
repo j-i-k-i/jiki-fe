@@ -4,20 +4,16 @@ import React from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { readonlyCompartment } from "./setup/editorCompartments";
-import { useEditorSetup, type Handler } from "./setup/useEditorSetup";
+import { setupEditor } from "./setup/setupEditor";
 
 export { readonlyCompartment };
-export type { Handler };
 export type ViewRef = React.MutableRefObject<EditorView | null>;
 
 export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
   const { defaultCode, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
 
-  // Use defaultCode as initial value
-  const value = defaultCode;
-
-  // Set up the editor using the custom hook - remove reactive values that cause re-renders
-  const { editorRef } = useEditorSetup(orchestrator, value, false, 0, shouldAutoRunCode);
+  // Set up the editor - returns a ref callback
+  const editorRef = setupEditor(orchestrator, defaultCode, false, 0, shouldAutoRunCode);
 
   return (
     <div className="editor-wrapper">
