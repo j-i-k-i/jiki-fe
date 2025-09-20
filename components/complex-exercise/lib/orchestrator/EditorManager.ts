@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import type { EditorView, ViewUpdate } from "@codemirror/view";
-import { EditorView as EditorViewClass } from "@codemirror/view";
+import type { ViewUpdate } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
+import { EditorState } from "@codemirror/state";
 import { foldEffect, unfoldEffect } from "@codemirror/language";
 import type { StateEffectType, Extension } from "@codemirror/state";
 import { debounce } from "lodash";
@@ -27,7 +28,9 @@ import { getCodeMirrorFieldValue } from "../../ui/codemirror/utils/getCodeMirror
 import { getFoldedLines as getCodeMirrorFoldedLines } from "../../ui/codemirror/utils/getFoldedLines";
 import { updateUnfoldableFunctions } from "../../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "../localStorage";
+import { createEditorExtensions } from "../../ui/codemirror/setup/editorExtensions";
 import type { UnderlineRange, InformationWidgetData, OrchestratorStore } from "../types";
+import type { Orchestrator } from "../Orchestrator";
 
 export class EditorManager {
   private editorView: EditorView | null = null;
@@ -35,13 +38,110 @@ export class EditorManager {
   private onEditorChangeCallback?: (view: EditorView) => void;
   private isSaving = false;
   private saveDebounced: ReturnType<typeof debounce> | null = null;
+  private editorRef: ((element: HTMLDivElement | null) => void) | null = null;
 
   constructor(
     private readonly store: StoreApi<OrchestratorStore>,
-    private readonly exerciseUuid: string
+    private readonly exerciseUuid: string,
+    private readonly orchestrator: Orchestrator,
+    value: string,
+    readonly: boolean,
+    highlightedLine: number,
+    shouldAutoRunCode: boolean
   ) {
     this.initializeAutoSave();
     this.initializeSubscriptions();
+    this.createEditorRef(value, readonly, highlightedLine, shouldAutoRunCode);
+  }
+
+  private createEditorRef(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+    this.editorRef = (element: HTMLDivElement | null) => {
+      if (!element) {
+        // Cleanup when element is removed
+        if (this.editorView) {
+          const code = this.editorView.state.doc.toString();
+          const readonlyRanges = getCodeMirrorFieldValue(this.editorView, readOnlyRangesStateField);
+          this.saveImmediately(code, readonlyRanges);
+          this.setEditorView(null);
+        }
+        return;
+      }
+
+      // Don't initialize if editor already exists
+      if (this.editorView) {
+        return;
+      }
+
+      // Create event handlers
+      const onBreakpointChange = this.createBreakpointChangeHandler();
+      const onFoldChange = this.createFoldChangeHandler();
+      const onEditorChange = this.createEditorChangeHandlers(shouldAutoRunCode, () =>
+        this.orchestrator.handleRunCode()
+      );
+
+      // Create extensions
+      const extensions = createEditorExtensions({
+        orchestrator: this.orchestrator,
+        highlightedLine,
+        readonly,
+        onBreakpointChange,
+        onFoldChange,
+        onEditorChange
+      });
+
+      // Create editor view
+      const view = new EditorView({
+        state: EditorState.create({
+          doc: value,
+          extensions
+        }),
+        parent: element
+      });
+
+      this.setEditorView(view);
+
+      // Create and store editor API
+      const setValue = (text: string) => {
+        if (!this.editorView) {
+          return;
+        }
+
+        const transaction = this.editorView.state.update({
+          changes: {
+            from: 0,
+            to: this.editorView.state.doc.length,
+            insert: text
+          }
+        });
+
+        this.editorView.dispatch(transaction);
+      };
+
+      const getValue = () => {
+        return this.editorView?.state.doc.toString() || "";
+      };
+
+      try {
+        this.setEditorAPI({
+          setValue,
+          getValue,
+          focus: view.focus.bind(view)
+        });
+      } catch (e: unknown) {
+        if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+          throw e;
+        }
+
+        this.store.getState().setHasUnhandledError(true);
+        this.store
+          .getState()
+          .setUnhandledErrorBase64(Buffer.from(JSON.stringify({ error: String(e) })).toString("base64"));
+      }
+    };
+  }
+
+  getEditorRef() {
+    return this.editorRef;
   }
 
   private initializeSubscriptions() {
@@ -270,7 +370,7 @@ export class EditorManager {
     }
 
     this.editorView.dispatch({
-      effects: readonlyCompartment.reconfigure([EditorViewClass.editable.of(!readonly)])
+      effects: readonlyCompartment.reconfigure([EditorView.editable.of(!readonly)])
     });
   }
 
@@ -401,7 +501,7 @@ export class EditorManager {
 
   // Event handler methods
   private onEditorChange(...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return EditorViewClass.updateListener.of((update) => {
+    return EditorView.updateListener.of((update) => {
       if (update.docChanged) {
         cb.forEach((fn) => fn(update));
       }
@@ -417,7 +517,7 @@ export class EditorManager {
   }
 
   private onViewChange(effectTypes: StateEffectType<any>[], ...cb: Array<(update: ViewUpdate) => void>): Extension {
-    return EditorViewClass.updateListener.of((update) => {
+    return EditorView.updateListener.of((update) => {
       const changed = update.transactions.some((transaction) =>
         transaction.effects.some((effect) => effectTypes.some((effectType) => effect.is(effectType)))
       );

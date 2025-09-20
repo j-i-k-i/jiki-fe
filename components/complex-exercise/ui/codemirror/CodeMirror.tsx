@@ -4,7 +4,6 @@ import React from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { readonlyCompartment } from "./setup/editorCompartments";
-import { setupEditor } from "./setup/setupEditor";
 
 export { readonlyCompartment };
 export type ViewRef = React.MutableRefObject<EditorView | null>;
@@ -13,7 +12,7 @@ export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
   const { defaultCode, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
 
   // Set up the editor - returns a ref callback
-  const editorRef = setupEditor(orchestrator, defaultCode, false, 0, shouldAutoRunCode);
+  const editorRef = orchestrator.setupEditor(defaultCode, false, 0, shouldAutoRunCode);
 
   return (
     <div className="editor-wrapper">

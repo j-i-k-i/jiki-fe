@@ -4,7 +4,6 @@
 // passed around, controls the state, etc.
 
 import type { EditorView } from "@codemirror/view";
-import type { Extension } from "@codemirror/state";
 import type { StoreApi } from "zustand/vanilla";
 import { EditorManager } from "./orchestrator/EditorManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
@@ -15,7 +14,7 @@ class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
-  private readonly editorManager: EditorManager;
+  private editorManager: EditorManager | null = null;
   private handleRunCodeCallback?: () => void;
 
   constructor(exerciseUuid: string, initialCode: string) {
@@ -24,9 +23,9 @@ class Orchestrator {
     // Create instance-specific store
     this.store = createOrchestratorStore(exerciseUuid, initialCode);
 
-    // Initialize managers
+    // Initialize timeline manager only
     this.timelineManager = new TimelineManager(this.store);
-    this.editorManager = new EditorManager(this.store, exerciseUuid);
+    // EditorManager will be created lazily when setupEditor is called
   }
 
   // Expose the store so a hook can use it
@@ -34,23 +33,45 @@ class Orchestrator {
     return this.store;
   }
 
+  // Setup the editor - creates EditorManager if needed and returns ref
+  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+    if (!this.editorManager) {
+      this.editorManager = new EditorManager(
+        this.store,
+        this.exerciseUuid,
+        this,
+        value,
+        readonly,
+        highlightedLine,
+        shouldAutoRunCode
+      );
+    }
+    return this.editorManager.getEditorRef();
+  }
+
   // EditorView management - delegate to EditorManager
   setEditorView(view: EditorView | null) {
-    this.editorManager.setEditorView(view);
+    if (this.editorManager) {
+      this.editorManager.setEditorView(view);
+    }
   }
 
   getEditorView(): EditorView | null {
-    return this.editorManager.getEditorView();
+    return this.editorManager?.getEditorView() ?? null;
   }
 
   // Editor API management - delegate to EditorManager
   setEditorAPI(api: any) {
-    this.editorManager.setEditorAPI(api);
+    if (this.editorManager) {
+      this.editorManager.setEditorAPI(api);
+    }
   }
 
   // Editor change callback management - delegate to EditorManager
   setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
-    this.editorManager.setOnEditorChangeCallback(callback);
+    if (this.editorManager) {
+      this.editorManager.setOnEditorChangeCallback(callback);
+    }
   }
 
   // Run code callback management
@@ -75,23 +96,29 @@ class Orchestrator {
 
   // Call the editor change callback if set - delegate to EditorManager
   callOnEditorChangeCallback(view: EditorView) {
-    this.editorManager.callOnEditorChangeCallback(view);
+    if (this.editorManager) {
+      this.editorManager.callOnEditorChangeCallback(view);
+    }
   }
 
   // Auto-save the current editor content - delegate to EditorManager
   // UNUSED: This function is currently not called.
   autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    this.editorManager.autoSaveContent(code, readonlyRanges);
+    if (this.editorManager) {
+      this.editorManager.autoSaveContent(code, readonlyRanges);
+    }
   }
 
   // Save immediately (for cleanup) - delegate to EditorManager
   saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    this.editorManager.saveImmediately(code, readonlyRanges);
+    if (this.editorManager) {
+      this.editorManager.saveImmediately(code, readonlyRanges);
+    }
   }
 
   // Get current editor value and update snapshot - delegate to EditorManager
   getCurrentEditorValue(): string | undefined {
-    return this.editorManager.getCurrentEditorValue();
+    return this.editorManager?.getCurrentEditorValue();
   }
 
   // Public methods that use the store actions
@@ -161,11 +188,15 @@ class Orchestrator {
   }
 
   setMultiLineHighlight(fromLine: number, toLine: number) {
-    this.editorManager.setMultiLineHighlight(fromLine, toLine);
+    if (this.editorManager) {
+      this.editorManager.setMultiLineHighlight(fromLine, toLine);
+    }
   }
 
   setMultipleLineHighlights(lines: number[]) {
-    this.editorManager.setMultipleLineHighlights(lines);
+    if (this.editorManager) {
+      this.editorManager.setMultipleLineHighlights(lines);
+    }
   }
 
   setInformationWidgetData(data: InformationWidgetData) {
@@ -174,7 +205,9 @@ class Orchestrator {
 
   setBreakpoints(breakpoints: number[]) {
     this.store.getState().setBreakpoints(breakpoints);
-    this.editorManager.applyBreakpoints(breakpoints);
+    if (this.editorManager) {
+      this.editorManager.applyBreakpoints(breakpoints);
+    }
   }
 
   setShouldAutoRunCode(shouldAutoRun: boolean) {
@@ -227,7 +260,9 @@ class Orchestrator {
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
   // UNUSED: This function is currently not called.
   initializeEditor(code: any, exercise: any, unfoldableFunctionNames: string[]) {
-    this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
+    if (this.editorManager) {
+      this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
+    }
   }
 
   // Reset editor to stub code and save to localStorage - delegate to EditorManager
@@ -237,23 +272,9 @@ class Orchestrator {
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    this.editorManager.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
-  }
-
-  // =====================================================
-  // CodeMirror Event Handler Methods - delegate to EditorManager
-  // =====================================================
-
-  createEditorChangeHandlers(shouldAutoRunCode: boolean): Extension {
-    return this.editorManager.createEditorChangeHandlers(shouldAutoRunCode, () => this.handleRunCode());
-  }
-
-  createBreakpointChangeHandler(): Extension {
-    return this.editorManager.createBreakpointChangeHandler();
-  }
-
-  createFoldChangeHandler(): Extension {
-    return this.editorManager.createFoldChangeHandler();
+    if (this.editorManager) {
+      this.editorManager.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
+    }
   }
 }
 

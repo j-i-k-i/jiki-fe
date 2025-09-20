@@ -11,10 +11,7 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
   }))
 }));
 
-// Mock the setupEditor function to avoid CodeMirror dependencies
-jest.mock("@/components/complex-exercise/ui/codemirror/setup/setupEditor", () => ({
-  setupEditor: jest.fn(() => jest.fn())
-}));
+// No need to mock setupEditor since it's now part of the orchestrator
 
 // Now we can import the component safely
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
@@ -23,7 +20,8 @@ const mockOrchestrator = {
   getEditorView: jest.fn(() => null),
   setEditorView: jest.fn(),
   setHighlightedLine: jest.fn(),
-  setReadonly: jest.fn()
+  setReadonly: jest.fn(),
+  setupEditor: jest.fn(() => jest.fn())
 } as any;
 
 describe("CodeMirror Re-render Tests", () => {

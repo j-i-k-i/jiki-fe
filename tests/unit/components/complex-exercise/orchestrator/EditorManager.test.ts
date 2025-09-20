@@ -1,18 +1,19 @@
 // Mock all CodeMirror modules before importing the EditorManager
-jest.mock("@codemirror/state");
+jest.mock("@codemirror/state", () => ({
+  EditorState: {
+    create: jest.fn().mockReturnValue({})
+  }
+}));
 jest.mock("@codemirror/language", () => ({
   foldEffect: { is: jest.fn() },
   unfoldEffect: { is: jest.fn() }
 }));
 jest.mock("@codemirror/view", () => ({
-  EditorView: {
-    editable: {
-      of: jest.fn()
-    },
-    updateListener: {
-      of: jest.fn().mockReturnValue({})
-    }
-  }
+  EditorView: jest.fn().mockImplementation(() => ({
+    state: { doc: { toString: jest.fn().mockReturnValue("") } },
+    dispatch: jest.fn(),
+    focus: jest.fn()
+  }))
 }));
 
 jest.mock("@/components/complex-exercise/ui/codemirror/CodeMirror", () => ({
@@ -62,6 +63,10 @@ jest.mock("@/components/complex-exercise/ui/codemirror/utils/unfoldableFunctionN
   updateUnfoldableFunctions: jest.fn()
 }));
 
+jest.mock("@/components/complex-exercise/ui/codemirror/setup/editorExtensions", () => ({
+  createEditorExtensions: jest.fn().mockReturnValue([])
+}));
+
 jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
   loadCodeMirrorContent: jest.fn().mockReturnValue({ success: false }),
   saveCodeMirrorContent: jest.fn().mockReturnValue({ success: true })
@@ -78,15 +83,27 @@ import type { EditorView } from "@codemirror/view";
 describe("EditorManager", () => {
   let store: ReturnType<typeof createOrchestratorStore>;
   let editorManager: EditorManager;
+  let mockOrchestrator: any;
 
   beforeEach(() => {
     store = createOrchestratorStore("test-uuid", "const x = 1;");
-    editorManager = new EditorManager(store, "test-uuid");
+    mockOrchestrator = {
+      handleRunCode: jest.fn(),
+      getEditorView: jest.fn(),
+      setEditorView: jest.fn()
+    };
+    editorManager = new EditorManager(store, "test-uuid", mockOrchestrator, "const x = 1;", false, 0, false);
   });
 
   describe("constructor", () => {
     it("should initialize with store and exerciseUuid", () => {
       expect(editorManager).toBeDefined();
+    });
+
+    it("should create and return an editor ref", () => {
+      const ref = editorManager.getEditorRef();
+      expect(ref).toBeDefined();
+      expect(typeof ref).toBe("function");
     });
   });
 
