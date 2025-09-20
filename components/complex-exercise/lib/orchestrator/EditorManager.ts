@@ -31,7 +31,7 @@ import type { UnderlineRange, InformationWidgetData, OrchestratorStore } from ".
 
 export class EditorManager {
   private editorView: EditorView | null = null;
-  private editorHandler: any = null;
+  private editorAPI: any = null;
   private onEditorChangeCallback?: (view: EditorView) => void;
   private isSaving = false;
   private saveDebounced: ReturnType<typeof debounce> | null = null;
@@ -121,12 +121,8 @@ export class EditorManager {
     return this.editorView;
   }
 
-  handleEditorDidMount(handler: any) {
-    this.editorHandler = handler;
-  }
-
-  getEditorHandler() {
-    return this.editorHandler;
+  setEditorAPI(api: any) {
+    this.editorAPI = api;
   }
 
   setOnEditorChangeCallback(callback?: (view: EditorView) => void) {
@@ -140,8 +136,8 @@ export class EditorManager {
   }
 
   getCurrentEditorValue(): string | undefined {
-    if (this.editorHandler?.getValue) {
-      const value = this.editorHandler.getValue();
+    if (this.editorAPI?.getValue) {
+      const value = this.editorAPI.getValue();
       this.store.getState().setLatestValueSnapshot(value);
       return value;
     }
@@ -360,7 +356,7 @@ export class EditorManager {
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    if (!this.editorHandler) {
+    if (!this.editorAPI) {
       return;
     }
 

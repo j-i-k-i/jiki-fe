@@ -104,14 +104,12 @@ describe("EditorManager", () => {
     });
   });
 
-  describe("handleEditorDidMount and getEditorHandler", () => {
-    it("should store and retrieve editor handler", () => {
-      const mockHandler = { getValue: jest.fn() };
+  describe("setEditorAPI", () => {
+    it("should store the editor API", () => {
+      const mockAPI = { getValue: jest.fn(), setValue: jest.fn() };
 
-      expect(editorManager.getEditorHandler()).toBeNull();
-
-      editorManager.handleEditorDidMount(mockHandler);
-      expect(editorManager.getEditorHandler()).toBe(mockHandler);
+      // Just verify it doesn't throw - the API is private now
+      expect(() => editorManager.setEditorAPI(mockAPI)).not.toThrow();
     });
   });
 
@@ -122,7 +120,7 @@ describe("EditorManager", () => {
 
     it("should get value from handler and update snapshot", () => {
       const mockHandler = { getValue: jest.fn().mockReturnValue("new code") };
-      editorManager.handleEditorDidMount(mockHandler);
+      editorManager.setEditorAPI(mockHandler);
 
       const value = editorManager.getCurrentEditorValue();
 

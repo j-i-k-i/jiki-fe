@@ -43,9 +43,9 @@ class Orchestrator {
     return this.editorManager.getEditorView();
   }
 
-  // Editor handler management - delegate to EditorManager
-  handleEditorDidMount(handler: any) {
-    this.editorManager.handleEditorDidMount(handler);
+  // Editor API management - delegate to EditorManager
+  setEditorAPI(api: any) {
+    this.editorManager.setEditorAPI(api);
   }
 
   // Editor change callback management - delegate to EditorManager
@@ -87,10 +87,6 @@ class Orchestrator {
   // Save immediately (for cleanup) - delegate to EditorManager
   saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
     this.editorManager.saveImmediately(code, readonlyRanges);
-  }
-
-  getEditorHandler() {
-    return this.editorManager.getEditorHandler();
   }
 
   // Get current editor value and update snapshot - delegate to EditorManager

@@ -93,9 +93,9 @@ export function useEditorSetup(
 
     orchestrator.setEditorView(view);
 
-    // Handle editor mount
+    // Store editor API
     try {
-      orchestrator.handleEditorDidMount({
+      orchestrator.setEditorAPI({
         setValue,
         getValue,
         focus: view.focus.bind(view)
