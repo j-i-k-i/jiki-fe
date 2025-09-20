@@ -35,10 +35,13 @@ function createMockOrchestrator(customState: Record<string, unknown> = {}): Orch
 
   const store = createStore(subscribeWithSelector(() => defaultState));
 
+  // TypeScript fix: Use 'as unknown as Orchestrator' for type casting
+  // We're creating a minimal mock that only has the properties needed for testing,
+  // so we need to bypass TypeScript's full type checking with 'unknown'
   return {
     store,
     getStore: () => store
-  } as Orchestrator;
+  } as unknown as Orchestrator;
 }
 
 describe("stateAccessors", () => {

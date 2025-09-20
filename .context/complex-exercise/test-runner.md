@@ -1,5 +1,14 @@
 # Test Runner System
 
+## Navigation
+
+- **Parent**: [Complex Exercise README](./README.md)
+- **Related**:
+  - [Scrubber Frames](./scrubber-frames.md) - Frame generation output
+  - [Orchestrator Pattern](./orchestrator-pattern.md) - State management
+  - [CodeMirror Integration](./codemirror.md) - Code execution source
+- **Context Root**: [.context/README.md](../README.md)
+
 ## Overview
 
 The test runner system executes student code against predefined tests, generating frames and animations that can be navigated via the scrubber.

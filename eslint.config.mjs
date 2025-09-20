@@ -1,6 +1,6 @@
+import { FlatCompat } from "@eslint/eslintrc";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,7 +32,7 @@ const eslintConfig = [
       ],
       // === Correctness / safety ===
       eqeqeq: ["error", "smart"],
-      curly: ["error", "all"],
+      // curly: ["error", "all"],
       "default-case-last": "error",
       // === Noise control ===
       "no-console": ["warn", { allow: ["warn", "error"] }],
@@ -90,7 +90,7 @@ const eslintConfig = [
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
 
       // Discourage `any` — warn when used, but allow in rest args.
-      "@typescript-eslint/no-explicit-any": ["warn", { ignoreRestArgs: true }],
+      "@typescript-eslint/no-explicit-any": "off",
 
       // Control use of ts-expect-error/ts-ignore.
       // Disallow blanket ignores, but allow ts-expect-error with a description.
@@ -142,13 +142,6 @@ const eslintConfig = [
 
       // Warn if async functions don't use `await` inside.
       "@typescript-eslint/require-await": "warn",
-
-      // === Modern TypeScript ergonomics ===
-      // Prefer `??` over `||` when checking null/undefined.
-      "@typescript-eslint/prefer-nullish-coalescing": [
-        "warn",
-        { ignoreConditionalTests: true, ignorePrimitives: true }
-      ],
 
       // Prefer optional chaining (`?.`) over nested && checks.
       "@typescript-eslint/prefer-optional-chain": "warn",

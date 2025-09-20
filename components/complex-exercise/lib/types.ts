@@ -1,4 +1,5 @@
 import type { Frame, AnimationTimeline } from "./stubs";
+import type { UnderlineRange, InformationWidgetData } from "./Orchestrator";
 
 // Actual types for the orchestrator pattern
 export interface TestState {
@@ -18,4 +19,22 @@ export interface OrchestratorState {
   hasCodeBeenEdited: boolean;
   isSpotlightActive: boolean;
   foldedLines: number[]; // Line numbers that are currently folded in the editor
+
+  // Editor store state
+  defaultCode: string;
+  readonly: boolean;
+  shouldShowInformationWidget: boolean;
+  underlineRange: UnderlineRange | undefined;
+  highlightedLineColor: string;
+  highlightedLine: number;
+  informationWidgetData: InformationWidgetData;
+  breakpoints: number[];
+  shouldAutoRunCode: boolean;
+
+  // Error store state
+  hasUnhandledError: boolean;
+  unhandledErrorBase64: string;
+
+  // Editor handler state
+  latestValueSnapshot: string | undefined;
 }

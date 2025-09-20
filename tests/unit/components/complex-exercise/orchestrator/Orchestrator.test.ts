@@ -61,16 +61,20 @@ describe("Orchestrator", () => {
   });
 
   describe("cache invalidation", () => {
+    // TypeScript fix: Throughout these tests, we use bracket notation ['_cachedCurrentFrame']
+    // to access the protected property _cachedCurrentFrame for testing purposes.
+    // This is a common pattern for testing private/protected class members.
+
     it("should start with undefined cache", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      expect(orchestrator._cachedCurrentFrame).toBeUndefined();
+      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
     });
 
     it("should invalidate cache when setCurrentTestTimelineTime is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
       // First, set the cache to something
-      orchestrator._cachedCurrentFrame = {
+      orchestrator["_cachedCurrentFrame"] = {
         line: 1,
         interpreterTime: 0,
         timelineTime: 0,
@@ -80,14 +84,14 @@ describe("Orchestrator", () => {
       // Call setCurrentTestTimelineTime which should invalidate
       orchestrator.setCurrentTestTimelineTime(100);
 
-      expect(orchestrator._cachedCurrentFrame).toBeUndefined();
+      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
     });
 
     it("should invalidate cache when setCurrentTest is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
       // Set cache
-      orchestrator._cachedCurrentFrame = {
+      orchestrator["_cachedCurrentFrame"] = {
         line: 1,
         interpreterTime: 0,
         timelineTime: 0,
@@ -102,14 +106,14 @@ describe("Orchestrator", () => {
 
       orchestrator.setCurrentTest(newTest);
 
-      expect(orchestrator._cachedCurrentFrame).toBeUndefined();
+      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
     });
 
     it("should invalidate cache when setFoldedLines is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
       // Set cache
-      orchestrator._cachedCurrentFrame = {
+      orchestrator["_cachedCurrentFrame"] = {
         line: 1,
         interpreterTime: 0,
         timelineTime: 0,
@@ -118,7 +122,7 @@ describe("Orchestrator", () => {
 
       orchestrator.setFoldedLines([2, 3]);
 
-      expect(orchestrator._cachedCurrentFrame).toBeUndefined();
+      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
     });
   });
 

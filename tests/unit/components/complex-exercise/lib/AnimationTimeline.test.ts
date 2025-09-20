@@ -20,7 +20,9 @@ describe("AnimationTimeline", () => {
       interpreterTime: 90,
       timelineTime: 90,
       status: "ERROR",
-      error: { message: "Test error" }
+      // TypeScript fix: StaticError interface requires 'type' property
+      // Added 'type: "runtime"' to satisfy the StaticError type definition
+      error: { message: "Test error", type: "runtime" }
     }
   ];
 

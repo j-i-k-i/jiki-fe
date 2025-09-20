@@ -33,6 +33,8 @@ export interface StaticError {
   column?: number;
   endLine?: number;
   endColumn?: number;
+  // TODO: edit this
+  type: string;
 }
 
 export interface EditorStoreState {
