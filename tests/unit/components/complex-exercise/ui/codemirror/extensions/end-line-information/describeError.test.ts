@@ -19,71 +19,114 @@ describe("describeError", () => {
     jest.clearAllMocks();
   });
 
-  describe("error heading generation", () => {
-    it("should display syntax error heading for SyntaxError type", () => {
-      const error: StaticError = {
-        type: "SyntaxError",
-        message: "Unexpected token"
-      };
+  describe("StaticError types", () => {
+    describe("SyntaxError", () => {
+      it("should display 'couldn't understand your code' for jikiscript", () => {
+        const error: StaticError = {
+          type: "SyntaxError",
+          message: "Unexpected token"
+        };
 
-      const result = describeError(error, "jikiscript");
+        const result = describeError(error, "jikiscript");
 
-      expect(result).toContain("<h2>Jiki couldn't understand your code</h2>");
+        expect(result).toContain("<h2>Jiki couldn't understand your code</h2>");
+      });
+
+      it("should display 'couldn't understand your code' for javascript", () => {
+        const error: StaticError = {
+          type: "SyntaxError",
+          message: "Unexpected token"
+        };
+
+        const result = describeError(error, "javascript");
+
+        expect(result).toContain("<h2>We couldn't understand your code</h2>");
+      });
+
+      it("should prepend context when provided", () => {
+        const error: StaticError = {
+          type: "SyntaxError",
+          message: "Unexpected token"
+        };
+
+        const result = describeError(error, "jikiscript", "Test 1");
+
+        expect(result).toContain("<h2>Test 1: Jiki couldn't understand your code</h2>");
+      });
     });
 
-    it("should display syntax error heading with 'We' for javascript", () => {
-      const error: StaticError = {
-        type: "SyntaxError",
-        message: "Unexpected token"
-      };
+    describe("LogicError", () => {
+      it("should display 'Something didn't go as expected!' for jikiscript", () => {
+        const error: StaticError = {
+          type: "LogicError",
+          message: "Division by zero"
+        };
 
-      const result = describeError(error, "javascript");
+        const result = describeError(error, "jikiscript");
 
-      expect(result).toContain("<h2>We couldn't understand your code</h2>");
+        expect(result).toContain("<h2>Something didn't go as expected!</h2>");
+      });
+
+      it("should display 'Something didn't go as expected!' for javascript", () => {
+        const error: StaticError = {
+          type: "LogicError",
+          message: "Division by zero"
+        };
+
+        const result = describeError(error, "javascript");
+
+        expect(result).toContain("<h2>Something didn't go as expected!</h2>");
+      });
+
+      it("should prepend context when provided", () => {
+        const error: StaticError = {
+          type: "LogicError",
+          message: "Division by zero"
+        };
+
+        const result = describeError(error, "jikiscript", "Test 2");
+
+        expect(result).toContain("<h2>Test 2: Something didn't go as expected!</h2>");
+      });
     });
 
-    it("should display logic error heading for LogicError type", () => {
-      const error: StaticError = {
-        type: "LogicError",
-        message: "Division by zero"
-      };
+    describe("Other error types (fallback)", () => {
+      const testCases = [
+        { type: "RuntimeError", message: "Variable not defined" },
+        { type: "TypeError", message: "Type mismatch" },
+        { type: "ReferenceError", message: "Reference not found" },
+        { type: "UnknownError", message: "Something went wrong" },
+        { type: "CustomError", message: "Custom error message" }
+      ];
 
-      const result = describeError(error, "jikiscript");
+      testCases.forEach(({ type, message }) => {
+        it(`should display generic error heading for ${type} with jikiscript`, () => {
+          const error: StaticError = { type, message };
 
-      expect(result).toContain("<h2>Something didn't go as expected!</h2>");
-    });
+          const result = describeError(error, "jikiscript");
 
-    it("should display generic error heading for other error types", () => {
-      const error: StaticError = {
-        type: "RuntimeError",
-        message: "Variable not defined"
-      };
+          expect(result).toContain("<h2>Jiki hit a problem running your code.</h2>");
+        });
 
-      const result = describeError(error, "jikiscript");
+        it(`should display generic error heading for ${type} with javascript`, () => {
+          const error: StaticError = { type, message };
 
-      expect(result).toContain("<h2>Jiki hit a problem running your code.</h2>");
-    });
+          const result = describeError(error, "javascript");
 
-    it("should display generic error heading with 'We' for javascript", () => {
-      const error: StaticError = {
-        type: "RuntimeError",
-        message: "Variable not defined"
-      };
+          expect(result).toContain("<h2>We hit a problem running your code.</h2>");
+        });
+      });
 
-      const result = describeError(error, "javascript");
+      it("should prepend context to generic error heading when provided", () => {
+        const error: StaticError = {
+          type: "RuntimeError",
+          message: "Variable not defined"
+        };
 
-      expect(result).toContain("<h2>We hit a problem running your code.</h2>");
-    });
+        const result = describeError(error, "jikiscript", "Test 3");
 
-    it("should prepend context to error heading when provided", () => {
-      const error: StaticError = {
-        type: "SyntaxError",
-        message: "Unexpected token"
-      };
-
-      const result = describeError(error, "jikiscript", "Test 1");
-
-      expect(result).toContain("<h2>Test 1: Jiki couldn't understand your code</h2>");
+        expect(result).toContain("<h2>Test 3: Jiki hit a problem running your code.</h2>");
+      });
     });
   });
 
@@ -156,33 +199,20 @@ describe("describeError", () => {
       expect(marked.parse).toHaveBeenCalledWith("");
     });
 
-    it("should handle error with unknown type", () => {
-      const error: StaticError = {
-        type: "UnknownError",
-        message: "Something went wrong"
-      };
-
-      const result = describeError(error, "jikiscript");
-
-      expect(result).toContain("<h2>Jiki hit a problem running your code.</h2>");
-    });
-  });
-
-  describe("regression tests", () => {
-    it("should not use instanceof SyntaxError (would always be false)", () => {
-      // This test ensures we're checking error.type === "SyntaxError"
-      // not error instanceof SyntaxError which would never work
-      // since error is a StaticError type, not a JavaScript Error
+    it("should handle error with all optional fields populated", () => {
       const error: StaticError = {
         type: "SyntaxError",
-        message: "Syntax issue"
+        message: "Error at specific location",
+        line: 5,
+        column: 10,
+        endLine: 5,
+        endColumn: 15
       };
 
       const result = describeError(error, "jikiscript");
 
-      // If the check was using instanceof, this would show the generic error
-      expect(result).toContain("couldn't understand your code");
-      expect(result).not.toContain("hit a problem running your code");
+      expect(result).toBeDefined();
+      expect(result).toContain("<h2>Jiki couldn't understand your code</h2>");
     });
   });
 });
