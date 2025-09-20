@@ -2,22 +2,38 @@
 
 This file provides guidance to AI agents when working with code in this repository.
 
-## Context Files
+## Context Documentation
 
-Context files explain how everthing works. If the human MENTIONS something that MIGHT BE explained by one or more of these files, READ THE FILES before putting together any plan or action.
+Context files explain how everything works. If the human MENTIONS something that MIGHT BE explained by one or more of these files, READ THE FILES before putting together any plan or action.
+
+### Documentation Structure
+
+- **[.context/README.md](.context/README.md)** - **START HERE** - Overview of all context documentation
+- **[.context/complex-exercise/README.md](.context/complex-exercise/README.md)** - Complex exercise system overview
+
+### General Context Files
 
 Load the relevant context files from `.context/` directory based on your task:
 
-- **`.context/coding-style.md`** - **ALWAYS READ THIS FIRST** - Coding style and file organization guidelines
-- `.context/about-jiki.md` - Overview of Jiki platform and business model
-- `.context/commands.md` - Development commands and scripts
-- `.context/tech-stack.md` - Technologies, frameworks, and dependencies
-- `.context/architecture.md` - Frontend architecture and design decisions
-- `.context/deployment.md` - Deployment process and configuration
-- `.context/git.md` - Git hooks configuration
-- `.context/testing.md` - Testing setup and guidelines. **ALWAYS READ THIS BEFORE EDITING OR ADDING TESTS.**
-- `.context/orchestrator-pattern.md` - Orchestrator pattern for complex state management
-- `.context/eslint.md` - ESLint configuration and how to handle lint errors. **ALWAYS READ THIS BEFORE LINTING**
+- **[.context/coding-style.md](.context/coding-style.md)** - **ALWAYS READ THIS FIRST** - Coding style and file organization guidelines
+- [.context/about-jiki.md](.context/about-jiki.md) - Overview of Jiki platform and business model
+- [.context/commands.md](.context/commands.md) - Development commands and scripts
+- [.context/tech-stack.md](.context/tech-stack.md) - Technologies, frameworks, and dependencies
+- [.context/architecture.md](.context/architecture.md) - Frontend architecture and design decisions
+- [.context/deployment.md](.context/deployment.md) - Deployment process and configuration
+- [.context/git.md](.context/git.md) - Git hooks configuration
+- [.context/testing.md](.context/testing.md) - Testing setup and guidelines. **ALWAYS READ THIS BEFORE EDITING OR ADDING TESTS.**
+- [.context/eslint.md](.context/eslint.md) - ESLint configuration and how to handle lint errors. **ALWAYS READ THIS BEFORE LINTING**
+
+### Complex Exercise Context Files
+
+When working on the complex exercise component, load these files from `.context/complex-exercise/`:
+
+- [.context/complex-exercise/orchestrator-pattern.md](.context/complex-exercise/orchestrator-pattern.md) - Orchestrator pattern for complex state management
+- [.context/complex-exercise/codemirror.md](.context/complex-exercise/codemirror.md) - CodeMirror editor integration
+- [.context/complex-exercise/scrubber-frames.md](.context/complex-exercise/scrubber-frames.md) - Frame system and timeline
+- [.context/complex-exercise/scrubber-implementation.md](.context/complex-exercise/scrubber-implementation.md) - Scrubber UI implementation
+- [.context/complex-exercise/test-runner.md](.context/complex-exercise/test-runner.md) - Test execution system
 
 ## Quick Start
 
