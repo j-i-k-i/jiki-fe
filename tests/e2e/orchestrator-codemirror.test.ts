@@ -29,40 +29,27 @@ describe("Orchestrator-CodeMirror E2E", () => {
     await page.waitForSelector(".cm-breakpoint-gutter");
 
     // Count initial breakpoint markers
-    const getBreakpointCount = async () => {
-      return await page.evaluate(() => {
-        return document.querySelectorAll(".cm-breakpoint-marker").length;
-      });
-    };
-
-    const initialCount = await getBreakpointCount();
+    const initialMarkers = await page.$$(".cm-breakpoint-marker");
+    const initialCount = initialMarkers.length;
 
     // Click on line number 2 to add a breakpoint
     await page.click(".cm-lineNumbers .cm-gutterElement:nth-child(2)");
 
-    // Wait for breakpoint count to increase
-    await page.waitForFunction(
-      (expected) => document.querySelectorAll(".cm-breakpoint-marker").length === expected,
-      { timeout: 2000 },
-      initialCount + 1
-    );
+    // Small delay to allow DOM update
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Verify breakpoint was added
-    let currentCount = await getBreakpointCount();
-    expect(currentCount).toBe(initialCount + 1);
+    let currentMarkers = await page.$$(".cm-breakpoint-marker");
+    expect(currentMarkers.length).toBe(initialCount + 1);
 
     // Click again to remove the breakpoint
     await page.click(".cm-lineNumbers .cm-gutterElement:nth-child(2)");
 
-    // Wait for breakpoint count to decrease
-    await page.waitForFunction(
-      (expected) => document.querySelectorAll(".cm-breakpoint-marker").length === expected,
-      { timeout: 2000 },
-      initialCount
-    );
+    // Small delay to allow DOM update
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Verify breakpoint was removed
-    currentCount = await getBreakpointCount();
-    expect(currentCount).toBe(initialCount);
+    currentMarkers = await page.$$(".cm-breakpoint-marker");
+    expect(currentMarkers.length).toBe(initialCount);
   });
 });
