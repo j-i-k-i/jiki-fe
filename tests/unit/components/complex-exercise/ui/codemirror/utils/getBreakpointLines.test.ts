@@ -121,7 +121,14 @@ describe("getBreakpointLines", () => {
   });
 
   it("should use the correct document range", () => {
-    mockView.state!.doc.length = 2000;
+    // TypeScript fix: Use Object.defineProperty to modify readonly 'length' property
+    // The doc.length property is readonly in the actual CodeMirror types,
+    // but we need to modify it for testing different document sizes
+    Object.defineProperty(mockView.state!.doc, "length", {
+      value: 2000,
+      writable: true,
+      configurable: true
+    });
     mockBreakpoints.between = jest.fn();
 
     getBreakpointLines(mockView as EditorView);
@@ -130,7 +137,14 @@ describe("getBreakpointLines", () => {
   });
 
   it("should handle empty document", () => {
-    mockView.state!.doc.length = 0;
+    // TypeScript fix: Use Object.defineProperty to modify readonly 'length' property
+    // The doc.length property is readonly in the actual CodeMirror types,
+    // but we need to modify it for testing empty document scenarios
+    Object.defineProperty(mockView.state!.doc, "length", {
+      value: 0,
+      writable: true,
+      configurable: true
+    });
     mockBreakpoints.between = jest.fn();
 
     const result = getBreakpointLines(mockView as EditorView);

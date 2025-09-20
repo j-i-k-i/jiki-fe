@@ -122,6 +122,83 @@ describe("Feature E2E", () => {
 });
 ```
 
+## TypeScript Testing Patterns
+
+When writing tests with TypeScript strict mode enabled, use these patterns:
+
+### Accessing Private/Protected Properties
+
+```typescript
+// Use bracket notation for testing protected class members
+expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
+orchestrator["_cachedCurrentFrame"] = mockFrame;
+```
+
+### Modifying Readonly Properties
+
+```typescript
+// Use Object.defineProperty for readonly DOM/object properties
+Object.defineProperty(mockView.state!.doc, "length", {
+  value: 2000,
+  writable: true,
+  configurable: true
+});
+
+// For DOM elements
+Object.defineProperty(element, "clientHeight", {
+  value: 800,
+  writable: true,
+  configurable: true
+});
+```
+
+### Type Casting for Mocks
+
+```typescript
+// Use 'as unknown as Type' for complex type conversions
+const mockOrchestrator = {
+  store,
+  getStore: () => store
+} as unknown as Orchestrator;
+
+// For library mocks (e.g., marked)
+(marked.parse as unknown as jest.Mock).mockReturnValue("<p>HTML</p>");
+```
+
+### Complete Mock Objects
+
+```typescript
+// Provide all required properties for strict types
+mockView.state!.doc.lineAt = jest.fn(() => ({
+  number: 3,
+  from: 100,
+  to: 149,
+  text: "line content",
+  length: 49 // All Line properties required
+}));
+
+// For BlockInfo type
+mockView.lineBlockAt = jest.fn(() => ({
+  from: 0,
+  to: 100,
+  top: 0,
+  bottom: 20,
+  height: 20,
+  length: 100,
+  type: "text" as any, // Cast to any for complex union types
+  widget: null,
+  widgetLineBreaks: 0
+}));
+```
+
+### Non-null Assertions
+
+```typescript
+// Use ! when you know the value exists
+const element = array[0]!; // Assert element exists
+const result = object.method!(); // Assert method exists
+```
+
 ### Best Practices
 
 1. **Test user behavior, not implementation details**
@@ -141,6 +218,14 @@ describe("Feature E2E", () => {
     - Use `jest.mock()` for module mocking
     - Create reusable mock factories for complex objects
 11. **Test component event handlers** to ensure functions are called with correct arguments
+12. **Accessing private/protected properties in tests**:
+    - Use bracket notation `object['privateProperty']` to access private/protected class members
+    - This allows testing internal state without modifying production code
+    - Example: `orchestrator['_cachedCurrentFrame']` instead of `orchestrator._cachedCurrentFrame`
+13. **E2E test element selection**:
+    - Use `page.$$` to select multiple elements (returns array of ElementHandle)
+    - Use `page.$` to select a single element (returns ElementHandle or null)
+    - Example: `const buttons = await page.$$('button.action')` to get all action buttons
 
 ## CI/CD Integration
 

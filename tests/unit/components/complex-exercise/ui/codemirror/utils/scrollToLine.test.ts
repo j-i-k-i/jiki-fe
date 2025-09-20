@@ -80,7 +80,14 @@ describe("scrollToLine", () => {
   });
 
   it("should handle viewport with different heights", () => {
-    mockView.scrollDOM!.clientHeight = 800;
+    // TypeScript fix: Use Object.defineProperty to modify readonly 'clientHeight' property
+    // The clientHeight property is readonly in DOM types,
+    // but we need to modify it for testing different viewport sizes
+    Object.defineProperty(mockView.scrollDOM!, "clientHeight", {
+      value: 800,
+      writable: true,
+      configurable: true
+    });
 
     scrollToLine(mockView as EditorView, 5);
 
@@ -90,12 +97,19 @@ describe("scrollToLine", () => {
   });
 
   it("should handle line blocks with different sizes", () => {
+    // TypeScript fix: Provide complete BlockInfo type object with correct 'type' value
+    // CodeMirror's BlockInfo.type expects BlockType | readonly BlockInfo[]
+    // We cast to 'any' here because the mock doesn't need the full BlockType complexity
     mockView.lineBlockAt = jest.fn((pos: number) => ({
       from: pos,
       to: pos + 100,
       top: pos * 2,
       bottom: pos * 2 + 40, // Bigger line: 40px high
-      height: 40
+      height: 40,
+      length: 100,
+      type: "text" as any, // Cast to any to bypass BlockType constraints in mock
+      widget: null,
+      widgetLineBreaks: 0
     }));
 
     scrollToLine(mockView as EditorView, 5);

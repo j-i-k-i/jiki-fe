@@ -91,8 +91,14 @@ describe("getFoldedLines", () => {
       callback(100, 149); // Both positions are on line 3
     });
 
+    // TypeScript fix: Provide complete Line type object
+    // CodeMirror's Line interface requires all properties, not just 'number'
     mockView.state!.doc.lineAt = jest.fn((_pos: number) => ({
-      number: 3 // Both positions return line 3
+      number: 3, // Both positions return line 3
+      from: 100,
+      to: 149,
+      text: "line content",
+      length: 49
     }));
 
     const result = getFoldedLines(mockView as EditorView);
@@ -106,14 +112,16 @@ describe("getFoldedLines", () => {
       callback(50, 450);
     });
 
+    // TypeScript fix: Provide complete Line type objects for all return values
+    // CodeMirror's Line interface requires all properties (number, from, to, text, length)
     mockView.state!.doc.lineAt = jest.fn((pos: number) => {
       if (pos === 50) {
-        return { number: 2 };
+        return { number: 2, from: 40, to: 60, text: "line 2", length: 20 };
       }
       if (pos === 450) {
-        return { number: 10 };
+        return { number: 10, from: 440, to: 460, text: "line 10", length: 20 };
       }
-      return { number: 1 };
+      return { number: 1, from: 0, to: 20, text: "line 1", length: 20 };
     });
 
     const result = getFoldedLines(mockView as EditorView);
@@ -162,7 +170,14 @@ describe("getFoldedLines", () => {
   });
 
   it("should use correct document range when querying folds", () => {
-    mockView.state!.doc.length = 2000;
+    // TypeScript fix: Use Object.defineProperty to modify readonly 'length' property
+    // The doc.length property is readonly in CodeMirror types,
+    // but we need to modify it for testing different document sizes
+    Object.defineProperty(mockView.state!.doc, "length", {
+      value: 2000,
+      writable: true,
+      configurable: true
+    });
     mockFoldRanges.between = jest.fn();
 
     getFoldedLines(mockView as EditorView);
@@ -171,7 +186,14 @@ describe("getFoldedLines", () => {
   });
 
   it("should handle empty document", () => {
-    mockView.state!.doc.length = 0;
+    // TypeScript fix: Use Object.defineProperty to modify readonly 'length' property
+    // The doc.length property is readonly in CodeMirror types,
+    // but we need to modify it for testing empty document scenarios
+    Object.defineProperty(mockView.state!.doc, "length", {
+      value: 0,
+      writable: true,
+      configurable: true
+    });
     mockFoldRanges.between = jest.fn();
 
     const result = getFoldedLines(mockView as EditorView);
@@ -193,8 +215,14 @@ describe("getFoldedLines", () => {
         callback(from, to);
       });
 
+      // TypeScript fix: Provide complete Line type object with all required properties
+      // CodeMirror's Line interface requires: number, from, to, text, length
       mockView.state!.doc.lineAt = jest.fn((pos: number) => ({
-        number: Math.floor(pos / 50) + 1
+        number: Math.floor(pos / 50) + 1,
+        from: Math.floor(pos / 50) * 50,
+        to: Math.floor(pos / 50) * 50 + 49,
+        text: `line ${Math.floor(pos / 50) + 1}`,
+        length: 49
       }));
 
       const result = getFoldedLines(mockView as EditorView);

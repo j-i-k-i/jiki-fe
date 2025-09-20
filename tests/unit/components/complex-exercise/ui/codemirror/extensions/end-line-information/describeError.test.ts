@@ -164,7 +164,10 @@ describe("describeError", () => {
         type: "SyntaxError",
         message: "Error message"
       };
-      (marked.parse as jest.Mock).mockReturnValue("<p>Parsed message</p>");
+      // TypeScript fix: Use 'as unknown as jest.Mock' for marked.parse
+      // The marked library doesn't have mock methods, so we need to cast through 'unknown'
+      // to treat it as a Jest mock in our test environment
+      (marked.parse as unknown as jest.Mock).mockReturnValue("<p>Parsed message</p>");
 
       const result = describeError(error, "jikiscript");
 
@@ -177,7 +180,8 @@ describe("describeError", () => {
         type: "RuntimeError",
         message: "Test error"
       };
-      (marked.parse as jest.Mock).mockReturnValue("<p>Test error</p>");
+      // TypeScript fix: Cast marked.parse to jest.Mock through 'unknown'
+      (marked.parse as unknown as jest.Mock).mockReturnValue("<p>Test error</p>");
 
       const result = describeError(error, "jikiscript");
 
