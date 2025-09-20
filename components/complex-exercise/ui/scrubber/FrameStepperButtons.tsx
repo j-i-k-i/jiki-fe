@@ -17,7 +17,7 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
     // Update prev/next frames whenever relevant state changes
     setPrevFrame(orchestrator.findPrevFrame());
     setNextFrame(orchestrator.findNextFrame());
-  }, [orchestrator, currentTest, currentTest?.frames, currentTest?.timelineTime, foldedLines]);
+  }, [orchestrator, currentTest, currentTest?.frames, currentTest?.currentFrame, foldedLines]);
 
   return (
     <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
