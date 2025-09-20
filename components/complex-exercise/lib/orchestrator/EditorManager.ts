@@ -33,12 +33,12 @@ import type { UnderlineRange, InformationWidgetData, OrchestratorStore } from ".
 import type { Orchestrator } from "../Orchestrator";
 
 export class EditorManager {
-  private editorView: EditorView | null = null;
+  readonly editorView: EditorView;
   private isSaving = false;
   private saveDebounced: ReturnType<typeof debounce> | null = null;
-  private editorRef: ((element: HTMLDivElement | null) => void) | null = null;
 
   constructor(
+    element: HTMLDivElement,
     private readonly store: StoreApi<OrchestratorStore>,
     private readonly exerciseUuid: string,
     private readonly orchestrator: Orchestrator,
@@ -49,74 +49,57 @@ export class EditorManager {
   ) {
     this.initializeAutoSave();
     this.initializeSubscriptions();
-    this.createEditorRef(value, readonly, highlightedLine, shouldAutoRunCode);
+
+    // Create event handlers
+    const onBreakpointChange = this.createBreakpointChangeHandler();
+    const onFoldChange = this.createFoldChangeHandler();
+    const onEditorChange = this.createEditorChangeHandlers(shouldAutoRunCode, () => this.orchestrator.handleRunCode());
+
+    // Create extensions
+    const extensions = createEditorExtensions({
+      orchestrator: this.orchestrator,
+      highlightedLine,
+      readonly,
+      onBreakpointChange,
+      onFoldChange,
+      onEditorChange
+    });
+
+    // Create editor view directly with the element
+    this.editorView = new EditorView({
+      state: EditorState.create({
+        doc: value,
+        extensions
+      }),
+      parent: element
+    });
+
+    // Update snapshot after editor is created
+    try {
+      const currentCode = this.getValue();
+      this.store.getState().setLatestValueSnapshot(currentCode);
+    } catch (e: unknown) {
+      if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+        throw e;
+      }
+
+      this.store.getState().setHasUnhandledError(true);
+      this.store
+        .getState()
+        .setUnhandledErrorBase64(Buffer.from(JSON.stringify({ error: String(e) })).toString("base64"));
+    }
   }
 
-  private createEditorRef(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
-    this.editorRef = (element: HTMLDivElement | null) => {
-      if (!element) {
-        // Cleanup when element is removed
-        if (this.editorView) {
-          const code = this.editorView.state.doc.toString();
-          const readonlyRanges = getCodeMirrorFieldValue(this.editorView, readOnlyRangesStateField);
-          this.saveImmediately(code, readonlyRanges);
-          this.editorView = null;
-        }
-        return;
-      }
+  cleanup() {
+    // Save content before cleanup
+    const code = this.editorView.state.doc.toString();
+    const readonlyRanges = getCodeMirrorFieldValue(this.editorView, readOnlyRangesStateField);
+    this.saveImmediately(code, readonlyRanges);
 
-      // Don't initialize if editor already exists
-      if (this.editorView) {
-        return;
-      }
-
-      // Create event handlers
-      const onBreakpointChange = this.createBreakpointChangeHandler();
-      const onFoldChange = this.createFoldChangeHandler();
-      const onEditorChange = this.createEditorChangeHandlers(shouldAutoRunCode, () =>
-        this.orchestrator.handleRunCode()
-      );
-
-      // Create extensions
-      const extensions = createEditorExtensions({
-        orchestrator: this.orchestrator,
-        highlightedLine,
-        readonly,
-        onBreakpointChange,
-        onFoldChange,
-        onEditorChange
-      });
-
-      // Create editor view directly
-      this.editorView = new EditorView({
-        state: EditorState.create({
-          doc: value,
-          extensions
-        }),
-        parent: element
-      });
-
-      // Editor is now ready - methods can be called directly
-
-      // Update snapshot after editor is created
-      try {
-        const currentCode = this.getValue();
-        this.store.getState().setLatestValueSnapshot(currentCode);
-      } catch (e: unknown) {
-        if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
-          throw e;
-        }
-
-        this.store.getState().setHasUnhandledError(true);
-        this.store
-          .getState()
-          .setUnhandledErrorBase64(Buffer.from(JSON.stringify({ error: String(e) })).toString("base64"));
-      }
-    };
-  }
-
-  getEditorRef() {
-    return this.editorRef;
+    // Cancel any pending saves
+    if (this.saveDebounced) {
+      this.saveDebounced.cancel();
+    }
   }
 
   private initializeSubscriptions() {
@@ -188,15 +171,7 @@ export class EditorManager {
     }, 500);
   }
 
-  getEditorView(): EditorView | null {
-    return this.editorView;
-  }
-
   setValue(text: string): void {
-    if (!this.editorView) {
-      return;
-    }
-
     const transaction = this.editorView.state.update({
       changes: {
         from: 0,
@@ -208,11 +183,11 @@ export class EditorManager {
   }
 
   getValue(): string {
-    return this.editorView?.state.doc.toString() || "";
+    return this.editorView.state.doc.toString();
   }
 
   focus(): void {
-    this.editorView?.focus();
+    this.editorView.focus();
   }
 
   // UNUSED: This function is currently not called.
@@ -220,11 +195,7 @@ export class EditorManager {
     // No-op - callback mechanism removed
   }
 
-  getCurrentEditorValue(): string | undefined {
-    if (!this.editorView) {
-      return undefined;
-    }
-
+  getCurrentEditorValue(): string {
     const value = this.getValue();
     this.store.getState().setLatestValueSnapshot(value);
     return value;
@@ -263,10 +234,6 @@ export class EditorManager {
   }
 
   setMultiLineHighlight(fromLine: number, toLine: number) {
-    if (!this.editorView) {
-      return;
-    }
-
     if (fromLine === 0 && toLine === 0) {
       this.editorView.dispatch({
         effects: changeMultiLineHighlightEffect.of([])
@@ -283,20 +250,12 @@ export class EditorManager {
   }
 
   setMultipleLineHighlights(lines: number[]) {
-    if (!this.editorView) {
-      return;
-    }
-
     this.editorView.dispatch({
       effects: changeMultiLineHighlightEffect.of(lines)
     });
   }
 
   applyBreakpoints(breakpoints: number[]) {
-    if (!this.editorView) {
-      return;
-    }
-
     const currentBreakpoints = getBreakpointLines(this.editorView);
     const effects = [];
 
@@ -329,10 +288,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyInformationWidgetData(data: InformationWidgetData) {
-    if (!this.editorView) {
-      return;
-    }
-
     this.editorView.dispatch({
       effects: informationWidgetDataEffect.of(data)
     });
@@ -340,10 +295,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyShouldShowInformationWidget(show: boolean) {
-    if (!this.editorView) {
-      return;
-    }
-
     this.editorView.dispatch({
       effects: showInfoWidgetEffect.of(show)
     });
@@ -351,10 +302,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyReadonlyCompartment(readonly: boolean) {
-    if (!this.editorView) {
-      return;
-    }
-
     this.editorView.dispatch({
       effects: readonlyCompartment.reconfigure([EditorView.editable.of(!readonly)])
     });
@@ -362,10 +309,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyHighlightLine(highlightedLine: number) {
-    if (!this.editorView) {
-      return;
-    }
-
     this.editorView.dispatch({
       effects: changeLineEffect.of(highlightedLine)
     });
@@ -373,10 +316,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyHighlightLineColor(highlightedLineColor: string) {
-    if (!this.editorView) {
-      return;
-    }
-
     if (highlightedLineColor) {
       this.editorView.dispatch({
         effects: changeColorEffect.of(highlightedLineColor)
@@ -386,10 +325,6 @@ export class EditorManager {
 
   // UNUSED: This function is currently not called.
   applyUnderlineRange(range: UnderlineRange | undefined) {
-    if (!this.editorView) {
-      return;
-    }
-
     const effectRange = range || { from: 0, to: 0 };
     this.editorView.dispatch({
       effects: addUnderlineEffect.of(effectRange)
@@ -442,10 +377,6 @@ export class EditorManager {
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    if (!this.editorView) {
-      return;
-    }
-
     saveCodeMirrorContent(this.exerciseUuid, stubCode, defaultReadonlyRanges);
 
     this.setupEditor(unfoldableFunctionNames, {
@@ -463,10 +394,6 @@ export class EditorManager {
     unfoldableFunctionNames: string[],
     { readonlyRanges, code }: { readonlyRanges?: { from: number; to: number }[]; code: string }
   ) {
-    if (!this.editorView) {
-      return;
-    }
-
     updateUnfoldableFunctions(this.editorView, unfoldableFunctionNames);
 
     if (code) {
@@ -539,15 +466,11 @@ export class EditorManager {
       () => this.store.getState().setUnderlineRange(undefined),
 
       () => {
-        if (this.editorView) {
-          this.store.getState().setBreakpoints(getBreakpointLines(this.editorView));
-        }
+        this.store.getState().setBreakpoints(getBreakpointLines(this.editorView));
       },
 
       () => {
-        if (this.editorView) {
-          this.store.getState().setFoldedLines(getCodeMirrorFoldedLines(this.editorView));
-        }
+        this.store.getState().setFoldedLines(getCodeMirrorFoldedLines(this.editorView));
       },
 
       () => {
@@ -557,26 +480,20 @@ export class EditorManager {
       },
 
       () => {
-        if (this.editorView) {
-          this.callOnEditorChangeCallback(this.editorView);
-        }
+        this.callOnEditorChangeCallback(this.editorView);
       }
     );
   }
 
   createBreakpointChangeHandler(): Extension {
     return this.onBreakpointChange(() => {
-      if (this.editorView) {
-        this.store.getState().setBreakpoints(getBreakpointLines(this.editorView));
-      }
+      this.store.getState().setBreakpoints(getBreakpointLines(this.editorView));
     });
   }
 
   createFoldChangeHandler(): Extension {
     return this.onFoldChange(() => {
-      if (this.editorView) {
-        this.store.getState().setFoldedLines(getCodeMirrorFoldedLines(this.editorView));
-      }
+      this.store.getState().setFoldedLines(getCodeMirrorFoldedLines(this.editorView));
     });
   }
 }

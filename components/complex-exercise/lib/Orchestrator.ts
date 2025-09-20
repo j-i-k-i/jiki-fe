@@ -16,6 +16,7 @@ class Orchestrator {
   private readonly timelineManager: TimelineManager;
   private editorManager: EditorManager | null = null;
   private handleRunCodeCallback?: () => void;
+  private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
   constructor(exerciseUuid: string, initialCode: string) {
     this.exerciseUuid = exerciseUuid;
@@ -33,26 +34,42 @@ class Orchestrator {
     return this.store;
   }
 
-  // Setup the editor - creates EditorManager if needed and returns ref
+  // Setup the editor - returns a stable ref callback that manages EditorManager lifecycle
   setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
-    if (!this.editorManager) {
-      this.editorManager = new EditorManager(
-        this.store,
-        this.exerciseUuid,
-        this,
-        value,
-        readonly,
-        highlightedLine,
-        shouldAutoRunCode
-      );
+    // Create ref callback only once to ensure stability across renders
+    // React requires ref callbacks to be stable to avoid unnecessary re-runs
+    if (!this.editorRefCallback) {
+      this.editorRefCallback = (element: HTMLDivElement | null) => {
+        if (element) {
+          // Create EditorManager when element is available
+          if (!this.editorManager) {
+            this.editorManager = new EditorManager(
+              element,
+              this.store,
+              this.exerciseUuid,
+              this,
+              value,
+              readonly,
+              highlightedLine,
+              shouldAutoRunCode
+            );
+          }
+        } else {
+          // Cleanup when element is removed
+          if (this.editorManager) {
+            this.editorManager.cleanup();
+            this.editorManager = null;
+          }
+        }
+      };
     }
-    // Always return the existing ref - it's stable once created
-    return this.editorManager.getEditorRef();
+    return this.editorRefCallback;
   }
 
-  // Get the editor view if it exists
+  // Get the editor view - primarily for testing purposes
+  // Production code should use the orchestrator's methods instead of direct view access
   getEditorView(): EditorView | null {
-    return this.editorManager?.getEditorView() ?? null;
+    return this.editorManager?.editorView ?? null;
   }
 
   // Run code callback management
