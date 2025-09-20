@@ -30,7 +30,7 @@ import { getCodeMirrorFieldValue } from "../ui/codemirror/utils/getCodeMirrorFie
 import { getFoldedLines as getCodeMirrorFoldedLines } from "../ui/codemirror/utils/getFoldedLines";
 import { updateUnfoldableFunctions } from "../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "./localStorage";
-import { findNextFrame, getNearestCurrentFrame } from "./orchestrator/frameMethods";
+import { TimelineManager } from "./orchestrator/TimelineManager";
 import {
   getCode,
   getCurrentTest,
@@ -98,7 +98,7 @@ type OrchestratorStore = OrchestratorState & OrchestratorActions;
 class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
-  protected _cachedCurrentFrame: Frame | null | undefined; // undefined means needs recalculation, not private so methods can access
+  private readonly timelineManager: TimelineManager;
   private editorView: EditorView | null = null;
   private editorHandler: any = null; // Handler from CodeMirror component
   private onEditorChangeCallback?: (view: EditorView) => void;
@@ -113,14 +113,16 @@ class Orchestrator {
     this.initializeAutoSave();
 
     // Temporary mock test data for testing the scrubber
+    const mockFrames = [
+      { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
+      { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
+      { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
+      { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
+      { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
+    ];
+
     const mockTest: TestState = {
-      frames: [
-        { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
-        { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
-        { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
-        { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
-        { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
-      ],
+      frames: mockFrames,
       animationTimeline: {
         duration: 5,
         paused: true,
@@ -138,7 +140,8 @@ class Orchestrator {
           currentTime: 0
         }
       } as AnimationTimeline,
-      timelineTime: 0
+      timelineTime: 0,
+      currentFrame: mockFrames[0] // Initialize with first frame
     };
 
     // Create instance-specific store
@@ -183,17 +186,21 @@ class Orchestrator {
             if (!state.currentTest) {
               return {};
             }
+
+            // Calculate the nearest frame for the new timeline time
+            const nearestFrame = TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines);
+
             return {
               currentTest: {
                 ...state.currentTest,
-                timelineTime: time
+                timelineTime: time,
+                currentFrame: nearestFrame
               }
             };
           }),
         setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
         setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
         setFoldedLines: (lines) => {
-          this._cachedCurrentFrame = undefined; // Invalidate cache when folded lines change
           set({ foldedLines: lines });
         },
 
@@ -245,6 +252,9 @@ class Orchestrator {
           })
       }))
     );
+
+    // Initialize TimelineManager
+    this.timelineManager = new TimelineManager(this.store);
 
     // Subscribe to state changes to automatically apply editor effects
     let previousInformationWidgetData = this.store.getState().informationWidgetData;
@@ -421,22 +431,14 @@ class Orchestrator {
   }
 
   setCurrentTestTimelineTime(time: number) {
-    this._cachedCurrentFrame = undefined; // Invalidate cache
-    const state = this.store.getState();
-    state.setCurrentTestTimelineTime(time);
-    // Also seek the animation timeline if it exists
-    const animationTimeline = state.currentTest?.animationTimeline;
-    if (animationTimeline) {
-      animationTimeline.seek(time / 100);
-    }
+    this.timelineManager.setTimelineTime(time);
   }
 
   setCurrentTestInterpreterTime(interpreterTime: number) {
-    this.setCurrentTestTimelineTime(interpreterTime * 100);
+    this.timelineManager.setInterpreterTime(interpreterTime);
   }
 
   setCurrentTest(test: TestState | null) {
-    this._cachedCurrentFrame = undefined; // Invalidate cache when test changes
     this.store.getState().setCurrentTest(test);
   }
 
@@ -449,7 +451,14 @@ class Orchestrator {
   }
 
   setFoldedLines(lines: number[]) {
-    this.store.getState().setFoldedLines(lines);
+    // When folded lines change, recalculate the current frame
+    const state = this.store.getState();
+    // Set folded lines first
+    state.setFoldedLines(lines);
+    // Then recalculate the frame with the new folded lines
+    if (state.currentTest) {
+      state.setCurrentTestTimelineTime(state.currentTest.timelineTime);
+    }
   }
 
   // Editor store public methods
@@ -671,9 +680,14 @@ class Orchestrator {
   protected getCurrentTestTimelineTime = getCurrentTestTimelineTime.bind(this);
   protected hasValidTest = hasValidTest.bind(this);
 
-  // Methods from frameMethods.ts
-  getNearestCurrentFrame = getNearestCurrentFrame.bind(this);
-  findNextFrame = findNextFrame.bind(this);
+  // Delegate frame methods to TimelineManager
+  getNearestCurrentFrame() {
+    return this.timelineManager.getNearestCurrentFrame();
+  }
+
+  findNextFrame(currentIdx: number) {
+    return this.timelineManager.findNextFrame(currentIdx);
+  }
 
   async runCode() {
     const state = this.store.getState();

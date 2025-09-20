@@ -6,6 +6,7 @@ export interface TestState {
   frames: Frame[];
   animationTimeline: AnimationTimeline;
   timelineTime: number;
+  currentFrame: Frame | null; // Current frame based on timeline position
 }
 
 // Public read-only state that components can access

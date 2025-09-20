@@ -92,7 +92,8 @@ describe("stateAccessors", () => {
       const testState: TestState = {
         frames: [],
         animationTimeline: { duration: 5 } as AnimationTimeline,
-        timelineTime: 100
+        timelineTime: 100,
+        currentFrame: null
       };
       const orchestrator = createMockOrchestrator({ currentTest: testState });
       const result = getCurrentTest.call(orchestrator);
@@ -107,7 +108,8 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames,
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineTime: 0
+          timelineTime: 0,
+          currentFrame: frames[0]
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -128,7 +130,8 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: animationTimeline as AnimationTimeline,
-          timelineTime: 0
+          timelineTime: 0,
+          currentFrame: null
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -148,7 +151,8 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineTime: 250
+          timelineTime: 250,
+          currentFrame: null
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -165,10 +169,12 @@ describe("stateAccessors", () => {
 
     describe("hasValidTest", () => {
       it("should return true when currentTest exists with frames", () => {
+        const frames = [{ line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" as const }];
         const testState: TestState = {
-          frames: [{ line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" }],
+          frames,
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineTime: 0
+          timelineTime: 0,
+          currentFrame: frames[0]
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 
@@ -180,7 +186,8 @@ describe("stateAccessors", () => {
         const testState: TestState = {
           frames: [],
           animationTimeline: { duration: 5 } as AnimationTimeline,
-          timelineTime: 0
+          timelineTime: 0,
+          currentFrame: null
         };
         const orchestrator = createMockOrchestrator({ currentTest: testState });
 

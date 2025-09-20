@@ -104,7 +104,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(3),
             animationTimeline: mockTimeline,
-            timelineTime: 100
+            timelineTime: 100,
+            currentFrame: createMockFrames(3)[1]
           }
         })
       );
@@ -143,7 +144,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(3),
             animationTimeline: mockTimeline,
-            timelineTime: 0
+            timelineTime: 0,
+            currentFrame: createMockFrames(3)[0]
           },
           hasCodeBeenEdited: true
         })
@@ -169,7 +171,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(3),
             animationTimeline: mockTimeline,
-            timelineTime: 0
+            timelineTime: 0,
+            currentFrame: createMockFrames(3)[0]
           },
           isSpotlightActive: true
         })
@@ -190,7 +193,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(1),
             animationTimeline: mockTimeline,
-            timelineTime: 0
+            timelineTime: 0,
+            currentFrame: createMockFrames(1)[0]
           }
         })
       );
@@ -210,7 +214,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(2),
             animationTimeline: mockTimeline,
-            timelineTime: 0
+            timelineTime: 0,
+            currentFrame: createMockFrames(2)[0]
           },
           hasCodeBeenEdited: false,
           isSpotlightActive: false
@@ -234,7 +239,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames: createMockFrames(3),
             animationTimeline: mockTimeline,
-            timelineTime: 0
+            timelineTime: 0,
+            currentFrame: createMockFrames(3)[0]
           }
         })
       );
@@ -264,7 +270,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames,
             animationTimeline: mockTimeline,
-            timelineTime: 150
+            timelineTime: 150,
+            currentFrame: frames[2]
           }
         })
       );
@@ -287,7 +294,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames,
             animationTimeline: mockTimeline,
-            timelineTime: 0 // At first frame
+            timelineTime: 0, // At first frame
+            currentFrame: frames[0]
           },
           hasCodeBeenEdited: false,
           isSpotlightActive: false
@@ -305,7 +313,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames,
             animationTimeline: mockTimeline,
-            timelineTime: 1.5 // Between frame 1 and frame 2
+            timelineTime: 1.5, // Between frame 1 and frame 2
+            currentFrame: frames[2]
           },
           hasCodeBeenEdited: false,
           isSpotlightActive: false
@@ -323,7 +332,8 @@ describe("Scrubber Component", () => {
           currentTest: {
             frames,
             animationTimeline: mockTimeline,
-            timelineTime: 3 // At last frame
+            timelineTime: 3, // At last frame
+            currentFrame: frames[3]
           },
           hasCodeBeenEdited: false,
           isSpotlightActive: false

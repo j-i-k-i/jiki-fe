@@ -1,7 +1,5 @@
 import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
-import type { TestState } from "@/components/complex-exercise/lib/types";
-import type { AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
 
 describe("Orchestrator", () => {
   describe("constructor", () => {
@@ -60,69 +58,38 @@ describe("Orchestrator", () => {
     });
   });
 
-  describe("cache invalidation", () => {
-    // TypeScript fix: Throughout these tests, we use bracket notation ['_cachedCurrentFrame']
-    // to access the protected property _cachedCurrentFrame for testing purposes.
-    // This is a common pattern for testing private/protected class members.
-
-    it("should start with undefined cache", () => {
+  describe("frame synchronization", () => {
+    it("should update currentFrame when setCurrentTestTimelineTime is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
+      const state = orchestrator.getStore().getState();
+
+      // Initial frame should be the first one
+      expect(state.currentTest?.currentFrame?.line).toBe(1);
+
+      // Change timeline time
+      orchestrator.setCurrentTestTimelineTime(150);
+
+      // Frame should update to nearest frame (equidistant from 100 and 200, picks later)
+      const updatedState = orchestrator.getStore().getState();
+      expect(updatedState.currentTest?.currentFrame?.line).toBe(3);
     });
 
-    it("should invalidate cache when setCurrentTestTimelineTime is called", () => {
+    it("should recalculate frame when setFoldedLines is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
-      // First, set the cache to something
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      // Call setCurrentTestTimelineTime which should invalidate
+      // Set timeline to line 2
       orchestrator.setCurrentTestTimelineTime(100);
+      let state = orchestrator.getStore().getState();
+      expect(state.currentTest?.currentFrame?.line).toBe(2);
 
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
-    });
+      // Fold line 2
+      orchestrator.setFoldedLines([2]);
 
-    it("should invalidate cache when setCurrentTest is called", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
-
-      // Set cache
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      const newTest: TestState = {
-        frames: [],
-        animationTimeline: { duration: 5 } as AnimationTimeline,
-        timelineTime: 0
-      };
-
-      orchestrator.setCurrentTest(newTest);
-
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
-    });
-
-    it("should invalidate cache when setFoldedLines is called", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
-
-      // Set cache
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      orchestrator.setFoldedLines([2, 3]);
-
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
+      // Frame should skip the folded line and pick nearest non-folded (line 1 or 3)
+      state = orchestrator.getStore().getState();
+      expect(state.currentTest?.currentFrame?.line).not.toBe(2);
+      // Should pick line 3 since it's the next available frame when line 2 is folded
+      expect(state.currentTest?.currentFrame?.line).toBe(3);
     });
   });
 
