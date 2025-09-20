@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
-import type { Frame } from "../../lib/stubs";
 
 interface FrameStepperButtonsProps {
   orchestrator: Orchestrator;
@@ -9,21 +8,17 @@ interface FrameStepperButtonsProps {
 }
 
 export default function FrameStepperButtons({ orchestrator, enabled }: FrameStepperButtonsProps) {
-  const { currentTest, foldedLines } = useOrchestratorStore(orchestrator);
-  const [prevFrame, setPrevFrame] = useState<Frame | undefined>(undefined);
-  const [nextFrame, setNextFrame] = useState<Frame | undefined>(undefined);
+  const { currentTest } = useOrchestratorStore(orchestrator);
 
-  useEffect(() => {
-    // Update prev/next frames whenever relevant state changes
-    setPrevFrame(orchestrator.findPrevFrame());
-    setNextFrame(orchestrator.findNextFrame());
-  }, [orchestrator, currentTest, currentTest?.frames, currentTest?.currentFrame, foldedLines]);
+  // Get prev/next frames directly from the store
+  const prevFrame = currentTest?.prevFrame;
+  const nextFrame = currentTest?.nextFrame;
 
   return (
     <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
       <button
         disabled={!enabled || !prevFrame}
-        onClick={() => handleGoToPreviousFrame(orchestrator)}
+        onClick={() => handleGoToPreviousFrame(orchestrator, prevFrame)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Previous frame"
       >
@@ -31,7 +26,7 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
       </button>
       <button
         disabled={!enabled || !nextFrame}
-        onClick={() => handleGoToNextFrame(orchestrator)}
+        onClick={() => handleGoToNextFrame(orchestrator, nextFrame)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Next frame"
       >
@@ -45,15 +40,13 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPreviousFrame(orchestrator: Orchestrator) {
-  const previousFrame = orchestrator.findPrevFrame();
-  if (previousFrame) {
-    orchestrator.setCurrentTestTimelineTime(previousFrame.timelineTime);
+function handleGoToPreviousFrame(orchestrator: Orchestrator, prevFrame: any) {
+  if (prevFrame) {
+    orchestrator.setCurrentTestTimelineTime(prevFrame.timelineTime);
   }
 }
 
-function handleGoToNextFrame(orchestrator: Orchestrator) {
-  const nextFrame = orchestrator.findNextFrame();
+function handleGoToNextFrame(orchestrator: Orchestrator, nextFrame: any) {
   if (nextFrame) {
     orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
   }

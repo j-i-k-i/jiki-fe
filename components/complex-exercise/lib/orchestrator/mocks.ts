@@ -30,5 +30,7 @@ export const mockTest: TestState = {
     }
   } as AnimationTimeline,
   timelineTime: 0,
-  currentFrame: mockFrames[0] // Initialize with first frame
+  currentFrame: mockFrames[0], // Initialize with first frame
+  prevFrame: undefined, // No previous frame at start
+  nextFrame: mockFrames[1] // Next frame is frame 1
 };

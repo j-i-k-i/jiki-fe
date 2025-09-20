@@ -18,6 +18,8 @@ export interface TestState {
   animationTimeline: AnimationTimeline;
   timelineTime: number;
   currentFrame: Frame | null; // Current frame based on timeline position
+  prevFrame: Frame | undefined; // Previous non-folded frame from current position
+  nextFrame: Frame | undefined; // Next non-folded frame from current position
 }
 
 // Public read-only state that components can access

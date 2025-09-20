@@ -17,6 +17,11 @@ function createMockFrame(interpreterTime: number, timelineTime: number, line: nu
 
 // Helper to create a test state
 function createTestState(frames: Frame[], timelineTime: number = 0, currentFrame: Frame | null = null): TestState {
+  // Calculate prev/next frames based on timeline time
+  const prevFrame =
+    frames.length > 0 && timelineTime > 0 ? TimelineManager.findPrevFrame(frames, timelineTime, []) : undefined;
+  const nextFrame = frames.length > 0 ? TimelineManager.findNextFrame(frames, timelineTime, []) : undefined;
+
   return {
     frames,
     animationTimeline: {
@@ -27,7 +32,9 @@ function createTestState(frames: Frame[], timelineTime: number = 0, currentFrame
       pause: jest.fn()
     } as unknown as AnimationTimeline,
     timelineTime,
-    currentFrame: currentFrame || frames[0] || null
+    currentFrame: currentFrame || frames[0] || null,
+    prevFrame,
+    nextFrame
   };
 }
 

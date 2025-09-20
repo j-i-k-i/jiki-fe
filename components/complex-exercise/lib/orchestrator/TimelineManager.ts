@@ -49,6 +49,92 @@ export class TimelineManager {
   }
 
   /**
+   * Static method to find the next non-folded frame from a given timeline position.
+   * Used by the store to calculate next frame.
+   */
+  static findNextFrame(
+    frames: Frame[] | undefined,
+    timelineTime: number | undefined,
+    foldedLines: number[]
+  ): Frame | undefined {
+    if (!frames || frames.length === 0 || timelineTime === undefined) {
+      return undefined;
+    }
+
+    // Find current position
+    let currentIdx: number;
+    if (timelineTime < 0) {
+      currentIdx = -1;
+    } else {
+      // Find the first frame after the timeline time
+      const idx = frames.findIndex((f: Frame) => f.timelineTime > timelineTime);
+      if (idx === -1) {
+        // Past all frames
+        return undefined;
+      }
+      currentIdx = idx - 1;
+    }
+
+    // Find next non-folded frame
+    for (let idx = currentIdx + 1; idx < frames.length; idx++) {
+      if (!foldedLines.includes(frames[idx].line)) {
+        return frames[idx];
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Static method to find the previous non-folded frame from a given timeline position.
+   * Used by the store to calculate prev frame.
+   */
+  static findPrevFrame(
+    frames: Frame[] | undefined,
+    timelineTime: number | undefined,
+    foldedLines: number[]
+  ): Frame | undefined {
+    if (!frames || frames.length === 0 || timelineTime === undefined) {
+      return undefined;
+    }
+
+    // Special case: if timeline is after all frames, return the last non-folded frame
+    if (frames.length > 0 && timelineTime > frames[frames.length - 1].timelineTime) {
+      for (let i = frames.length - 1; i >= 0; i--) {
+        if (!foldedLines.includes(frames[i].line)) {
+          return frames[i];
+        }
+      }
+      return undefined;
+    }
+
+    // Find current position
+    if (timelineTime < 0) {
+      return undefined;
+    }
+
+    // Find the last frame before or at the timeline time
+    let lastIdx = -1;
+    for (let i = 0; i < frames.length; i++) {
+      if (frames[i].timelineTime <= timelineTime) {
+        lastIdx = i;
+      } else {
+        break;
+      }
+    }
+    const currentIdx = lastIdx === -1 ? 0 : lastIdx;
+
+    // Find previous non-folded frame
+    for (let idx = currentIdx - 1; idx >= 0; idx--) {
+      if (!foldedLines.includes(frames[idx].line)) {
+        return frames[idx];
+      }
+    }
+
+    return undefined;
+  }
+
+  /**
    * Static helper to find the index of the nearest frame
    */
   private static findFrameIdxNearestTimelineTime(

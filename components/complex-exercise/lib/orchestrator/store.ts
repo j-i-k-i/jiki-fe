@@ -53,18 +53,49 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Calculate the nearest frame for the new timeline time
           const nearestFrame = TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines);
 
+          // Calculate prev/next frames using static methods
+          const prevFrame = TimelineManager.findPrevFrame(state.currentTest.frames, time, state.foldedLines);
+          const nextFrame = TimelineManager.findNextFrame(state.currentTest.frames, time, state.foldedLines);
+
           return {
             currentTest: {
               ...state.currentTest,
               timelineTime: time,
-              currentFrame: nearestFrame
+              currentFrame: nearestFrame,
+              prevFrame,
+              nextFrame
             }
           };
         }),
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
       setFoldedLines: (lines) => {
-        set({ foldedLines: lines });
+        set((state) => {
+          // Update folded lines
+          const newState: any = { foldedLines: lines };
+
+          // If we have a current test, recalculate prev/next frames
+          if (state.currentTest) {
+            const prevFrame = TimelineManager.findPrevFrame(
+              state.currentTest.frames,
+              state.currentTest.timelineTime,
+              lines
+            );
+            const nextFrame = TimelineManager.findNextFrame(
+              state.currentTest.frames,
+              state.currentTest.timelineTime,
+              lines
+            );
+
+            newState.currentTest = {
+              ...state.currentTest,
+              prevFrame,
+              nextFrame
+            };
+          }
+
+          return newState;
+        });
       },
 
       // Editor store actions
