@@ -2,6 +2,15 @@
 
 This document explains the CodeMirror 6 integration in the Jiki frontend, including its architecture, extension system, and interaction with the Orchestrator pattern.
 
+## Navigation
+
+- **Parent**: [Complex Exercise README](./README.md)
+- **Related**:
+  - [Orchestrator Pattern](./orchestrator-pattern.md) - State management system
+  - [Test Runner](./test-runner.md) - Execution and frame generation
+  - [Scrubber Implementation](./scrubber-implementation.md) - Timeline UI
+- **Context Root**: [.context/README.md](../README.md)
+
 ## Overview
 
 CodeMirror 6 is the code editor used in the complex exercise component. It provides syntax highlighting, code folding, breakpoints, line highlighting, and other interactive features for the learn-to-code experience.

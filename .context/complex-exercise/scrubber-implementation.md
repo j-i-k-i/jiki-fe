@@ -1,5 +1,14 @@
 # Scrubber Implementation Details
 
+## Navigation
+
+- **Parent**: [Complex Exercise README](./README.md)
+- **Related**:
+  - [Scrubber Frames](./scrubber-frames.md) - Frame system concepts
+  - [Orchestrator Pattern](./orchestrator-pattern.md) - State management
+  - [CodeMirror Integration](./codemirror.md) - Editor synchronization
+- **Context Root**: [.context/README.md](../README.md)
+
 ## Architecture
 
 The scrubber uses the orchestrator pattern for centralized state management with modular UI components.

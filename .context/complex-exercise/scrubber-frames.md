@@ -1,5 +1,14 @@
 # Scrubber and Frame System
 
+## Navigation
+
+- **Parent**: [Complex Exercise README](./README.md)
+- **Related**:
+  - [Scrubber Implementation](./scrubber-implementation.md) - UI implementation details
+  - [Test Runner](./test-runner.md) - Generates frames during execution
+  - [Orchestrator Pattern](./orchestrator-pattern.md) - Manages frame state
+- **Context Root**: [.context/README.md](../README.md)
+
 ## Overview
 
 The scrubber is a timeline control that allows students to navigate through the execution of their code, synchronizing code frames with visual animations.

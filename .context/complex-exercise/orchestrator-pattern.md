@@ -2,6 +2,15 @@
 
 The codebase uses an orchestrator pattern for complex components that require centralized state management.
 
+## Navigation
+
+- **Parent**: [Complex Exercise README](./README.md)
+- **Related**:
+  - [CodeMirror Integration](./codemirror.md) - Editor that uses orchestrator
+  - [Scrubber Frames](./scrubber-frames.md) - Frame system managed by orchestrator
+  - [Test Runner](./test-runner.md) - Test execution integrated with orchestrator
+- **Context Root**: [.context/README.md](../README.md)
+
 ## Overview
 
 The orchestrator pattern combines:
