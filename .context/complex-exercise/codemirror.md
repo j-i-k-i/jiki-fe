@@ -27,13 +27,12 @@ The main React component that:
 - Connects to the Orchestrator for state management
 - Uses the `useEditorSetup` hook to initialize the editor with proper extensions
 
-```typescript
-// Key responsibilities:
+Key responsibilities:
+
 - Receives orchestrator instance as prop
 - Reads initial state from orchestrator store (defaultCode, shouldAutoRunCode)
 - Creates editor DOM element with ref callback
 - Handles component lifecycle (mount/unmount)
-```
 
 #### 2. Editor Setup Hook (`useEditorSetup.ts`)
 

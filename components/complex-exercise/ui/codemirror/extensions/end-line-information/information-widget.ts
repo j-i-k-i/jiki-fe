@@ -121,7 +121,7 @@ export class InformationWidget extends WidgetType {
     hljs.registerLanguage("jikiscript", setupJikiscript);
     const codeBlocks = element.querySelectorAll("pre code");
     codeBlocks.forEach((block) => {
-      hljs.highlightBlock(block as HTMLElement);
+      hljs.highlightElement(block as HTMLElement);
     });
   }
 
