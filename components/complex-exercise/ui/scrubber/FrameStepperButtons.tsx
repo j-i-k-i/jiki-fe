@@ -1,31 +1,37 @@
-import React from "react";
-import type { Frame } from "../../lib/stubs";
+import React, { useEffect, useState } from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
+import { useOrchestratorStore } from "../../lib/Orchestrator";
+import type { Frame } from "../../lib/stubs";
 
 interface FrameStepperButtonsProps {
   orchestrator: Orchestrator;
-  frames: Frame[];
-  timelineTime: number;
   enabled: boolean;
 }
 
-export default function FrameStepperButtons({ orchestrator, frames, timelineTime, enabled }: FrameStepperButtonsProps) {
-  const isPrevFrame = prevFrameExists(timelineTime, frames);
-  const isNextFrame = nextFrameExists(timelineTime, frames);
+export default function FrameStepperButtons({ orchestrator, enabled }: FrameStepperButtonsProps) {
+  const { currentTest } = useOrchestratorStore(orchestrator);
+  const [prevFrame, setPrevFrame] = useState<Frame | undefined>(undefined);
+  const [nextFrame, setNextFrame] = useState<Frame | undefined>(undefined);
+
+  useEffect(() => {
+    // Update prev/next frames whenever the current frame changes
+    setPrevFrame(orchestrator.findPrevFrame());
+    setNextFrame(orchestrator.findNextFrame());
+  }, [orchestrator, currentTest?.currentFrame, currentTest?.timelineTime]);
 
   return (
     <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
       <button
-        disabled={!enabled || !isPrevFrame}
-        onClick={() => handleGoToPreviousFrame(orchestrator, frames, timelineTime)}
+        disabled={!enabled || !prevFrame}
+        onClick={() => handleGoToPreviousFrame(orchestrator)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Previous frame"
       >
         ←
       </button>
       <button
-        disabled={!enabled || !isNextFrame}
-        onClick={() => handleGoToNextFrame(orchestrator, frames, timelineTime)}
+        disabled={!enabled || !nextFrame}
+        onClick={() => handleGoToNextFrame(orchestrator)}
         className="p-1 border rounded disabled:opacity-50"
         aria-label="Next frame"
       >
@@ -39,35 +45,16 @@ export default function FrameStepperButtons({ orchestrator, frames, timelineTime
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPreviousFrame(orchestrator: Orchestrator, frames: Frame[], currentTimelineTime: number) {
-  const previousFrames = frames.filter((frame) => frame.timelineTime < currentTimelineTime);
-  if (previousFrames.length > 0) {
-    const previousFrame = previousFrames[previousFrames.length - 1];
+function handleGoToPreviousFrame(orchestrator: Orchestrator) {
+  const previousFrame = orchestrator.findPrevFrame();
+  if (previousFrame) {
     orchestrator.setCurrentTestTimelineTime(previousFrame.timelineTime);
   }
 }
 
-function handleGoToNextFrame(orchestrator: Orchestrator, frames: Frame[], currentTimelineTime: number) {
-  const nextFrame = frames.find((frame) => frame.timelineTime > currentTimelineTime);
+function handleGoToNextFrame(orchestrator: Orchestrator) {
+  const nextFrame = orchestrator.findNextFrame();
   if (nextFrame) {
     orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
   }
-}
-
-/* **************** */
-/* HELPER FUNCTIONS */
-/* **************** */
-
-function prevFrameExists(timelineTime: number, frames: Frame[]): boolean {
-  if (frames.length === 0) {
-    return false;
-  }
-  return frames.some((frame) => frame.timelineTime < timelineTime);
-}
-
-function nextFrameExists(timelineTime: number, frames: Frame[]): boolean {
-  if (frames.length === 0) {
-    return false;
-  }
-  return frames.some((frame) => frame.timelineTime > timelineTime);
 }

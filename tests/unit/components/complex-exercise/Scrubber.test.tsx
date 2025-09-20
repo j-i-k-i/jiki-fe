@@ -57,6 +57,8 @@ function createMockOrchestrator(): Orchestrator {
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
     getNearestCurrentFrame: jest.fn().mockReturnValue(null),
+    findNextFrame: jest.fn(),
+    findPrevFrame: jest.fn(),
     runCode: jest.fn(),
     getStore: jest.fn()
   } as unknown as Orchestrator;
@@ -284,11 +286,17 @@ describe("Scrubber Component", () => {
     });
 
     it("should pass correct props to FrameStepperButtons", () => {
-      const mockOrchestrator = createMockOrchestrator();
       const mockTimeline = createMockAnimationTimeline(5);
       const frames = createMockFrames(4); // Creates frames at timelineTime: 0, 1, 2, 3
 
+      // Create mock orchestrator with methods that can be updated
+      const mockOrchestrator = createMockOrchestrator();
+
       // Test navigation at first frame (position 0)
+      // At first frame: no previous, has next
+      (mockOrchestrator.findPrevFrame as jest.Mock).mockReturnValue(undefined);
+      (mockOrchestrator.findNextFrame as jest.Mock).mockReturnValue(frames[1]);
+
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
           currentTest: {
@@ -305,9 +313,13 @@ describe("Scrubber Component", () => {
       const { rerender } = render(<Scrubber orchestrator={mockOrchestrator} />);
 
       expect(screen.getByLabelText("Previous frame")).toBeDisabled(); // No previous frame
-      expect(screen.getByLabelText("Next frame")).not.toBeDisabled(); // Has next frame at 1
+      expect(screen.getByLabelText("Next frame")).not.toBeDisabled(); // Has next frame
 
       // Test navigation at middle position (between frames)
+      // In middle: has both previous and next
+      (mockOrchestrator.findPrevFrame as jest.Mock).mockReturnValue(frames[1]);
+      (mockOrchestrator.findNextFrame as jest.Mock).mockReturnValue(frames[3]);
+
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
           currentTest: {
@@ -327,6 +339,10 @@ describe("Scrubber Component", () => {
       expect(screen.getByLabelText("Next frame")).not.toBeDisabled(); // Has next frame
 
       // Test navigation at last frame (position 3)
+      // At last frame: has previous, no next
+      (mockOrchestrator.findPrevFrame as jest.Mock).mockReturnValue(frames[2]);
+      (mockOrchestrator.findNextFrame as jest.Mock).mockReturnValue(undefined);
+
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
           currentTest: {
@@ -342,7 +358,7 @@ describe("Scrubber Component", () => {
 
       rerender(<Scrubber orchestrator={mockOrchestrator} />);
 
-      expect(screen.getByLabelText("Previous frame")).not.toBeDisabled(); // Has previous frames
+      expect(screen.getByLabelText("Previous frame")).not.toBeDisabled(); // Has previous frame
       expect(screen.getByLabelText("Next frame")).toBeDisabled(); // No next frame
     });
   });

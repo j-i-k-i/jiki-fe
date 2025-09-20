@@ -47,12 +47,7 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         timelineTime={timelineTime}
         enabled={isEnabled}
       />
-      <FrameStepperButtons
-        orchestrator={orchestrator}
-        frames={frames}
-        timelineTime={timelineTime}
-        enabled={isEnabled}
-      />
+      <FrameStepperButtons orchestrator={orchestrator} enabled={isEnabled} />
       {/* <BreakpointStepperButtons
         currentFrame={_currentFrame}
         frames={frames}

@@ -9,6 +9,7 @@ import { EditorManager } from "./orchestrator/EditorManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import type { TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
+import type { Frame } from "./stubs";
 
 class Orchestrator {
   exerciseUuid: string;
@@ -71,7 +72,7 @@ class Orchestrator {
     return this.editorManager?.editorView ?? null;
   }
 
-  // Call the editor change callback if set - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   callOnEditorChangeCallback(view: EditorView) {
     if (this.editorManager) {
       this.editorManager.callOnEditorChangeCallback(view);
@@ -86,14 +87,14 @@ class Orchestrator {
     }
   }
 
-  // Save immediately (for cleanup) - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
     if (this.editorManager) {
       this.editorManager.saveImmediately(code, readonlyRanges);
     }
   }
 
-  // Get current editor value and update snapshot - delegate to EditorManager
+  // UNUSED: This function is currently not called.
   getCurrentEditorValue(): string | undefined {
     return this.editorManager?.getCurrentEditorValue();
   }
@@ -118,10 +119,12 @@ class Orchestrator {
   }
 
   // UNUSED: This function is currently not called.
+  // UNUSED: This function is currently not called.
   setHasCodeBeenEdited(value: boolean) {
     this.store.getState().setHasCodeBeenEdited(value);
   }
 
+  // UNUSED: This function is currently not called.
   // UNUSED: This function is currently not called.
   setIsSpotlightActive(value: boolean) {
     this.store.getState().setIsSpotlightActive(value);
@@ -139,6 +142,7 @@ class Orchestrator {
   }
 
   // Editor store public methods
+  // UNUSED: This function is currently not called.
   // UNUSED: This function is currently not called.
   setDefaultCode(code: string) {
     this.store.getState().setDefaultCode(code);
@@ -192,10 +196,12 @@ class Orchestrator {
   }
 
   // Error store public methods
+  // UNUSED: This function is currently not called.
   setHasUnhandledError(hasError: boolean) {
     this.store.getState().setHasUnhandledError(hasError);
   }
 
+  // UNUSED: This function is currently not called.
   setUnhandledErrorBase64(errorData: string) {
     this.store.getState().setUnhandledErrorBase64(errorData);
   }
@@ -205,8 +211,13 @@ class Orchestrator {
     return this.timelineManager.getNearestCurrentFrame();
   }
 
-  findNextFrame(currentIdx: number) {
+  // Frame navigation methods - delegate to TimelineManager
+  findNextFrame(currentIdx?: number): Frame | undefined {
     return this.timelineManager.findNextFrame(currentIdx);
+  }
+
+  findPrevFrame(currentIdx?: number): Frame | undefined {
+    return this.timelineManager.findPrevFrame(currentIdx);
   }
 
   async runCode() {

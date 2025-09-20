@@ -10,6 +10,21 @@ export class TimelineManager {
   constructor(private readonly store: StoreApi<OrchestratorState & any>) {}
 
   /**
+   * Static helper to find previous non-folded frame index.
+   * Needs to be static because it's used by the static findNearestFrame method.
+   * startIdx is inclusive - it checks from startIdx down to 0.
+   */
+  private static findPrevFrameIdx(frames: Frame[], startIdx: number, foldedLines: number[]): number | undefined {
+    for (let idx = startIdx; idx >= 0; idx--) {
+      const frame = frames[idx];
+      if (!foldedLines.includes(frame.line)) {
+        return idx;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * Static method to find the frame nearest to a given timeline time.
    * Used by the store to calculate current frame when timeline changes.
    */
@@ -79,19 +94,6 @@ export class TimelineManager {
   }
 
   /**
-   * Static helper to find previous non-folded frame
-   */
-  private static findPrevFrameIdx(frames: Frame[], startIdx: number, foldedLines: number[]): number | undefined {
-    for (let idx = startIdx; idx >= 0; idx--) {
-      const frame = frames[idx];
-      if (!foldedLines.includes(frame.line)) {
-        return idx;
-      }
-    }
-    return undefined;
-  }
-
-  /**
    * Sets the current timeline time.
    * The frame calculation happens automatically in the store action.
    * Also seeks the animation timeline if it exists.
@@ -115,38 +117,185 @@ export class TimelineManager {
   }
 
   /**
-   * Gets the current frame from the current test.
-   * The frame is automatically calculated and stored when timeline time changes.
+   * Gets the nearest frame to the current timeline time.
+   * Calculates dynamically based on current timeline time and folded lines.
    */
   getNearestCurrentFrame(): Frame | null {
     const state = this.store.getState();
-    return state.currentTest?.currentFrame || null;
+    const timelineTime = state.currentTest?.timelineTime;
+    if (timelineTime === undefined) {
+      return null;
+    }
+
+    return TimelineManager.findNearestFrame(state.currentTest?.frames, timelineTime, state.foldedLines);
   }
 
   /**
    * Finds the next frame that isn't folded.
-   * Searches forward from the given index.
+   * If no index is provided, uses the current frame's position.
    *
-   * @param currentIdx The current frame index to search from
+   * @param currentIdx Optional frame index to search from. If not provided, uses current frame.
    * @returns The next non-folded frame, or undefined if none found
    */
-  findNextFrame(currentIdx: number): Frame | undefined {
+  findNextFrame(currentIdx?: number): Frame | undefined {
     const state = this.store.getState();
     const frames = state.currentTest?.frames;
     if (!frames) {
       return undefined;
     }
 
+    // If no index provided, find the current frame's index
+    if (currentIdx === undefined) {
+      currentIdx = this.getCurrentOrFirstFrameIdx();
+      if (currentIdx === undefined) {
+        return undefined;
+      }
+    }
+
+    const nextIdx = this.findNextFrameIdx(currentIdx);
+    return nextIdx !== undefined ? frames[nextIdx] : undefined;
+  }
+
+  /**
+   * Finds the previous frame that isn't folded.
+   * If no index is provided, uses the current frame's position.
+   *
+   * @param currentIdx Optional frame index to search from. If not provided, uses current frame.
+   * @returns The previous non-folded frame, or undefined if none found
+   */
+  findPrevFrame(currentIdx?: number): Frame | undefined {
+    const state = this.store.getState();
+    const frames = state.currentTest?.frames;
+    const timelineTime = state.currentTest?.timelineTime;
+
+    if (!frames || frames.length === 0) {
+      return undefined;
+    }
+
+    // If no index provided, find the current frame's index
+    if (currentIdx === undefined) {
+      currentIdx = this.getCurrentOrLastFrameIdx();
+      if (currentIdx === undefined) {
+        return undefined;
+      }
+
+      // Special case: if timeline is after all frames, return the last non-folded frame
+      if (timelineTime !== undefined && frames.length > 0 && timelineTime > frames[frames.length - 1].timelineTime) {
+        // Start from the last frame and find the last non-folded one
+        for (let i = frames.length - 1; i >= 0; i--) {
+          if (!state.foldedLines.includes(frames[i].line)) {
+            return frames[i];
+          }
+        }
+        return undefined;
+      }
+    }
+
+    // If currentIdx is beyond array bounds, start from last frame
+    if (currentIdx >= frames.length) {
+      currentIdx = frames.length - 1;
+    }
+
+    const prevIdx = this.findPrevFrameIdx(currentIdx);
+    return prevIdx !== undefined ? frames[prevIdx] : undefined;
+  }
+
+  /**
+   * Private helper to find previous non-folded frame index
+   * Finds the previous frame before startIdx (exclusive)
+   */
+  private findPrevFrameIdx(startIdx: number): number | undefined {
+    const state = this.store.getState();
+    const frames = state.currentTest?.frames;
+    if (!frames) {
+      return undefined;
+    }
+    // Call static method with startIdx - 1 to exclude current frame
+    return TimelineManager.findPrevFrameIdx(frames, startIdx - 1, state.foldedLines);
+  }
+
+  /**
+   * Private helper to find next non-folded frame index
+   */
+  private findNextFrameIdx(startIdx: number): number | undefined {
+    const state = this.store.getState();
+    const frames = state.currentTest?.frames;
     const foldedLines = state.foldedLines;
 
-    // Go through all the frames from the next one to the length
-    // of the frames, and return the first one that isn't folded.
-    for (let idx = currentIdx + 1; idx < frames.length; idx++) {
+    if (!frames) {
+      return undefined;
+    }
+
+    for (let idx = startIdx + 1; idx < frames.length; idx++) {
       const frame = frames[idx];
       if (!foldedLines.includes(frame.line)) {
-        return frame;
+        return idx;
       }
     }
     return undefined;
+  }
+
+  /**
+   * Private helper to get current frame index or default to first frame position (-1)
+   */
+  private getCurrentOrFirstFrameIdx(): number | undefined {
+    const state = this.store.getState();
+    const frames = state.currentTest?.frames;
+    const timelineTime = state.currentTest?.timelineTime;
+
+    if (!frames) {
+      return undefined;
+    }
+
+    if (timelineTime === undefined || timelineTime < 0) {
+      // No timeline time or negative, start from beginning (before first frame)
+      return -1;
+    }
+
+    // Find the first frame at or after the timeline time
+    const idx = frames.findIndex((f: Frame) => f.timelineTime > timelineTime);
+    if (idx === -1) {
+      // Past all frames, return last index
+      return frames.length - 1;
+    }
+    // Return the frame just before this one (or -1 if this is the first frame)
+    return idx - 1;
+  }
+
+  /**
+   * Private helper to get current frame index or default to last frame position
+   */
+  private getCurrentOrLastFrameIdx(): number | undefined {
+    const state = this.store.getState();
+    const frames = state.currentTest?.frames;
+    const timelineTime = state.currentTest?.timelineTime;
+
+    if (!frames) {
+      return undefined;
+    }
+
+    if (timelineTime === undefined) {
+      // No timeline time, start from end
+      return frames.length;
+    }
+
+    // For negative times or times before first frame, return 0
+    if (timelineTime < 0) {
+      return 0;
+    }
+
+    // Find the last frame before or at the timeline time
+    let lastIdx = -1;
+    for (let i = 0; i < frames.length; i++) {
+      if (frames[i].timelineTime <= timelineTime) {
+        lastIdx = i;
+      } else {
+        break;
+      }
+    }
+
+    // If no frame found (timeline before all frames), return 0
+    // Otherwise return the last matching frame index
+    return lastIdx === -1 ? 0 : lastIdx;
   }
 }
