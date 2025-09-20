@@ -9,20 +9,6 @@ import type { StoreApi } from "zustand/vanilla";
 import { EditorManager } from "./orchestrator/EditorManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import { createOrchestratorStore } from "./orchestrator/store";
-import {
-  getCode,
-  getCurrentTest,
-  getCurrentTestAnimationTimeline,
-  getCurrentTestFrames,
-  getCurrentTestTimelineTime,
-  getError,
-  getFoldedLines,
-  getHasCodeBeenEdited,
-  getIsSpotlightActive,
-  getOutput,
-  getStatus,
-  hasValidTest
-} from "./orchestrator/stateAccessors";
 import type { TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
 
 class Orchestrator {
@@ -207,32 +193,6 @@ class Orchestrator {
   setUnhandledErrorBase64(errorData: string) {
     this.store.getState().setUnhandledErrorBase64(errorData);
   }
-
-  // Protected state accessor methods from stateAccessors.ts
-  // UNUSED: This function is currently not called.
-  protected getCode = getCode.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getOutput = getOutput.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getStatus = getStatus.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getError = getError.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getHasCodeBeenEdited = getHasCodeBeenEdited.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getIsSpotlightActive = getIsSpotlightActive.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getFoldedLines = getFoldedLines.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getCurrentTest = getCurrentTest.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getCurrentTestFrames = getCurrentTestFrames.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getCurrentTestAnimationTimeline = getCurrentTestAnimationTimeline.bind(this);
-  // UNUSED: This function is currently not called.
-  protected getCurrentTestTimelineTime = getCurrentTestTimelineTime.bind(this);
-  // UNUSED: This function is currently not called.
-  protected hasValidTest = hasValidTest.bind(this);
 
   // Delegate frame methods to TimelineManager
   getNearestCurrentFrame() {
