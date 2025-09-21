@@ -59,22 +59,25 @@ describe("Orchestrator", () => {
   });
 
   describe("frame synchronization", () => {
-    it("should update currentFrame when setCurrentTestTimelineTime is called", () => {
+    it("should only update currentFrame when landing exactly on a frame", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
       const state = orchestrator.getStore().getState();
 
       // Initial frame should be the first one
       expect(state.currentTest?.currentFrame?.line).toBe(1);
 
-      // Change timeline time
+      // Change timeline time to between frames (should NOT update currentFrame)
       orchestrator.setCurrentTestTimelineTime(150);
+      let updatedState = orchestrator.getStore().getState();
+      expect(updatedState.currentTest?.currentFrame?.line).toBe(1); // Should stay at 1
 
-      // Frame should update to nearest frame (equidistant from 100 and 200, picks later)
-      const updatedState = orchestrator.getStore().getState();
-      expect(updatedState.currentTest?.currentFrame?.line).toBe(3);
+      // Change timeline time to exact frame position (should update currentFrame)
+      orchestrator.setCurrentTestTimelineTime(200);
+      updatedState = orchestrator.getStore().getState();
+      expect(updatedState.currentTest?.currentFrame?.line).toBe(3); // Should update to line 3
     });
 
-    it("should recalculate frame when setFoldedLines is called", () => {
+    it("should recalculate navigation frames when setFoldedLines is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
       // Set timeline to line 2
@@ -85,11 +88,13 @@ describe("Orchestrator", () => {
       // Fold line 2
       orchestrator.setFoldedLines([2]);
 
-      // Frame should skip the folded line and pick nearest non-folded (line 1 or 3)
+      // currentFrame should remain the same (we haven't moved the timeline)
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.currentFrame?.line).not.toBe(2);
-      // Should pick line 3 since it's the next available frame when line 2 is folded
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTest?.currentFrame?.line).toBe(2);
+
+      // But navigation frames should skip the folded line
+      expect(state.currentTest?.prevFrame?.line).toBe(1);
+      expect(state.currentTest?.nextFrame?.line).toBe(3);
     });
   });
 

@@ -96,16 +96,31 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
             return {};
           }
 
-          // Calculate the nearest frame for the new timeline time
-          const nearestFrame = TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines);
+          // Check if we're exactly on a frame
+          const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
 
-          // Create a temporary test state with the new current frame for breakpoint calculation
-          const tempTestState = { ...state.currentTest, currentFrame: nearestFrame, timelineTime: time };
+          // If currentFrame doesn't change, only update timelineTime and navigation frames
+          if (!exactFrame) {
+            const tempTestState = { ...state.currentTest, timelineTime: time };
+            const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
+
+            return {
+              currentTest: {
+                ...state.currentTest,
+                timelineTime: time,
+                prevFrame,
+                nextFrame
+              }
+            };
+          }
+
+          // currentFrame is changing, so recalculate everything
+          const tempTestState = { ...state.currentTest, currentFrame: exactFrame, timelineTime: time };
 
           // Calculate navigation frames
           const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
 
-          // Calculate breakpoint frames
+          // Calculate breakpoint frames (only needed when currentFrame changes)
           const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
             tempTestState,
             state.breakpoints,
@@ -116,14 +131,14 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
             currentTest: {
               ...state.currentTest,
               timelineTime: time,
-              currentFrame: nearestFrame,
+              currentFrame: exactFrame,
               prevFrame,
               nextFrame,
               prevBreakpointFrame,
               nextBreakpointFrame
             },
-            // Update highlighted line to match the current frame's line
-            highlightedLine: nearestFrame?.line ?? 0
+            // Update highlighted line since we're on an exact frame
+            highlightedLine: exactFrame.line
           };
         }),
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
