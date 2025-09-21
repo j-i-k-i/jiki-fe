@@ -116,7 +116,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           highlightedLine: frame.line
         });
 
-        // Recalculate breakpoint frames after updating current frame
+        // Recalculate both navigation and breakpoint frames after updating current frame
+        state.recalculateNavigationFrames();
         state.recalculateBreakpointFrames();
       },
       setCurrentTestTimelineTime: (time) => {
@@ -132,9 +133,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
             timelineTime: time
           }
         });
-
-        // Recalculate navigation frames
-        state.recalculateNavigationFrames();
 
         // Check if we landed on an exact frame and update if so
         const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
