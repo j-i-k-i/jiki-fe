@@ -3,6 +3,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
 import { TimelineManager } from "./TimelineManager";
+import { BreakpointManager } from "./BreakpointManager";
 import { mockTest } from "./mocks";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 
@@ -57,13 +58,29 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           const prevFrame = TimelineManager.findPrevFrame(state.currentTest.frames, time, state.foldedLines);
           const nextFrame = TimelineManager.findNextFrame(state.currentTest.frames, time, state.foldedLines);
 
+          // Calculate prev/next breakpoint frames
+          const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
+            nearestFrame,
+            state.currentTest.frames,
+            state.breakpoints,
+            state.foldedLines
+          );
+          const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
+            nearestFrame,
+            state.currentTest.frames,
+            state.breakpoints,
+            state.foldedLines
+          );
+
           return {
             currentTest: {
               ...state.currentTest,
               timelineTime: time,
               currentFrame: nearestFrame,
               prevFrame,
-              nextFrame
+              nextFrame,
+              prevBreakpointFrame,
+              nextBreakpointFrame
             }
           };
         }),
@@ -87,10 +104,26 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
               lines
             );
 
+            // Also recalculate breakpoint frames
+            const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
+              state.currentTest.currentFrame,
+              state.currentTest.frames,
+              state.breakpoints,
+              lines
+            );
+            const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
+              state.currentTest.currentFrame,
+              state.currentTest.frames,
+              state.breakpoints,
+              lines
+            );
+
             newState.currentTest = {
               ...state.currentTest,
               prevFrame,
-              nextFrame
+              nextFrame,
+              prevBreakpointFrame,
+              nextBreakpointFrame
             };
           }
 
@@ -106,7 +139,35 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setHighlightedLineColor: (color) => set({ highlightedLineColor: color }),
       setHighlightedLine: (line) => set({ highlightedLine: line }),
       setInformationWidgetData: (data) => set({ informationWidgetData: data }),
-      setBreakpoints: (breakpoints) => set({ breakpoints }),
+      setBreakpoints: (breakpoints) =>
+        set((state) => {
+          // Update breakpoints
+          const newState: any = { breakpoints };
+
+          // If we have a current test, recalculate breakpoint frames
+          if (state.currentTest) {
+            const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
+              state.currentTest.currentFrame,
+              state.currentTest.frames,
+              breakpoints,
+              state.foldedLines
+            );
+            const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
+              state.currentTest.currentFrame,
+              state.currentTest.frames,
+              breakpoints,
+              state.foldedLines
+            );
+
+            newState.currentTest = {
+              ...state.currentTest,
+              prevBreakpointFrame,
+              nextBreakpointFrame
+            };
+          }
+
+          return newState;
+        }),
       setShouldAutoRunCode: (shouldAutoRun) => set({ shouldAutoRunCode: shouldAutoRun }),
 
       // Error store actions

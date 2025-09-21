@@ -65,7 +65,9 @@ function createTestState(
     timelineTime,
     currentFrame,
     prevFrame,
-    nextFrame
+    nextFrame,
+    prevBreakpointFrame: undefined,
+    nextBreakpointFrame: undefined
   };
 }
 

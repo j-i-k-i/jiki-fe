@@ -59,7 +59,9 @@ export default function FrameStepperButtonsTestPage() {
         timelineTime: 0,
         currentFrame: frames[0],
         prevFrame: initialPrevFrame,
-        nextFrame: initialNextFrame
+        nextFrame: initialNextFrame,
+        prevBreakpointFrame: undefined,
+        nextBreakpointFrame: undefined
       }
     });
 

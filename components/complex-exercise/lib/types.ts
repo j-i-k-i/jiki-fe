@@ -20,6 +20,8 @@ export interface TestState {
   currentFrame: Frame | null; // Current frame based on timeline position
   prevFrame: Frame | undefined; // Previous non-folded frame from current position
   nextFrame: Frame | undefined; // Next non-folded frame from current position
+  prevBreakpointFrame: Frame | undefined; // Previous frame on a breakpoint line
+  nextBreakpointFrame: Frame | undefined; // Next frame on a breakpoint line
 }
 
 // Public read-only state that components can access

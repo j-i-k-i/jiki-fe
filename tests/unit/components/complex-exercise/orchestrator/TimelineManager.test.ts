@@ -34,7 +34,9 @@ function createTestState(frames: Frame[], timelineTime: number = 0, currentFrame
     timelineTime,
     currentFrame: currentFrame || frames[0] || null,
     prevFrame,
-    nextFrame
+    nextFrame,
+    prevBreakpointFrame: undefined,
+    nextBreakpointFrame: undefined
   };
 }
 

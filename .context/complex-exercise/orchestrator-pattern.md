@@ -40,6 +40,12 @@ See `components/complex-exercise/lib/Orchestrator.ts` for the implementation.
 - **Stable ref callbacks** for React lifecycle management
 - **Direct method calls** instead of callback indirection for cleaner architecture
 
+**Internal Managers:**
+
+- **TimelineManager** - Handles frame navigation and timeline positioning
+- **EditorManager** - Manages CodeMirror editor integration (created lazily)
+- **BreakpointManager** - Handles breakpoint navigation and state
+
 ### 2. React Hook
 
 Export a hook that connects components to the orchestrator's store using `useStore` with `useShallow` to prevent infinite render loops.

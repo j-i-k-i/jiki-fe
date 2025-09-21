@@ -32,5 +32,7 @@ export const mockTest: TestState = {
   timelineTime: 0,
   currentFrame: mockFrames[0], // Initialize with first frame
   prevFrame: undefined, // No previous frame at start
-  nextFrame: mockFrames[1] // Next frame is frame 1
+  nextFrame: mockFrames[1], // Next frame is frame 1
+  prevBreakpointFrame: undefined, // No previous breakpoint frame at start
+  nextBreakpointFrame: undefined // No next breakpoint frame initially
 };

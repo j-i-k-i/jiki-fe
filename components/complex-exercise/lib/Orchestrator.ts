@@ -7,6 +7,7 @@ import type { EditorView } from "@codemirror/view";
 import type { StoreApi } from "zustand/vanilla";
 import { EditorManager } from "./orchestrator/EditorManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
+import { BreakpointManager } from "./orchestrator/BreakpointManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import type { TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
 import type { Frame } from "./stubs";
@@ -15,6 +16,7 @@ class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
+  private readonly breakpointManager: BreakpointManager;
   private editorManager: EditorManager | null = null;
   private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
@@ -24,8 +26,9 @@ class Orchestrator {
     // Create instance-specific store
     this.store = createOrchestratorStore(exerciseUuid, initialCode);
 
-    // Initialize timeline manager only
+    // Initialize managers
     this.timelineManager = new TimelineManager(this.store);
+    this.breakpointManager = new BreakpointManager(this.store);
     // EditorManager will be created lazily when setupEditor is called
   }
 
@@ -218,6 +221,15 @@ class Orchestrator {
 
   findPrevFrame(currentIdx?: number): Frame | undefined {
     return this.timelineManager.findPrevFrame(currentIdx);
+  }
+
+  // Breakpoint navigation methods - delegate to BreakpointManager
+  goToPrevBreakpoint() {
+    this.breakpointManager.goToPrevBreakpoint();
+  }
+
+  goToNextBreakpoint() {
+    this.breakpointManager.goToNextBreakpoint();
   }
 
   async runCode() {

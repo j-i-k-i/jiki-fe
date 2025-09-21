@@ -115,6 +115,7 @@ components/complex-exercise/
 │   └── orchestrator/            # Orchestrator composition
 │       ├── EditorManager.ts     # CodeMirror management
 │       ├── TimelineManager.ts   # Timeline & frame logic
+│       ├── BreakpointManager.ts # Breakpoint navigation
 │       ├── store.ts             # Zustand store factory
 │       └── mocks.ts             # Test data
 └── ui/
