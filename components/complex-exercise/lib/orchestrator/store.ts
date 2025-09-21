@@ -5,7 +5,75 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { TimelineManager } from "./TimelineManager";
 import { BreakpointManager } from "./BreakpointManager";
 import { mockTest } from "./mocks";
-import type { OrchestratorState, OrchestratorStore } from "../types";
+import type { OrchestratorState, OrchestratorStore, TestState } from "../types";
+import type { Frame } from "../stubs";
+
+// Helper function to recalculate navigation frames
+function recalculateNavigationFrames(
+  currentTest: TestState,
+  foldedLines: number[]
+): {
+  prevFrame: Frame | undefined;
+  nextFrame: Frame | undefined;
+} {
+  const prevFrame = TimelineManager.findPrevFrame(currentTest.frames, currentTest.timelineTime, foldedLines);
+  const nextFrame = TimelineManager.findNextFrame(currentTest.frames, currentTest.timelineTime, foldedLines);
+
+  return { prevFrame, nextFrame };
+}
+
+// Helper function to recalculate breakpoint frames
+function recalculateBreakpointFrames(
+  currentTest: TestState,
+  breakpoints: number[],
+  foldedLines: number[]
+): {
+  prevBreakpointFrame: Frame | undefined;
+  nextBreakpointFrame: Frame | undefined;
+} {
+  const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
+    currentTest.currentFrame,
+    currentTest.frames,
+    breakpoints,
+    foldedLines
+  );
+  const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
+    currentTest.currentFrame,
+    currentTest.frames,
+    breakpoints,
+    foldedLines
+  );
+
+  return { prevBreakpointFrame, nextBreakpointFrame };
+}
+
+// Helper function to get recalculated frames when state changes
+function getRecalculatedFrames(
+  state: OrchestratorState,
+  updates: {
+    foldedLines?: number[];
+    breakpoints?: number[];
+  }
+): {
+  navigationFrames?: ReturnType<typeof recalculateNavigationFrames>;
+  breakpointFrames: ReturnType<typeof recalculateBreakpointFrames>;
+} {
+  if (!state.currentTest) {
+    return { breakpointFrames: { prevBreakpointFrame: undefined, nextBreakpointFrame: undefined } };
+  }
+
+  const foldedLines = updates.foldedLines ?? state.foldedLines;
+  const breakpoints = updates.breakpoints ?? state.breakpoints;
+
+  // Recalculate navigation frames if folded lines changed
+  const navigationFrames =
+    updates.foldedLines !== undefined ? recalculateNavigationFrames(state.currentTest, foldedLines) : undefined;
+
+  // Recalculate breakpoint frames if either folded lines or breakpoints changed
+  const breakpointFrames = recalculateBreakpointFrames(state.currentTest, breakpoints, foldedLines);
+
+  return { navigationFrames, breakpointFrames };
+}
 
 // Factory function to create an instance-specific store
 export function createOrchestratorStore(exerciseUuid: string, initialCode: string): StoreApi<OrchestratorStore> {
@@ -86,50 +154,23 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }),
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
-      setFoldedLines: (lines) => {
+      setFoldedLines: (lines) =>
         set((state) => {
-          // Update folded lines
-          const newState: any = { foldedLines: lines };
+          const { navigationFrames, breakpointFrames } = getRecalculatedFrames(state, { foldedLines: lines });
 
-          // If we have a current test, recalculate prev/next frames
-          if (state.currentTest) {
-            const prevFrame = TimelineManager.findPrevFrame(
-              state.currentTest.frames,
-              state.currentTest.timelineTime,
-              lines
-            );
-            const nextFrame = TimelineManager.findNextFrame(
-              state.currentTest.frames,
-              state.currentTest.timelineTime,
-              lines
-            );
-
-            // Also recalculate breakpoint frames
-            const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-              state.currentTest.currentFrame,
-              state.currentTest.frames,
-              state.breakpoints,
-              lines
-            );
-            const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-              state.currentTest.currentFrame,
-              state.currentTest.frames,
-              state.breakpoints,
-              lines
-            );
-
-            newState.currentTest = {
-              ...state.currentTest,
-              prevFrame,
-              nextFrame,
-              prevBreakpointFrame,
-              nextBreakpointFrame
-            };
+          if (!state.currentTest) {
+            return { foldedLines: lines };
           }
 
-          return newState;
-        });
-      },
+          return {
+            foldedLines: lines,
+            currentTest: {
+              ...state.currentTest,
+              ...(navigationFrames || {}),
+              ...breakpointFrames
+            }
+          };
+        }),
 
       // Editor store actions
       setDefaultCode: (code) => set({ defaultCode: code }),
@@ -141,32 +182,19 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setInformationWidgetData: (data) => set({ informationWidgetData: data }),
       setBreakpoints: (breakpoints) =>
         set((state) => {
-          // Update breakpoints
-          const newState: any = { breakpoints };
+          const { breakpointFrames } = getRecalculatedFrames(state, { breakpoints });
 
-          // If we have a current test, recalculate breakpoint frames
-          if (state.currentTest) {
-            const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-              state.currentTest.currentFrame,
-              state.currentTest.frames,
-              breakpoints,
-              state.foldedLines
-            );
-            const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-              state.currentTest.currentFrame,
-              state.currentTest.frames,
-              breakpoints,
-              state.foldedLines
-            );
-
-            newState.currentTest = {
-              ...state.currentTest,
-              prevBreakpointFrame,
-              nextBreakpointFrame
-            };
+          if (!state.currentTest) {
+            return { breakpoints };
           }
 
-          return newState;
+          return {
+            breakpoints,
+            currentTest: {
+              ...state.currentTest,
+              ...breakpointFrames
+            }
+          };
         }),
       setShouldAutoRunCode: (shouldAutoRun) => set({ shouldAutoRunCode: shouldAutoRun }),
 
