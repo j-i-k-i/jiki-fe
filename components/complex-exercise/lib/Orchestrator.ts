@@ -116,7 +116,6 @@ class Orchestrator {
     this.timelineManager.setInterpreterTime(interpreterTime);
   }
 
-  // UNUSED: This function is currently not called.
   setCurrentTest(test: TestState | null) {
     this.store.getState().setCurrentTest(test);
   }

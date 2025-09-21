@@ -151,8 +151,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
 
     render(<CodeEditor orchestrator={orchestrator} />);
 
-    // Should render the editor container (using data-ci attribute)
-    const editorElement = document.querySelector('[data-ci="codemirror-editor"]');
+    // Should render the editor container (using data-testid attribute)
+    const editorElement = document.querySelector('[data-testid="codemirror-editor"]');
     expect(editorElement).toBeInTheDocument();
   });
 

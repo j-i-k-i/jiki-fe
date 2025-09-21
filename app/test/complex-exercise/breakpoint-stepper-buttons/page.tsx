@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
@@ -20,107 +20,94 @@ function createTestFrames(): Frame[] {
 }
 
 export default function BreakpointStepperButtonsTestPage() {
-  const [breakpoints, setBreakpoints] = useState<number[]>([2, 4, 6]); // Initial breakpoints
-  const [foldedLines, setFoldedLines] = useState<number[]>([]);
-  const [currentFrame, setCurrentFrame] = useState<Frame | null>(null);
-  const [timelineTime, setTimelineTime] = useState<number>(0);
-
+  // Use ref to ensure single orchestrator instance (following ComplexExercise pattern)
   const orchestratorRef = useRef<Orchestrator>(
     new Orchestrator(
-      "example-exercise-001",
-      `// Custom initial code\nfunction greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("World"));`
+      "test-breakpoint-stepper",
+      `// Test code for breakpoint stepper\nconsole.log("Line 1");\nconsole.log("Line 2");\nconsole.log("Line 3");`
     )
   );
   const orchestrator = orchestratorRef.current;
 
-  const { currentTest } = useOrchestratorStore(orchestrator);
+  // Get state from orchestrator store
+  const { currentTest, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
     const frames = createTestFrames();
 
-    // Set the state directly - minimum needed for component to render
-    const store = orch.getStore();
-    store.setState({
-      currentTest: testState,
-      breakpoints: [],
-      foldedLines: []
-    });
+    // Create test state similar to what would come from the test runner
+    const testState = {
+      frames,
+      animationTimeline: {
+        duration: 8,
+        paused: true,
+        seek: (_time: number) => {},
+        play: () => {},
+        pause: () => {},
+        progress: 0,
+        currentTime: 0,
+        completed: false,
+        hasPlayedOrScrubbed: false,
+        seekEndOfTimeline: () => {},
+        onUpdate: () => {},
+        timeline: {
+          duration: 8,
+          currentTime: 0
+        }
+      } as any,
+      timelineTime: 0,
+      currentFrame: frames[0],
+      prevFrame: undefined,
+      nextFrame: undefined,
+      prevBreakpointFrame: undefined,
+      nextBreakpointFrame: undefined
+    };
 
-    // Trigger recalculations by calling public methods
-    // Setting breakpoints will trigger recalculateBreakpointFrames
-
-    setOrchestrator(orch);
-    console.log(orch);
-    // orch.setCurrentTestTimelineTime(0);
-    // orch.setBreakpoints([2, 4, 6]);
-    setCurrentFrame(frames[0]); // Set a default frame so the page renders
+    // Initialize the orchestrator with test state
+    orchestrator.setCurrentTest(testState);
+    orchestrator.setBreakpoints([2, 4, 6]);
+    orchestrator.setCurrentTestTimelineTime(0);
 
     // Expose orchestrator to window for E2E testing
-    (window as any).testOrchestrator = orch;
-
-    // Subscribe to store changes to update local state
-    const unsubscribe = orch.getStore().subscribe((state) => {
-      setCurrentFrame(state.currentTest?.currentFrame ?? null);
-      setTimelineTime(state.currentTest?.timelineTime ?? 0);
-      setBreakpoints(state.breakpoints);
-      setFoldedLines(state.foldedLines);
-    });
+    (window as any).testOrchestrator = orchestrator;
 
     return () => {
-      // unsubscribe();
       delete (window as any).testOrchestrator;
     };
-  }, []);
+  }, [orchestrator]);
 
   const handleToggleBreakpoint = (line: number) => {
-    if (!orchestrator) {
-      return;
-    }
-    const store = orchestrator.getStore();
-    const currentBreakpoints = store.getState().breakpoints;
-
-    if (currentBreakpoints.includes(line)) {
-      store.getState().setBreakpoints(currentBreakpoints.filter((b) => b !== line));
+    if (breakpoints.includes(line)) {
+      orchestrator.setBreakpoints(breakpoints.filter((b) => b !== line));
     } else {
-      store.getState().setBreakpoints([...currentBreakpoints, line].sort((a, b) => a - b));
+      orchestrator.setBreakpoints([...breakpoints, line].sort((a, b) => a - b));
     }
   };
 
   const handleToggleFold = (line: number) => {
-    if (!orchestrator) {
-      return;
-    }
-    const currentFolded = orchestrator.getStore().getState().foldedLines;
-
-    if (currentFolded.includes(line)) {
-      orchestrator.setFoldedLines(currentFolded.filter((l) => l !== line));
+    if (foldedLines.includes(line)) {
+      orchestrator.setFoldedLines(foldedLines.filter((l) => l !== line));
     } else {
-      orchestrator.setFoldedLines([...currentFolded, line].sort((a, b) => a - b));
+      orchestrator.setFoldedLines([...foldedLines, line].sort((a, b) => a - b));
     }
   };
 
   const handleClearBreakpoints = () => {
-    if (!orchestrator) {
-      return;
-    }
-    orchestrator.getStore().getState().setBreakpoints([]);
+    orchestrator.setBreakpoints([]);
   };
 
   const handleClearFolds = () => {
-    if (!orchestrator) {
-      return;
-    }
     orchestrator.setFoldedLines([]);
   };
 
   const handleSetAllBreakpoints = () => {
-    if (!orchestrator) {
-      return;
-    }
-    orchestrator.getStore().getState().setBreakpoints([1, 2, 3, 4, 5, 6, 7, 8]);
+    orchestrator.setBreakpoints([1, 2, 3, 4, 5, 6, 7, 8]);
   };
 
-  if (!orchestrator || !currentFrame) {
+  const currentFrame = currentTest?.currentFrame;
+  const timelineTime = currentTest?.timelineTime || 0;
+
+  if (!currentFrame) {
     return <div>Loading...</div>;
   }
 

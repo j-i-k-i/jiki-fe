@@ -115,7 +115,7 @@ describe("BreakpointStepperButtons Component", () => {
   });
 
   describe("button rendering", () => {
-    it("should have correct data-ci attribute on container", () => {
+    it("should have correct data-testid attribute on container", () => {
       const mockOrchestrator = createMockOrchestrator();
       const currentFrame = createMockFrame(2, 200);
 
@@ -126,7 +126,7 @@ describe("BreakpointStepperButtons Component", () => {
 
       const { container } = render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
 
-      const buttonsContainer = container.querySelector('[data-ci="breakpoint-stepper-buttons"]');
+      const buttonsContainer = container.querySelector('[data-testid="breakpoint-stepper-buttons"]');
       expect(buttonsContainer).toBeInTheDocument();
       expect(buttonsContainer).toHaveClass("breakpoint-stepper-buttons");
     });

@@ -16,7 +16,7 @@ export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
 
   return (
     <div className="editor-wrapper">
-      <div id="bootcamp-cm-editor" data-ci="codemirror-editor" className="editor" ref={editorRef} />
+      <div id="bootcamp-cm-editor" data-testid="codemirror-editor" className="editor" ref={editorRef} />
     </div>
   );
 }

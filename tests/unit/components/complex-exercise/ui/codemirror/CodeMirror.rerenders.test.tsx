@@ -85,6 +85,6 @@ describe("CodeMirror Re-render Tests", () => {
     // Verify the editor div is rendered
     const editorDiv = container.querySelector("#bootcamp-cm-editor");
     expect(editorDiv).toBeInTheDocument();
-    expect(editorDiv).toHaveAttribute("data-ci", "codemirror-editor");
+    expect(editorDiv).toHaveAttribute("data-testid", "codemirror-editor");
   });
 });

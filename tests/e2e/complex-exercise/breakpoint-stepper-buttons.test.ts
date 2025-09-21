@@ -1,61 +1,63 @@
 describe("BreakpointStepper Buttons E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3060/test/complex-exercise/breakpoint-stepper-buttons", {
-      waitUntil: "networkidle2"
-    });
+    await page.goto("http://localhost:3060/test/complex-exercise/breakpoint-stepper-buttons");
+    // Wait for the page to be ready
+    await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 5000 });
   });
 
   describe("Initial State", () => {
     it("should render with initial breakpoints and navigation state", async () => {
-      // First just check if the page container loads
-      console.log("Waiting for container...");
-      await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 5000 });
-      console.log("Container found!");
+      // Wait for basic page elements first
+      await page.waitForSelector("body");
 
-      // Now wait for the buttons
-      // console.log("Waiting for buttons...");
-      // await page.waitForSelector('[data-ci="breakpoint-stepper-buttons"]');
-      // console.log("Buttons found!");
-
-      // Get the buttons
-      // const buttons = await page.$$('[data-ci="breakpoint-stepper-buttons"] button');
-      // expect(buttons).toHaveLength(2);
-
-      // Check initial breakpoints
+      // Check initial breakpoints first (as suggested)
+      await page.waitForSelector('[data-testid="breakpoints"]', { timeout: 3000 });
       const breakpointsText = await page.$eval('[data-testid="breakpoints"]', (el) => el.textContent);
       expect(breakpointsText).toBe("2, 4, 6");
 
+      // Now wait for the container
+      await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 3000 });
+
+      // Wait for the buttons
+      await page.waitForSelector('[data-testid="breakpoint-stepper-buttons"]', { timeout: 3000 });
+
+      // Get the buttons
+      const buttons = await page.$$('[data-testid="breakpoint-stepper-buttons"] button');
+      expect(buttons).toHaveLength(2);
+
       // Check initial state - at frame 1, no prev breakpoint, next is line 2
-      // const currentFrame = await page.$eval('[data-testid="current-frame"]', (el) => el.textContent);
-      // expect(currentFrame).toContain("Frame 1");
+      const currentFrame = await page.$eval('[data-testid="current-frame"]', (el) => el.textContent);
+      expect(currentFrame).toContain("Frame 1");
 
-      // const prevBreakpoint = await page.$eval('[data-testid="prev-breakpoint"]', (el) => el.textContent);
-      // expect(prevBreakpoint).toContain("None");
+      const prevBreakpoint = await page.$eval('[data-testid="prev-breakpoint"]', (el) => el.textContent);
+      expect(prevBreakpoint).toContain("None");
 
-      // const nextBreakpoint = await page.$eval('[data-testid="next-breakpoint"]', (el) => el.textContent);
-      // expect(nextBreakpoint).toContain("2");
+      const nextBreakpoint = await page.$eval('[data-testid="next-breakpoint"]', (el) => el.textContent);
+      expect(nextBreakpoint).toContain("2");
 
       // Prev button should be disabled (no previous breakpoint)
-      // const prevButtonDisabled = await page.$eval(
-      //   '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
-      //   (el) => el.hasAttribute("disabled")
-      // );
-      // expect(prevButtonDisabled).toBe(true);
+      const prevButtonDisabled = await page.$eval(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        (el) => el.hasAttribute("disabled")
+      );
+      expect(prevButtonDisabled).toBe(true);
 
-      // // Next button should be enabled (next breakpoint exists)
-      // const nextButtonDisabled = await page.$eval(
-      //   '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
-      //   (el) => el.hasAttribute("disabled")
-      // );
-      // expect(nextButtonDisabled).toBe(false);
+      // Next button should be enabled (next breakpoint exists)
+      const nextButtonDisabled = await page.$eval(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
+        (el) => el.hasAttribute("disabled")
+      );
+      expect(nextButtonDisabled).toBe(false);
     });
   });
 
   describe("Basic Navigation", () => {
     it("should navigate to next breakpoint", async () => {
-      await page.waitForSelector('[data-ci="breakpoint-stepper-buttons"]');
+      await page.waitForSelector('[data-testid="breakpoint-stepper-buttons"]');
 
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
 
       // Click next to go to line 2
       await nextButton?.click();
@@ -89,14 +91,14 @@ describe("BreakpointStepper Buttons E2E", () => {
     });
 
     it("should navigate to previous breakpoint", async () => {
-      await page.waitForSelector('[data-ci="breakpoint-stepper-buttons"]');
+      await page.waitForSelector('[data-testid="breakpoint-stepper-buttons"]');
 
       // First navigate to line 6
       await page.click('[data-testid="goto-frame-6"]');
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const prevButton = await page.$(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
       );
 
       // Click prev to go to line 4
@@ -115,7 +117,7 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // Now prev button should be disabled
       const prevButtonDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(prevButtonDisabled).toBe(true);
@@ -143,7 +145,9 @@ describe("BreakpointStepper Buttons E2E", () => {
       expect(nextBreakpoint).toContain("3");
 
       // Navigate to line 3
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
       await nextButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -187,7 +191,7 @@ describe("BreakpointStepper Buttons E2E", () => {
       expect(breakpointsText).toBe("None");
 
       // Buttons should not be visible when no breakpoints
-      const buttons = await page.$$('[data-ci="breakpoint-stepper-buttons"] button');
+      const buttons = await page.$$('[data-testid="breakpoint-stepper-buttons"] button');
       expect(buttons).toHaveLength(0);
     });
 
@@ -207,7 +211,9 @@ describe("BreakpointStepper Buttons E2E", () => {
       expect(nextBreakpoint).toContain("2");
 
       // Navigate should go through every frame
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
 
       for (let i = 2; i <= 8; i++) {
         await nextButton?.click();
@@ -236,7 +242,9 @@ describe("BreakpointStepper Buttons E2E", () => {
       expect(nextBreakpoint).toContain("4");
 
       // Navigate with next button
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
       await nextButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -262,7 +270,7 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // Navigate with prev button
       const prevButton = await page.$(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
       );
       await prevButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -314,13 +322,13 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // Both buttons should be disabled
       const prevButtonDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(prevButtonDisabled).toBe(true);
 
       const nextButtonDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(nextButtonDisabled).toBe(true);
@@ -341,7 +349,9 @@ describe("BreakpointStepper Buttons E2E", () => {
       await page.click('[data-testid="toggle-fold-7"]');
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
 
       // Navigate forward - should visit 1 -> 2 -> 4 -> 6 -> 8
       const expectedSequence = [2, 4, 6, 8];
@@ -356,7 +366,7 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // Navigate back
       const prevButton = await page.$(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
       );
       const reverseSequence = [6, 4, 2, 1];
 
@@ -370,11 +380,13 @@ describe("BreakpointStepper Buttons E2E", () => {
     });
 
     it("should maintain button state during rapid navigation", async () => {
-      await page.waitForSelector('[data-ci="breakpoint-stepper-buttons"]');
+      await page.waitForSelector('[data-testid="breakpoint-stepper-buttons"]');
 
-      const nextButton = await page.$('[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]');
+      const nextButton = await page.$(
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]'
+      );
       const prevButton = await page.$(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
       );
 
       // Navigate to line 4 (middle breakpoint)
@@ -418,7 +430,7 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // Navigate to prev breakpoint
       const prevButton = await page.$(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]'
       );
       await prevButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -430,15 +442,15 @@ describe("BreakpointStepper Buttons E2E", () => {
 
   describe("Button States", () => {
     it("should properly enable/disable buttons at boundaries", async () => {
-      await page.waitForSelector('[data-ci="breakpoint-stepper-buttons"]');
+      await page.waitForSelector('[data-testid="breakpoint-stepper-buttons"]');
 
       // At first frame - prev disabled, next enabled
       let prevDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       let nextDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(prevDisabled).toBe(true);
@@ -450,11 +462,11 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // At last breakpoint - prev enabled, next disabled
       prevDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       nextDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(prevDisabled).toBe(false);
@@ -466,11 +478,11 @@ describe("BreakpointStepper Buttons E2E", () => {
 
       // In middle - both enabled
       prevDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Previous breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       nextDisabled = await page.$eval(
-        '[data-ci="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
+        '[data-testid="breakpoint-stepper-buttons"] button[aria-label="Next breakpoint"]',
         (el) => el.hasAttribute("disabled")
       );
       expect(prevDisabled).toBe(false);

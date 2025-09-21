@@ -68,14 +68,14 @@ describe("FrameStepperButtons Component", () => {
       expect(screen.getByLabelText("Next frame")).toBeInTheDocument();
     });
 
-    it("should have correct data-ci attribute on container", () => {
+    it("should have correct data-testid attribute on container", () => {
       const mockOrchestrator = createMockOrchestrator();
 
       // Setup store mock with current frame
       setupStoreMock();
       const { container } = render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
 
-      const buttonsContainer = container.querySelector('[data-ci="frame-stepper-buttons"]');
+      const buttonsContainer = container.querySelector('[data-testid="frame-stepper-buttons"]');
       expect(buttonsContainer).toBeInTheDocument();
       expect(buttonsContainer).toHaveClass("frame-stepper-buttons");
     });
