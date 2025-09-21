@@ -1,6 +1,6 @@
 describe("FrameStepper Buttons E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3060/test/complex-exercise/frame-stepper-buttons", {
+    await page.goto("http://localhost:3070/test/complex-exercise/frame-stepper-buttons", {
       waitUntil: "networkidle2"
     });
   });

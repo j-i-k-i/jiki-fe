@@ -13,8 +13,8 @@ module.exports = {
     ]
   },
   server: {
-    command: "pnpm run dev",
-    port: 3060,
+    command: "next dev --turbopack --port 3070",
+    port: 3070,
     launchTimeout: 10000,
     debug: true
   }

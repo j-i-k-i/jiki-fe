@@ -1,6 +1,6 @@
 describe("Orchestrator-CodeMirror E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3060/test/complex-exercise/orchestrator-codemirror");
+    await page.goto("http://localhost:3070/test/complex-exercise/orchestrator-codemirror");
   });
 
   it("should render the CodeMirror editor with initial code", async () => {

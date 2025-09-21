@@ -1,6 +1,6 @@
 describe("Navigation E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3060", {
+    await page.goto("http://localhost:3070", {
       waitUntil: "networkidle2"
     });
   });
@@ -15,7 +15,7 @@ describe("Navigation E2E", () => {
 
     for (const link of links.slice(0, 3)) {
       if (link.href && !link.href.includes("http")) {
-        await page.goto(`http://localhost:3060${link.href}`, {
+        await page.goto(`http://localhost:3070${link.href}`, {
           waitUntil: "networkidle2"
         });
 
@@ -28,7 +28,7 @@ describe("Navigation E2E", () => {
   });
 
   it("should handle 404 pages gracefully", async () => {
-    await page.goto("http://localhost:3060/non-existent-page", {
+    await page.goto("http://localhost:3070/non-existent-page", {
       waitUntil: "networkidle2"
     });
 
@@ -38,7 +38,7 @@ describe("Navigation E2E", () => {
 
   it("should measure page load performance", async () => {
     const startTime = Date.now();
-    await page.goto("http://localhost:3060", {
+    await page.goto("http://localhost:3070", {
       waitUntil: "load"
     });
     const loadTime = Date.now() - startTime;
