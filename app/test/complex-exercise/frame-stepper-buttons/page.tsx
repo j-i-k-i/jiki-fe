@@ -1,0 +1,95 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
+import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/FrameStepperButtons";
+import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
+import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
+import { FrameInfo } from "../ui-utils/FrameInfo";
+import type { Frame } from "@/components/complex-exercise/lib/stubs";
+
+// Create test frames similar to mockFrames
+function createTestFrames(): Frame[] {
+  return [
+    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
+    { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
+    { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
+    { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
+    { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame
+  ];
+}
+
+export default function FrameStepperButtonsTestPage() {
+  const [orchestrator, setOrchestrator] = useState<Orchestrator | null>(null);
+
+  useEffect(() => {
+    const orch = new Orchestrator("test-exercise", "// Test code for frame stepping");
+
+    // Create test frames and set up the test state
+    const frames = createTestFrames();
+
+    // Initialize the orchestrator's test state with frames
+    // Calculate initial prev/next frames
+    const initialPrevFrame = TimelineManager.findPrevFrame(frames, 0, []);
+    const initialNextFrame = TimelineManager.findNextFrame(frames, 0, []);
+
+    orch.getStore().setState({
+      currentTest: {
+        frames,
+        animationTimeline: {
+          duration: 5,
+          paused: true,
+          seek: (_time: number) => {
+            // Don't call setCurrentTestTimelineTime here to avoid circular dependency
+            // The orchestrator will handle the timeline updates
+          },
+          play: () => {},
+          pause: () => {},
+          progress: 0,
+          currentTime: 0,
+          completed: false,
+          hasPlayedOrScrubbed: false,
+          seekEndOfTimeline: () => {},
+          onUpdate: () => {},
+          timeline: {
+            duration: 5,
+            currentTime: 0
+          }
+        } as any,
+        timelineTime: 0,
+        currentFrame: frames[0],
+        prevFrame: initialPrevFrame,
+        nextFrame: initialNextFrame
+      }
+    });
+
+    setOrchestrator(orch);
+
+    // Expose orchestrator to window for E2E testing
+    (window as any).testOrchestrator = orch;
+
+    return () => {
+      delete (window as any).testOrchestrator;
+    };
+  }, []);
+
+  if (!orchestrator) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="p-8">
+      <h1 className="text-2xl mb-4">FrameStepper Buttons E2E Test Page</h1>
+
+      <div className="mb-4">
+        <h2 className="font-bold mb-2">Controls:</h2>
+        <div data-testid="frame-stepper-container">
+          <FrameStepperButtons orchestrator={orchestrator} enabled={true} />
+        </div>
+      </div>
+
+      <FrameInfo orchestrator={orchestrator} />
+      <LineFoldingControls orchestrator={orchestrator} />
+    </div>
+  );
+}
