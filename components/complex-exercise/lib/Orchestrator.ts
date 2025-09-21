@@ -258,7 +258,11 @@ class Orchestrator {
 
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
   // UNUSED: This function is currently not called.
-  initializeEditor(code: any, exercise: any, unfoldableFunctionNames: string[]) {
+  initializeEditor(
+    code: { storedAt?: string; code: string; readonlyRanges?: { from: number; to: number }[] },
+    exercise: unknown,
+    unfoldableFunctionNames: string[]
+  ) {
     if (this.editorManager) {
       this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
     }

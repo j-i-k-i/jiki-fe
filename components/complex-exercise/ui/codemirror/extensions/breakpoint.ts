@@ -1,4 +1,5 @@
 import { RangeSet, StateEffect, StateField } from "@codemirror/state";
+import type { Range } from "@codemirror/state";
 import { EditorView, gutter, GutterMarker, lineNumbers } from "@codemirror/view";
 
 export const breakpointEffect = StateEffect.define<{
@@ -68,7 +69,7 @@ export const breakpointGutter = [
     class: "cm-breakpoint-gutter",
     markers: (view) => {
       const breakpoints = view.state.field(breakpointState);
-      const markers: any[] = [];
+      const markers: Range<GutterMarker>[] = [];
 
       for (let i = 1; i <= view.state.doc.lines; i++) {
         const pos = view.state.doc.line(i).from;

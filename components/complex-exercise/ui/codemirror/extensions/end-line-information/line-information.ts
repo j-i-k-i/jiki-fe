@@ -1,4 +1,5 @@
 import { StateEffect, StateField } from "@codemirror/state";
+import type { Range } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
 import { Decoration, type DecorationSet, EditorView, ViewPlugin } from "@codemirror/view";
 import { highlightedLineField } from "../lineHighlighter";
@@ -46,7 +47,7 @@ export const informationWidgetDataField = StateField.define<InformationWidgetDat
 });
 
 function lineInformationWidget(view: EditorView, onClose: (view: EditorView) => void): DecorationSet {
-  const widgets: any[] = [];
+  const widgets: Range<Decoration>[] = [];
 
   const shouldShowWidget = view.state.field(showInfoWidgetField);
   const widgetData = view.state.field(informationWidgetDataField);

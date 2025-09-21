@@ -1,6 +1,7 @@
 import React from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import type { Frame } from "../../lib/stubs";
 
 interface FrameStepperButtonsProps {
   orchestrator: Orchestrator;
@@ -40,13 +41,13 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPreviousFrame(orchestrator: Orchestrator, prevFrame: any) {
+function handleGoToPreviousFrame(orchestrator: Orchestrator, prevFrame: Frame | undefined) {
   if (prevFrame) {
     orchestrator.setCurrentTestTimelineTime(prevFrame.timelineTime);
   }
 }
 
-function handleGoToNextFrame(orchestrator: Orchestrator, nextFrame: any) {
+function handleGoToNextFrame(orchestrator: Orchestrator, nextFrame: Frame | undefined) {
   if (nextFrame) {
     orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
   }

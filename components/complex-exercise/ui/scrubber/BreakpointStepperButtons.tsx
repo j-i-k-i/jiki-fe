@@ -1,6 +1,7 @@
 import React from "react";
 import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import type { Frame } from "../../lib/stubs";
 
 interface BreakpointStepperButtonsProps {
   orchestrator: Orchestrator;
@@ -45,13 +46,13 @@ export default function BreakpointStepperButtons({ orchestrator, enabled }: Brea
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPrevBreakpoint(orchestrator: Orchestrator, prevBreakpointFrame: any) {
+function handleGoToPrevBreakpoint(orchestrator: Orchestrator, prevBreakpointFrame: Frame | undefined) {
   if (prevBreakpointFrame) {
     orchestrator.goToPrevBreakpoint();
   }
 }
 
-function handleGoToNextBreakpoint(orchestrator: Orchestrator, nextBreakpointFrame: any) {
+function handleGoToNextBreakpoint(orchestrator: Orchestrator, nextBreakpointFrame: Frame | undefined) {
   if (nextBreakpointFrame) {
     orchestrator.goToNextBreakpoint();
   }

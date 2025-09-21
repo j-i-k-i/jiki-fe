@@ -338,7 +338,11 @@ export class EditorManager {
     }
   }
 
-  initializeEditor(code: any, exercise: any, unfoldableFunctionNames: string[]) {
+  initializeEditor(
+    code: { storedAt?: string; code: string; readonlyRanges?: { from: number; to: number }[] },
+    exercise: unknown,
+    unfoldableFunctionNames: string[]
+  ) {
     const localStorageResult = loadCodeMirrorContent(this.exerciseUuid);
 
     if (
