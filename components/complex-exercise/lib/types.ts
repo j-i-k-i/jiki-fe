@@ -89,5 +89,11 @@ export interface OrchestratorActions {
   reset: () => void;
 }
 
+// Private actions that are not exposed to components
+interface OrchestratorPrivateActions {
+  recalculateNavigationFrames: () => void;
+  recalculateBreakpointFrames: () => void;
+}
+
 // Combined store type
-export type OrchestratorStore = OrchestratorState & OrchestratorActions;
+export type OrchestratorStore = OrchestratorState & OrchestratorActions & OrchestratorPrivateActions;

@@ -5,47 +5,7 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { TimelineManager } from "./TimelineManager";
 import { BreakpointManager } from "./BreakpointManager";
 import { mockTest } from "./mocks";
-import type { OrchestratorState, OrchestratorStore, TestState } from "../types";
-import type { Frame } from "../stubs";
-
-// Helper function to recalculate navigation frames (prev/next)
-function recalculateNavigationFrames(
-  currentTest: TestState,
-  foldedLines: number[]
-): {
-  prevFrame: Frame | undefined;
-  nextFrame: Frame | undefined;
-} {
-  const prevFrame = TimelineManager.findPrevFrame(currentTest.frames, currentTest.timelineTime, foldedLines);
-  const nextFrame = TimelineManager.findNextFrame(currentTest.frames, currentTest.timelineTime, foldedLines);
-
-  return { prevFrame, nextFrame };
-}
-
-// Helper function to recalculate breakpoint frames
-function recalculateBreakpointFrames(
-  currentTest: TestState,
-  breakpoints: number[],
-  foldedLines: number[]
-): {
-  prevBreakpointFrame: Frame | undefined;
-  nextBreakpointFrame: Frame | undefined;
-} {
-  const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-    currentTest.currentFrame,
-    currentTest.frames,
-    breakpoints,
-    foldedLines
-  );
-  const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-    currentTest.currentFrame,
-    currentTest.frames,
-    breakpoints,
-    foldedLines
-  );
-
-  return { prevBreakpointFrame, nextBreakpointFrame };
-}
+import type { OrchestratorState, OrchestratorStore } from "../types";
 
 // Factory function to create an instance-specific store
 export function createOrchestratorStore(exerciseUuid: string, initialCode: string): StoreApi<OrchestratorStore> {
@@ -80,6 +40,58 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       latestValueSnapshot: undefined as string | undefined,
 
       // Private actions - not exposed to components
+      recalculateNavigationFrames: () => {
+        const state = get();
+        if (!state.currentTest) {
+          return;
+        }
+
+        const prevFrame = TimelineManager.findPrevFrame(
+          state.currentTest.frames,
+          state.currentTest.timelineTime,
+          state.foldedLines
+        );
+        const nextFrame = TimelineManager.findNextFrame(
+          state.currentTest.frames,
+          state.currentTest.timelineTime,
+          state.foldedLines
+        );
+
+        set({
+          currentTest: {
+            ...state.currentTest,
+            prevFrame,
+            nextFrame
+          }
+        });
+      },
+      recalculateBreakpointFrames: () => {
+        const state = get();
+        if (!state.currentTest) {
+          return;
+        }
+
+        const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
+          state.currentTest.currentFrame,
+          state.currentTest.frames,
+          state.breakpoints,
+          state.foldedLines
+        );
+        const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
+          state.currentTest.currentFrame,
+          state.currentTest.frames,
+          state.breakpoints,
+          state.foldedLines
+        );
+
+        set({
+          currentTest: {
+            ...state.currentTest,
+            prevBreakpointFrame,
+            nextBreakpointFrame
+          }
+        });
+      },
       setCode: (code) => set({ code, hasCodeBeenEdited: true }),
       setOutput: (output) => set({ output }),
       setStatus: (status) => set({ status }),
@@ -90,90 +102,58 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Update highlighted line when setting a new test
           highlightedLine: test?.currentFrame?.line ?? 0
         }),
-      setCurrentFrame: (frame) =>
-        set((state) => {
-          if (!state.currentTest) {
-            return {};
-          }
+      setCurrentFrame: (frame) => {
+        const state = get();
+        if (!state.currentTest) {
+          return;
+        }
 
-          const tempTestState = { ...state.currentTest, currentFrame: frame };
-
-          // Recalculate breakpoint frames when current frame changes
-          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
-            tempTestState,
-            state.breakpoints,
-            state.foldedLines
-          );
-
-          return {
-            currentTest: {
-              ...state.currentTest,
-              currentFrame: frame,
-              prevBreakpointFrame,
-              nextBreakpointFrame
-            },
-            // Update highlighted line to match the new frame
-            highlightedLine: frame.line
-          };
-        }),
-      setCurrentTestTimelineTime: (time) => {
-        set((state) => {
-          if (!state.currentTest) {
-            return {};
-          }
-
-          // Update timeline time and navigation frames
-          const tempTestState = { ...state.currentTest, timelineTime: time };
-          const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
-
-          return {
-            currentTest: {
-              ...state.currentTest,
-              timelineTime: time,
-              prevFrame,
-              nextFrame
-            }
-          };
+        set({
+          currentTest: {
+            ...state.currentTest,
+            currentFrame: frame
+          },
+          highlightedLine: frame.line
         });
 
-        // Check if we landed on an exact frame and update if so
+        // Recalculate breakpoint frames after updating current frame
+        state.recalculateBreakpointFrames();
+      },
+      setCurrentTestTimelineTime: (time) => {
         const state = get();
-        if (state.currentTest) {
-          const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
-          if (exactFrame) {
-            state.setCurrentFrame(exactFrame);
+        if (!state.currentTest) {
+          return;
+        }
+
+        // Update timeline time
+        set({
+          currentTest: {
+            ...state.currentTest,
+            timelineTime: time
           }
+        });
+
+        // Recalculate navigation frames
+        state.recalculateNavigationFrames();
+
+        // Check if we landed on an exact frame and update if so
+        const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
+        if (exactFrame) {
+          state.setCurrentFrame(exactFrame);
         }
       },
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
-      setFoldedLines: (lines) =>
-        set((state) => {
-          if (!state.currentTest) {
-            return { foldedLines: lines };
-          }
+      setFoldedLines: (lines) => {
+        set({ foldedLines: lines });
 
-          // Recalculate navigation frames (affected by folded lines)
-          const { prevFrame, nextFrame } = recalculateNavigationFrames(state.currentTest, lines);
-
-          // Recalculate breakpoint frames (affected by folded lines)
-          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
-            state.currentTest,
-            state.breakpoints,
-            lines
-          );
-
-          return {
-            foldedLines: lines,
-            currentTest: {
-              ...state.currentTest,
-              prevFrame,
-              nextFrame,
-              prevBreakpointFrame,
-              nextBreakpointFrame
-            }
-          };
-        }),
+        // Recalculate frames that are affected by folded lines
+        const state = get();
+        if (state.currentTest) {
+          state.recalculateNavigationFrames();
+          state.recalculateBreakpointFrames();
+        }
+      },
 
       // Editor store actions
       setDefaultCode: (code) => set({ defaultCode: code }),
@@ -183,28 +163,15 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setHighlightedLineColor: (color) => set({ highlightedLineColor: color }),
       setHighlightedLine: (line) => set({ highlightedLine: line }),
       setInformationWidgetData: (data) => set({ informationWidgetData: data }),
-      setBreakpoints: (breakpoints) =>
-        set((state) => {
-          if (!state.currentTest) {
-            return { breakpoints };
-          }
+      setBreakpoints: (breakpoints) => {
+        set({ breakpoints });
 
-          // Only recalculate breakpoint frames (breakpoints don't affect navigation frames)
-          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
-            state.currentTest,
-            breakpoints,
-            state.foldedLines
-          );
-
-          return {
-            breakpoints,
-            currentTest: {
-              ...state.currentTest,
-              prevBreakpointFrame,
-              nextBreakpointFrame
-            }
-          };
-        }),
+        // Recalculate breakpoint frames
+        const state = get();
+        if (state.currentTest) {
+          state.recalculateBreakpointFrames();
+        }
+      },
       setShouldAutoRunCode: (shouldAutoRun) => set({ shouldAutoRunCode: shouldAutoRun }),
 
       // Error store actions
