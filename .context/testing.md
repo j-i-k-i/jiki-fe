@@ -107,10 +107,11 @@ describe('Component Name', () => {
 
 ```typescript
 describe("Feature E2E", () => {
-  beforeAll(async () => {
-    await page.goto("http://localhost:3060", {
-      waitUntil: "networkidle2"
-    });
+  // IMPORTANT: Avoid using networkidle2 with beforeEach as it can cause timeouts
+  // Instead, wait for specific elements to appear
+  beforeEach(async () => {
+    await page.goto("http://localhost:3060/test-page");
+    await page.waitForSelector('[data-testid="container"]', { timeout: 5000 });
   });
 
   it("performs user interaction", async () => {
@@ -118,6 +119,38 @@ describe("Feature E2E", () => {
     await page.waitForNavigation();
     const result = await page.$eval(".result", (el) => el.textContent);
     expect(result).toContain("Success");
+  });
+});
+```
+
+#### E2E Test Lifecycle Hooks
+
+**Important Discovery**: Using `beforeEach` with `waitUntil: "networkidle2"` can cause test timeouts. Instead:
+
+- **For test isolation**: Use `beforeEach` without `waitUntil` parameter, then wait for specific elements
+- **For single test setup**: Use `beforeAll` with `waitUntil: "networkidle2"` if needed
+- **Best practice**: Always wait for specific elements rather than network idle state
+
+Example patterns:
+
+```typescript
+// ✅ GOOD: beforeEach without networkidle2
+beforeEach(async () => {
+  await page.goto("http://localhost:3060/test-page");
+  await page.waitForSelector('[data-testid="container"]');
+});
+
+// ❌ BAD: Can cause timeouts
+beforeEach(async () => {
+  await page.goto("http://localhost:3060/test-page", {
+    waitUntil: "networkidle2"
+  });
+});
+
+// ✅ OK: beforeAll with networkidle2 (for non-repeating setup)
+beforeAll(async () => {
+  await page.goto("http://localhost:3060", {
+    waitUntil: "networkidle2"
   });
 });
 ```
