@@ -12,11 +12,11 @@ else
     echo "No files to format"
 fi
 
-# Run lint check
+# Run lint check (treating warnings as errors)
 echo "🔍 Running lint check..."
-pnpm run lint
+pnpm run lint --max-warnings=0
 if [ $? -ne 0 ]; then
-    echo "❌ Lint check failed. Commit aborted."
+    echo "❌ Lint check failed (errors or warnings found). Commit aborted."
     exit 1
 fi
 

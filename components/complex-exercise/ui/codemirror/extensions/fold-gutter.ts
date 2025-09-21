@@ -59,7 +59,7 @@ function getFunctionIdentifier(node: SyntaxNode, state: EditorState) {
   return null;
 }
 
-function isFunctionNode(node: any) {
+function isFunctionNode(node: SyntaxNode) {
   return node.name === "FunctionDefinition";
 }
 

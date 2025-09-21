@@ -14,8 +14,8 @@ The pre-commit hook (`.husky/pre-commit`) runs automatically before each commit 
    - Formatted files are automatically re-staged
 
 2. **Linting** (🔍)
-   - Runs ESLint on the entire codebase via `pnpm run lint`
-   - Blocks commit if linting errors are found
+   - Runs ESLint on the entire codebase via `pnpm run lint --max-warnings=0`
+   - Blocks commit if linting errors OR warnings are found (treats warnings as errors)
 
 3. **Testing** (🧪)
    - Runs all tests via `pnpm test`

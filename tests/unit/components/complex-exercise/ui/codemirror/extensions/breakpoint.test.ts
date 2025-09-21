@@ -534,9 +534,12 @@ describe("breakpoint extension", () => {
       expect(performanceScenarios).toHaveLength(2);
 
       // Test the performance scenario setup
-      // TypeScript fix: Use non-null assertions (!) for array access and function call
-      // TypeScript can't guarantee array elements exist at runtime, so we assert they do
-      const heavyState = performanceScenarios[0]!.setup!();
+      const scenario = performanceScenarios[0];
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!scenario?.setup) {
+        throw new Error("Performance scenario not found");
+      }
+      const heavyState = scenario.setup();
       expect(heavyState.doc.lines).toBe(100);
 
       const positions: number[] = [];

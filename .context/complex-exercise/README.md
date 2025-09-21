@@ -109,12 +109,15 @@ The Orchestrator pattern ensures:
 components/complex-exercise/
 ├── ComplexExercise.tsx          # Main component
 ├── lib/
-│   ├── Orchestrator.ts          # Central orchestrator
+│   ├── Orchestrator.ts          # Central orchestrator (facade)
 │   ├── AnimationTimeline.ts     # Timeline management
 │   ├── types.ts                 # TypeScript types
-│   └── orchestrator/            # Orchestrator helpers
-│       ├── frameMethods.ts      # Frame calculations
-│       └── stateAccessors.ts    # State getters
+│   └── orchestrator/            # Orchestrator composition
+│       ├── EditorManager.ts     # CodeMirror management
+│       ├── TimelineManager.ts   # Timeline & frame logic
+│       ├── BreakpointManager.ts # Breakpoint navigation
+│       ├── store.ts             # Zustand store factory
+│       └── mocks.ts             # Test data
 └── ui/
     ├── CodeEditor.tsx           # Editor wrapper
     ├── codemirror/              # CodeMirror implementation

@@ -3,6 +3,7 @@ import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import ScrubberInput from "./ScrubberInput";
 import FrameStepperButtons from "./FrameStepperButtons";
+import BreakpointStepperButtons from "./BreakpointStepperButtons";
 
 interface ScrubberProps {
   orchestrator: Orchestrator;
@@ -47,19 +48,8 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
         timelineTime={timelineTime}
         enabled={isEnabled}
       />
-      <FrameStepperButtons
-        orchestrator={orchestrator}
-        frames={frames}
-        timelineTime={timelineTime}
-        enabled={isEnabled}
-      />
-      {/* <BreakpointStepperButtons
-        currentFrame={_currentFrame}
-        frames={frames}
-        onNext={() => handleGoToNextBreakpoint(animationTimeline)}
-        onPrev={() => handleGoToPreviousBreakpoint(animationTimeline)}
-        enabled={isEnabled}
-      /> */}
+      <FrameStepperButtons orchestrator={orchestrator} enabled={isEnabled} />
+      <BreakpointStepperButtons orchestrator={orchestrator} enabled={isEnabled} />
       {/* <InformationWidgetToggleButton
         disabled={hasCodeBeenEdited || isSpotlightActive}
       /> */}

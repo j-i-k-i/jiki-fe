@@ -4,7 +4,6 @@
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.rulers": [120],
-  "editor.wordWrap": "bounded",
   "editor.wordWrapColumn": 120,
   "editor.renderWhitespace": "selection",
   "editor.trimAutoWhitespace": true,
@@ -136,5 +135,6 @@
 
   // Auto-import configuration for React
   "typescript.suggest.includeCompletionsForModuleExports": true,
-  "typescript.preferences.includePackageJsonAutoImports": "on"
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

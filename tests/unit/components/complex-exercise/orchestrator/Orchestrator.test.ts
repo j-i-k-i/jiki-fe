@@ -1,7 +1,5 @@
 import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
-import type { TestState } from "@/components/complex-exercise/lib/types";
-import type { AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
 
 describe("Orchestrator", () => {
   describe("constructor", () => {
@@ -60,69 +58,43 @@ describe("Orchestrator", () => {
     });
   });
 
-  describe("cache invalidation", () => {
-    // TypeScript fix: Throughout these tests, we use bracket notation ['_cachedCurrentFrame']
-    // to access the protected property _cachedCurrentFrame for testing purposes.
-    // This is a common pattern for testing private/protected class members.
-
-    it("should start with undefined cache", () => {
+  describe("frame synchronization", () => {
+    it("should only update currentFrame when landing exactly on a frame", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
+      const state = orchestrator.getStore().getState();
+
+      // Initial frame should be the first one
+      expect(state.currentTest?.currentFrame?.line).toBe(1);
+
+      // Change timeline time to between frames (should NOT update currentFrame)
+      orchestrator.setCurrentTestTimelineTime(150);
+      let updatedState = orchestrator.getStore().getState();
+      expect(updatedState.currentTest?.currentFrame?.line).toBe(1); // Should stay at 1
+
+      // Change timeline time to exact frame position (should update currentFrame)
+      orchestrator.setCurrentTestTimelineTime(200);
+      updatedState = orchestrator.getStore().getState();
+      expect(updatedState.currentTest?.currentFrame?.line).toBe(3); // Should update to line 3
     });
 
-    it("should invalidate cache when setCurrentTestTimelineTime is called", () => {
+    it("should recalculate navigation frames when setFoldedLines is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
-      // First, set the cache to something
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      // Call setCurrentTestTimelineTime which should invalidate
+      // Set timeline to line 2
       orchestrator.setCurrentTestTimelineTime(100);
+      let state = orchestrator.getStore().getState();
+      expect(state.currentTest?.currentFrame?.line).toBe(2);
 
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
-    });
+      // Fold line 2
+      orchestrator.setFoldedLines([2]);
 
-    it("should invalidate cache when setCurrentTest is called", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
+      // currentFrame should remain the same (we haven't moved the timeline)
+      state = orchestrator.getStore().getState();
+      expect(state.currentTest?.currentFrame?.line).toBe(2);
 
-      // Set cache
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      const newTest: TestState = {
-        frames: [],
-        animationTimeline: { duration: 5 } as AnimationTimeline,
-        timelineTime: 0
-      };
-
-      orchestrator.setCurrentTest(newTest);
-
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
-    });
-
-    it("should invalidate cache when setFoldedLines is called", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
-
-      // Set cache
-      orchestrator["_cachedCurrentFrame"] = {
-        line: 1,
-        interpreterTime: 0,
-        timelineTime: 0,
-        status: "SUCCESS"
-      };
-
-      orchestrator.setFoldedLines([2, 3]);
-
-      expect(orchestrator["_cachedCurrentFrame"]).toBeUndefined();
+      // But navigation frames should skip the folded line
+      expect(state.currentTest?.prevFrame?.line).toBe(1);
+      expect(state.currentTest?.nextFrame?.line).toBe(3);
     });
   });
 

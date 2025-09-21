@@ -45,19 +45,12 @@ The orchestrator (`components/complex-exercise/lib/Orchestrator.ts`) manages:
 
 The orchestrator provides key navigation methods:
 
-```typescript
-// Set timeline position directly
-orchestrator.setCurrentTestTimelineTime(timelineTime: number)
+- `setCurrentTestTimelineTime(timelineTime: number)` - Set timeline position directly
+- `setCurrentTestInterpreterTime(interpreterTime: number)` - Set by interpreter time (converts automatically)
+- `getNearestCurrentFrame(): Frame | null` - Get nearest frame to current position
+- `getCurrentFrame(): Frame | null` - Get current frame (cached for performance)
 
-// Set by interpreter time (converts automatically)
-orchestrator.setCurrentTestInterpreterTime(interpreterTime: number)
-
-// Get nearest frame to current position
-orchestrator.getNearestCurrentFrame(): Frame | null
-
-// Get current frame (cached for performance)
-orchestrator.getCurrentFrame(): Frame | null
-```
+**Performance Optimization**: Previous and next frames are now calculated and stored in the Zustand store for better performance. This avoids recalculating frame positions on every render and enables efficient frame navigation.
 
 ### Component Responsibilities
 
@@ -98,41 +91,24 @@ Planned keyboard shortcuts in ScrubberInput:
 
 ## Enabled State Logic
 
-The scrubber uses a single-line enabled calculation:
-
-```typescript
-const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
-```
-
-All child components receive this as an `enabled` prop.
+The scrubber calculates enabled state based on whether there's a current test, code hasn't been edited, spotlight isn't active, and there are at least 2 frames. All child components receive this as an `enabled` prop.
 
 ## Frame Structure
 
-```typescript
-interface Frame {
-  interpreterTime: number; // Internal interpreter clock
-  timelineTime: number; // Timeline position for UI
-  line: number; // Code line number
-  status: "SUCCESS" | "ERROR";
-  description: string; // Human-readable description
-}
-```
+See `components/complex-exercise/lib/stubs.ts` for the Frame interface which includes:
+
+- `interpreterTime` - Internal interpreter clock
+- `timelineTime` - Timeline position for UI
+- `line` - Code line number
+- `status` - SUCCESS or ERROR
+- `description` - Human-readable description
 
 ## Range Input Calculations
 
 ### Min/Max Values
 
-```typescript
-// Min: -1 for single frame, 0 for multiple frames
-function calculateMinInputValue(frames: Frame[]) {
-  return frames.length < 2 ? -1 : 0;
-}
-
-// Max: Animation duration * 100
-function calculateMaxInputValue(animationTimeline: AnimationTimeline) {
-  return Math.round(animationTimeline.duration * 100);
-}
-```
+- **Min Value**: -1 for single frame, 0 for multiple frames (see `calculateMinInputValue` in ScrubberInput.tsx)
+- **Max Value**: Animation duration × 100 (see `calculateMaxInputValue` in ScrubberInput.tsx)
 
 ### Frame Snapping
 

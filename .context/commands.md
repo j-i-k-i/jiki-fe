@@ -27,6 +27,14 @@
 
 - `npx puppeteer browsers install chrome` - Install Chrome browser for Puppeteer E2E tests (required after fresh clone)
 
+## Code Quality Commands
+
+### Dead Code Detection
+
+- `npx knip` - Run knip to detect unused code, dependencies, and exports across the codebase
+- `npx tsx scripts/analyze-exports.ts [file]` - Analyze specific file for unused exports and class members
+- `/cleanup [target]` - Claude Code slash command for automated dead code cleanup (requires approval before changes)
+
 ## Package Management
 
 This project uses pnpm for package management:
