@@ -17,14 +17,14 @@ describe("ScrubberInput E2E", () => {
       // Check scrubber input exists and has correct initial value
       const scrubberValue = await page.$eval(
         '[data-testid="scrubber-range-input"]',
-        (el: HTMLInputElement) => el.value
+        (el) => (el as HTMLInputElement).value
       );
       expect(scrubberValue).toBe("0");
 
       // Check scrubber is enabled
       const isDisabled = await page.$eval(
         '[data-testid="scrubber-range-input"]',
-        (el: HTMLInputElement) => el.disabled
+        (el) => (el as HTMLInputElement).disabled
       );
       expect(isDisabled).toBe(false);
     });
@@ -61,11 +61,12 @@ describe("ScrubberInput E2E", () => {
       const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');
 
       // Simulate dragging to position 240 (just before frame 3 at 250)
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "240");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "240");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       // Simulate mouseup
@@ -85,11 +86,12 @@ describe("ScrubberInput E2E", () => {
       const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');
 
       // Test snapping just past frame 7 (910 is just past frame 7 at 900)
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "910");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "910");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       await scrubberInput?.evaluate((el) => {
@@ -114,14 +116,15 @@ describe("ScrubberInput E2E", () => {
 
       for (const position of testPositions) {
         // Set value and trigger input/change events (simulating drag)
-        await scrubberInput?.evaluate((el: HTMLInputElement, pos: number) => {
+        await scrubberInput?.evaluate((el, pos: number) => {
+          const input = el as HTMLInputElement;
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
             window.HTMLInputElement.prototype,
             "value"
           )?.set;
-          nativeInputValueSetter?.call(el, String(pos));
-          el.dispatchEvent(new Event("input", { bubbles: true }));
-          el.dispatchEvent(new Event("change", { bubbles: true }));
+          nativeInputValueSetter?.call(input, String(pos));
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
         }, position);
 
         // Verify the timeline time updates to exact value (no snapping)
@@ -186,10 +189,10 @@ describe("ScrubberInput E2E", () => {
     it("should have correct min and max values", async () => {
       const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');
 
-      const min = await scrubberInput?.evaluate((el: HTMLInputElement) => el.min);
+      const min = await scrubberInput?.evaluate((el) => (el as HTMLInputElement).min);
       expect(min).toBe("0");
 
-      const max = await scrubberInput?.evaluate((el: HTMLInputElement) => el.max);
+      const max = await scrubberInput?.evaluate((el) => (el as HTMLInputElement).max);
       expect(max).toBe("1000"); // duration (10) * 100
     });
 
@@ -197,22 +200,24 @@ describe("ScrubberInput E2E", () => {
       const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');
 
       // Test minimum value
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "0");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "0");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       let timelineTime = await page.$eval('[data-testid="timeline-time"]', (el) => el.textContent);
       expect(timelineTime).toContain("0");
 
       // Test maximum value
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "1000");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "1000");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       timelineTime = await page.$eval('[data-testid="timeline-time"]', (el) => el.textContent);
@@ -228,7 +233,7 @@ describe("ScrubberInput E2E", () => {
       // Check scrubber value updated
       const scrubberValue = await page.$eval(
         '[data-testid="scrubber-range-input"]',
-        (el: HTMLInputElement) => el.value
+        (el) => (el as HTMLInputElement).value
       );
       expect(scrubberValue).toBe("175");
 
@@ -243,7 +248,7 @@ describe("ScrubberInput E2E", () => {
 
       const scrubberValue = await page.$eval(
         '[data-testid="scrubber-range-input"]',
-        (el: HTMLInputElement) => el.value
+        (el) => (el as HTMLInputElement).value
       );
       expect(scrubberValue).toBe("600"); // Frame 5's timeline time
 
@@ -260,14 +265,15 @@ describe("ScrubberInput E2E", () => {
       const positions = [50, 110, 260, 410, 610, 760, 910, 610, 410, 110];
 
       for (const position of positions) {
-        await scrubberInput?.evaluate((el: HTMLInputElement, pos: number) => {
+        await scrubberInput?.evaluate((el, pos: number) => {
+          const input = el as HTMLInputElement;
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
             window.HTMLInputElement.prototype,
             "value"
           )?.set;
-          nativeInputValueSetter?.call(el, String(pos));
-          el.dispatchEvent(new Event("input", { bubbles: true }));
-          el.dispatchEvent(new Event("change", { bubbles: true }));
+          nativeInputValueSetter?.call(input, String(pos));
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
         }, position);
       }
 
@@ -289,11 +295,12 @@ describe("ScrubberInput E2E", () => {
       const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');
 
       // First scrub to 110 (just past frame 2 at 100)
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "110");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "110");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       // Release (should snap)
@@ -305,11 +312,12 @@ describe("ScrubberInput E2E", () => {
       expect(timelineTime).toContain("100"); // Snapped to frame 2
 
       // Scrub again to 610 (just past frame 5 at 600)
-      await scrubberInput?.evaluate((el: HTMLInputElement) => {
+      await scrubberInput?.evaluate((el) => {
+        const input = el as HTMLInputElement;
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-        nativeInputValueSetter?.call(el, "610");
-        el.dispatchEvent(new Event("input", { bubbles: true }));
-        el.dispatchEvent(new Event("change", { bubbles: true }));
+        nativeInputValueSetter?.call(input, "610");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        input.dispatchEvent(new Event("change", { bubbles: true }));
       });
 
       timelineTime = await page.$eval('[data-testid="timeline-time"]', (el) => el.textContent);

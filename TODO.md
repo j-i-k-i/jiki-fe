@@ -15,4 +15,4 @@ _**For humans:** Use `/todo` within Claude Code to get it to complete the next i
 Complete the next task from the list below.
 
 - [x] Run e2e tests on port 3070
-- [ ] Move the app/test-extensions and app/dev/code-mirror testing, so they're both in app/test instead.
+- [x] Move the app/test-extensions and app/dev/code-mirror testing, so they're both in app/test instead.
