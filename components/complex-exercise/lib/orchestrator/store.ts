@@ -8,7 +8,7 @@ import { mockTest } from "./mocks";
 import type { OrchestratorState, OrchestratorStore, TestState } from "../types";
 import type { Frame } from "../stubs";
 
-// Helper function to recalculate navigation frames
+// Helper function to recalculate navigation frames (prev/next)
 function recalculateNavigationFrames(
   currentTest: TestState,
   foldedLines: number[]
@@ -45,34 +45,6 @@ function recalculateBreakpointFrames(
   );
 
   return { prevBreakpointFrame, nextBreakpointFrame };
-}
-
-// Helper function to get recalculated frames when state changes
-function getRecalculatedFrames(
-  state: OrchestratorState,
-  updates: {
-    foldedLines?: number[];
-    breakpoints?: number[];
-  }
-): {
-  navigationFrames?: ReturnType<typeof recalculateNavigationFrames>;
-  breakpointFrames: ReturnType<typeof recalculateBreakpointFrames>;
-} {
-  if (!state.currentTest) {
-    return { breakpointFrames: { prevBreakpointFrame: undefined, nextBreakpointFrame: undefined } };
-  }
-
-  const foldedLines = updates.foldedLines ?? state.foldedLines;
-  const breakpoints = updates.breakpoints ?? state.breakpoints;
-
-  // Recalculate navigation frames if folded lines changed
-  const navigationFrames =
-    updates.foldedLines !== undefined ? recalculateNavigationFrames(state.currentTest, foldedLines) : undefined;
-
-  // Recalculate breakpoint frames if either folded lines or breakpoints changed
-  const breakpointFrames = recalculateBreakpointFrames(state.currentTest, breakpoints, foldedLines);
-
-  return { navigationFrames, breakpointFrames };
 }
 
 // Factory function to create an instance-specific store
@@ -122,20 +94,15 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Calculate the nearest frame for the new timeline time
           const nearestFrame = TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines);
 
-          // Calculate prev/next frames using static methods
-          const prevFrame = TimelineManager.findPrevFrame(state.currentTest.frames, time, state.foldedLines);
-          const nextFrame = TimelineManager.findNextFrame(state.currentTest.frames, time, state.foldedLines);
+          // Create a temporary test state with the new current frame for breakpoint calculation
+          const tempTestState = { ...state.currentTest, currentFrame: nearestFrame, timelineTime: time };
 
-          // Calculate prev/next breakpoint frames
-          const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-            nearestFrame,
-            state.currentTest.frames,
-            state.breakpoints,
-            state.foldedLines
-          );
-          const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-            nearestFrame,
-            state.currentTest.frames,
+          // Calculate navigation frames
+          const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
+
+          // Calculate breakpoint frames
+          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
+            tempTestState,
             state.breakpoints,
             state.foldedLines
           );
@@ -156,18 +123,28 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
       setFoldedLines: (lines) =>
         set((state) => {
-          const { navigationFrames, breakpointFrames } = getRecalculatedFrames(state, { foldedLines: lines });
-
           if (!state.currentTest) {
             return { foldedLines: lines };
           }
+
+          // Recalculate navigation frames (affected by folded lines)
+          const { prevFrame, nextFrame } = recalculateNavigationFrames(state.currentTest, lines);
+
+          // Recalculate breakpoint frames (affected by folded lines)
+          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
+            state.currentTest,
+            state.breakpoints,
+            lines
+          );
 
           return {
             foldedLines: lines,
             currentTest: {
               ...state.currentTest,
-              ...(navigationFrames || {}),
-              ...breakpointFrames
+              prevFrame,
+              nextFrame,
+              prevBreakpointFrame,
+              nextBreakpointFrame
             }
           };
         }),
@@ -182,17 +159,23 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setInformationWidgetData: (data) => set({ informationWidgetData: data }),
       setBreakpoints: (breakpoints) =>
         set((state) => {
-          const { breakpointFrames } = getRecalculatedFrames(state, { breakpoints });
-
           if (!state.currentTest) {
             return { breakpoints };
           }
+
+          // Only recalculate breakpoint frames (breakpoints don't affect navigation frames)
+          const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
+            state.currentTest,
+            breakpoints,
+            state.foldedLines
+          );
 
           return {
             breakpoints,
             currentTest: {
               ...state.currentTest,
-              ...breakpointFrames
+              prevBreakpointFrame,
+              nextBreakpointFrame
             }
           };
         }),
