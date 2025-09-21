@@ -68,9 +68,13 @@ describe("Code Folding E2E", () => {
       });
 
       // Click on the first visible fold indicator
-      if (visibleFoldGutter && (await visibleFoldGutter.evaluate((el) => el !== null))) {
-        await visibleFoldGutter.click();
-        await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 200)));
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (visibleFoldGutter) {
+        const isNotNull = await (visibleFoldGutter as any).evaluate((el: Element | null) => el !== null);
+        if (isNotNull) {
+          await (visibleFoldGutter as any).click();
+          await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 200)));
+        }
       }
 
       // Check if fold was registered
@@ -109,9 +113,13 @@ describe("Code Folding E2E", () => {
       });
 
       // Click to unfold
-      if (visibleFoldGutter && (await visibleFoldGutter.evaluate((el) => el !== null))) {
-        await visibleFoldGutter.click();
-        await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 200)));
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (visibleFoldGutter) {
+        const isNotNull = await (visibleFoldGutter as any).evaluate((el: Element | null) => el !== null);
+        if (isNotNull) {
+          await (visibleFoldGutter as any).click();
+          await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 200)));
+        }
       }
 
       // Check if unfold was registered

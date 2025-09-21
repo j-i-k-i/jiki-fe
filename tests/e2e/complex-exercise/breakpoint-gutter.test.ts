@@ -279,7 +279,7 @@ describe("Breakpoint Gutter E2E", () => {
             await lineGutter[i].click();
             // Small delay to let DOM update but still rapid
             await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 10)));
-          } catch (e) {
+          } catch {
             // If clicking fails, continue to next element
           }
         }
