@@ -98,6 +98,7 @@ function createMockStoreState(overrides?: Partial<ReturnType<typeof useOrchestra
     status: "idle" as const,
     error: null,
     foldedLines: [],
+    breakpoints: [],
     ...overrides
   };
 }

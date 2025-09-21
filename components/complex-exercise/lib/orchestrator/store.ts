@@ -84,7 +84,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setOutput: (output) => set({ output }),
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
-      setCurrentTest: (test) => set({ currentTest: test }),
+      setCurrentTest: (test) =>
+        set({
+          currentTest: test,
+          // Update highlighted line when setting a new test
+          highlightedLine: test?.currentFrame?.line ?? 0
+        }),
       setCurrentTestTimelineTime: (time) =>
         set((state) => {
           if (!state.currentTest) {
@@ -116,7 +121,9 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
               nextFrame,
               prevBreakpointFrame,
               nextBreakpointFrame
-            }
+            },
+            // Update highlighted line to match the current frame's line
+            highlightedLine: nearestFrame?.line ?? 0
           };
         }),
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),

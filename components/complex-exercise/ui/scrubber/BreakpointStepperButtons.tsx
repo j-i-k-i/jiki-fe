@@ -24,7 +24,7 @@ export default function BreakpointStepperButtons({ orchestrator, enabled }: Brea
       <button
         disabled={!enabled || !prevBreakpointFrame}
         onClick={() => handleGoToPrevBreakpoint(orchestrator, prevBreakpointFrame)}
-        className="p-1 border rounded disabled:opacity-50"
+        className="p-1 border rounded bg-orange text-white disabled:opacity-50"
         aria-label="Previous breakpoint"
       >
         ⟵
@@ -32,7 +32,7 @@ export default function BreakpointStepperButtons({ orchestrator, enabled }: Brea
       <button
         disabled={!enabled || !nextBreakpointFrame}
         onClick={() => handleGoToNextBreakpoint(orchestrator, nextBreakpointFrame)}
-        className="p-1 border rounded disabled:opacity-50"
+        className="p-1 border rounded bg-orange text-white disabled:opacity-50"
         aria-label="Next breakpoint"
       >
         ⟶
