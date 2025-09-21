@@ -62,6 +62,7 @@ export interface OrchestratorActions {
   setStatus: (status: OrchestratorState["status"]) => void;
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestState | null) => void;
+  setCurrentFrame: (frame: Frame) => void;
   setCurrentTestTimelineTime: (time: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;

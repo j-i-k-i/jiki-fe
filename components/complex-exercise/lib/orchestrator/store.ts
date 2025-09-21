@@ -50,7 +50,7 @@ function recalculateBreakpointFrames(
 // Factory function to create an instance-specific store
 export function createOrchestratorStore(exerciseUuid: string, initialCode: string): StoreApi<OrchestratorStore> {
   return createStore<OrchestratorStore>()(
-    subscribeWithSelector((set, _get) => ({
+    subscribeWithSelector((set, get) => ({
       exerciseUuid,
       code: initialCode,
       output: "",
@@ -90,37 +90,15 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Update highlighted line when setting a new test
           highlightedLine: test?.currentFrame?.line ?? 0
         }),
-      setCurrentTestTimelineTime: (time) =>
+      setCurrentFrame: (frame) =>
         set((state) => {
           if (!state.currentTest) {
             return {};
           }
 
-          // Check if we're exactly on a frame
-          const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
+          const tempTestState = { ...state.currentTest, currentFrame: frame };
 
-          // If currentFrame doesn't change, only update timelineTime and navigation frames
-          if (!exactFrame) {
-            const tempTestState = { ...state.currentTest, timelineTime: time };
-            const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
-
-            return {
-              currentTest: {
-                ...state.currentTest,
-                timelineTime: time,
-                prevFrame,
-                nextFrame
-              }
-            };
-          }
-
-          // currentFrame is changing, so recalculate everything
-          const tempTestState = { ...state.currentTest, currentFrame: exactFrame, timelineTime: time };
-
-          // Calculate navigation frames
-          const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
-
-          // Calculate breakpoint frames (only needed when currentFrame changes)
+          // Recalculate breakpoint frames when current frame changes
           const { prevBreakpointFrame, nextBreakpointFrame } = recalculateBreakpointFrames(
             tempTestState,
             state.breakpoints,
@@ -130,17 +108,43 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           return {
             currentTest: {
               ...state.currentTest,
-              timelineTime: time,
-              currentFrame: exactFrame,
-              prevFrame,
-              nextFrame,
+              currentFrame: frame,
               prevBreakpointFrame,
               nextBreakpointFrame
             },
-            // Update highlighted line since we're on an exact frame
-            highlightedLine: exactFrame.line
+            // Update highlighted line to match the new frame
+            highlightedLine: frame.line
           };
         }),
+      setCurrentTestTimelineTime: (time) => {
+        set((state) => {
+          if (!state.currentTest) {
+            return {};
+          }
+
+          // Update timeline time and navigation frames
+          const tempTestState = { ...state.currentTest, timelineTime: time };
+          const { prevFrame, nextFrame } = recalculateNavigationFrames(tempTestState, state.foldedLines);
+
+          return {
+            currentTest: {
+              ...state.currentTest,
+              timelineTime: time,
+              prevFrame,
+              nextFrame
+            }
+          };
+        });
+
+        // Check if we landed on an exact frame and update if so
+        const state = get();
+        if (state.currentTest) {
+          const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
+          if (exactFrame) {
+            state.setCurrentFrame(exactFrame);
+          }
+        }
+      },
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
       setFoldedLines: (lines) =>
