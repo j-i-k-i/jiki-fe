@@ -155,6 +155,90 @@ beforeAll(async () => {
 });
 ```
 
+### E2E Test Page Setup Patterns
+
+When creating test pages for E2E tests, follow the same patterns used in production components for consistency and reliability:
+
+#### Orchestrator Initialization Pattern
+
+Test pages should initialize the Orchestrator following the same pattern as the ComplexExercise page:
+
+```typescript
+// ✅ CORRECT: Use useRef to ensure single orchestrator instance
+export default function TestPage() {
+  // Create orchestrator once using useRef (prevents re-creation on re-renders)
+  const orchestratorRef = useRef<Orchestrator>(
+    new Orchestrator(
+      "test-unique-id",
+      `// Initial code for testing`
+    )
+  );
+  const orchestrator = orchestratorRef.current;
+
+  // Use the orchestrator store hook
+  const { currentTest, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
+
+  // Initialize test state in useEffect
+  useEffect(() => {
+    const frames = createTestFrames();
+    const testState = {
+      frames,
+      timelineTime: 0,
+      currentFrame: frames[0],
+      // ... other test state
+    };
+
+    orchestrator.setCurrentTest(testState);
+    orchestrator.setBreakpoints([2, 4, 6]);
+
+    // Expose to window for E2E test access
+    (window as any).testOrchestrator = orchestrator;
+
+    return () => {
+      delete (window as any).testOrchestrator;
+    };
+  }, [orchestrator]);
+
+  return (
+    <div data-testid="test-container">
+      {/* Test UI components */}
+    </div>
+  );
+}
+```
+
+#### Key Patterns for E2E Test Pages
+
+1. **Singleton Orchestrator**: Always use `useRef` to create a single orchestrator instance
+2. **Store Hook Usage**: Use `useOrchestratorStore(orchestrator)` to access state
+3. **Window Exposure**: Expose the orchestrator on window for E2E test manipulation
+4. **Cleanup**: Remove window references in useEffect cleanup
+5. **Test IDs**: Use `data-testid` attributes for reliable element selection
+
+#### E2E Test Structure for Orchestrator-based Tests
+
+```typescript
+describe("Feature E2E", () => {
+  beforeEach(async () => {
+    await page.goto("http://localhost:3060/test/feature-page");
+    await page.waitForSelector('[data-testid="test-container"]');
+  });
+
+  it("should interact with orchestrator state", async () => {
+    // Access the orchestrator through window
+    await page.evaluate(() => {
+      const orchestrator = (window as any).testOrchestrator;
+      orchestrator.setBreakpoints([1, 3, 5]);
+      orchestrator.setCurrentTestTimelineTime(300);
+    });
+
+    // Verify UI updates
+    const breakpoints = await page.$eval('[data-testid="breakpoints"]', (el) => el.textContent);
+    expect(breakpoints).toBe("1, 3, 5");
+  });
+});
+```
+
 ## TypeScript Testing Patterns
 
 When writing tests with TypeScript strict mode enabled, use these patterns:
