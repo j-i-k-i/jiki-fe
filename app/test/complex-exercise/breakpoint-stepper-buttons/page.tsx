@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
-import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
+import React, { useEffect, useRef, useState } from "react";
+import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
 
@@ -21,54 +20,40 @@ function createTestFrames(): Frame[] {
 }
 
 export default function BreakpointStepperButtonsTestPage() {
-  const [orchestrator, setOrchestrator] = useState<Orchestrator | null>(null);
   const [breakpoints, setBreakpoints] = useState<number[]>([2, 4, 6]); // Initial breakpoints
   const [foldedLines, setFoldedLines] = useState<number[]>([]);
   const [currentFrame, setCurrentFrame] = useState<Frame | null>(null);
   const [timelineTime, setTimelineTime] = useState<number>(0);
 
+  const orchestratorRef = useRef<Orchestrator>(
+    new Orchestrator(
+      "example-exercise-001",
+      `// Custom initial code\nfunction greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("World"));`
+    )
+  );
+  const orchestrator = orchestratorRef.current;
+
+  const { currentTest } = useOrchestratorStore(orchestrator);
+
   useEffect(() => {
     const frames = createTestFrames();
-    const orch = new Orchestrator("test-uuid", "// test code");
 
-    // Initialize the orchestrator's test state with frames
-    const initialPrevFrame = TimelineManager.findPrevFrame(frames, 0, []);
-    const initialNextFrame = TimelineManager.findNextFrame(frames, 0, []);
-
-    orch.getStore().setState({
-      currentTest: {
-        frames,
-        animationTimeline: {
-          duration: 8,
-          paused: true,
-          seek: (_time: number) => {
-            // The orchestrator will handle the timeline updates
-          },
-          play: () => {},
-          pause: () => {},
-          progress: 0,
-          currentTime: 0,
-          completed: false,
-          hasPlayedOrScrubbed: false,
-          seekEndOfTimeline: () => {},
-          onUpdate: () => {},
-          timeline: {
-            duration: 8,
-            currentTime: 0
-          }
-        } as any,
-        timelineTime: 0,
-        currentFrame: frames[0],
-        prevFrame: initialPrevFrame,
-        nextFrame: initialNextFrame,
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined
-      },
-      breakpoints: [2, 4, 6], // Initial breakpoints
+    // Set the state directly - minimum needed for component to render
+    const store = orch.getStore();
+    store.setState({
+      currentTest: testState,
+      breakpoints: [],
       foldedLines: []
     });
 
+    // Trigger recalculations by calling public methods
+    // Setting breakpoints will trigger recalculateBreakpointFrames
+
     setOrchestrator(orch);
+    console.log(orch);
+    // orch.setCurrentTestTimelineTime(0);
+    // orch.setBreakpoints([2, 4, 6]);
+    setCurrentFrame(frames[0]); // Set a default frame so the page renders
 
     // Expose orchestrator to window for E2E testing
     (window as any).testOrchestrator = orch;
@@ -81,11 +66,8 @@ export default function BreakpointStepperButtonsTestPage() {
       setFoldedLines(state.foldedLines);
     });
 
-    // Trigger initial calculation of breakpoint frames
-    orch.setCurrentTestTimelineTime(0);
-
     return () => {
-      unsubscribe();
+      // unsubscribe();
       delete (window as any).testOrchestrator;
     };
   }, []);

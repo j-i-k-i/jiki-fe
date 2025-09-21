@@ -117,8 +117,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         });
 
         // Recalculate both navigation and breakpoint frames after updating current frame
-        state.recalculateNavigationFrames();
-        state.recalculateBreakpointFrames();
+        get().recalculateNavigationFrames();
+        get().recalculateBreakpointFrames();
       },
       setCurrentTestTimelineTime: (time) => {
         const state = get();
@@ -137,7 +137,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Check if we landed on an exact frame and update if so
         const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
         if (exactFrame) {
-          state.setCurrentFrame(exactFrame);
+          get().setCurrentFrame(exactFrame);
         }
       },
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
@@ -146,11 +146,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         set({ foldedLines: lines });
 
         // Recalculate frames that are affected by folded lines
-        const state = get();
-        if (state.currentTest) {
-          state.recalculateNavigationFrames();
-          state.recalculateBreakpointFrames();
-        }
+        get().recalculateNavigationFrames();
+        get().recalculateBreakpointFrames();
       },
 
       // Editor store actions
@@ -165,10 +162,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         set({ breakpoints });
 
         // Recalculate breakpoint frames
-        const state = get();
-        if (state.currentTest) {
-          state.recalculateBreakpointFrames();
-        }
+        get().recalculateBreakpointFrames();
       },
       setShouldAutoRunCode: (shouldAutoRun) => set({ shouldAutoRunCode: shouldAutoRun }),
 

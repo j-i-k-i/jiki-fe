@@ -20,7 +20,7 @@ export default function BreakpointStepperButtons({ orchestrator, enabled }: Brea
   const nextBreakpointFrame = currentTest.nextBreakpointFrame;
 
   return (
-    <div data-ci="breakpoint-stepper-buttons" className="breakpoint-stepper-buttons flex gap-1">
+    <div data-testid="breakpoint-stepper-buttons" className="breakpoint-stepper-buttons flex gap-1">
       <button
         disabled={!enabled || !prevBreakpointFrame}
         onClick={() => handleGoToPrevBreakpoint(orchestrator, prevBreakpointFrame)}

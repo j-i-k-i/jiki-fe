@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import type { Orchestrator } from "../lib/Orchestrator";
 import { useOrchestratorStore } from "../lib/Orchestrator";
 
@@ -9,15 +9,11 @@ interface FrameDescriptionProps {
 export default function FrameDescription({ orchestrator }: FrameDescriptionProps) {
   const { currentTest } = useOrchestratorStore(orchestrator);
 
-  // Subscribe to timelineTime to trigger re-renders when scrubbing
-  const timelineTime = currentTest?.timelineTime || 0;
+  // Get currentFrame directly from the store
+  const currentFrame = currentTest?.currentFrame;
 
-  // Use useMemo with explicit dependency to control when to recalculate
-  const currentFrame = useMemo(
-    () => orchestrator.getNearestCurrentFrame(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [orchestrator, timelineTime] // timelineTime triggers recalculation of internal orchestrator state
-  );
+  // Subscribe to timelineTime for display
+  const timelineTime = currentTest?.timelineTime || 0;
 
   if (!currentTest || !currentFrame) {
     return (

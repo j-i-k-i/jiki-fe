@@ -15,7 +15,7 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
   const nextFrame = currentTest?.nextFrame;
 
   return (
-    <div data-ci="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
+    <div data-testid="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
       <button
         disabled={!enabled || !prevFrame}
         onClick={() => handleGoToPreviousFrame(orchestrator, prevFrame)}
