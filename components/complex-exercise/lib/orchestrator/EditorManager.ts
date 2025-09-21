@@ -85,9 +85,7 @@ export class EditorManager {
       }
 
       this.store.getState().setHasUnhandledError(true);
-      this.store
-        .getState()
-        .setUnhandledErrorBase64(Buffer.from(JSON.stringify({ error: String(e) })).toString("base64"));
+      this.store.getState().setUnhandledErrorBase64(btoa(JSON.stringify({ error: String(e) })));
     }
   }
 
