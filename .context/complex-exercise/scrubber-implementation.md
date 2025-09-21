@@ -59,6 +59,8 @@ orchestrator.getNearestCurrentFrame(): Frame | null
 orchestrator.getCurrentFrame(): Frame | null
 ```
 
+**Performance Optimization**: Previous and next frames are now calculated and stored in the Zustand store for better performance. This avoids recalculating frame positions on every render and enables efficient frame navigation.
+
 ### Component Responsibilities
 
 1. **Scrubber.tsx**
