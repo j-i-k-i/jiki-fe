@@ -181,7 +181,13 @@ This pattern makes components readable from high-level to low-level details.
    **Note**: Folders prefixed with underscore (e.g., `_dev`) are treated as private by Next.js and don't create routes, so we use `/dev` instead.
    ```
 
-2. **Continuous learning** - When you learn something important or make a mistake, immediately update the relevant .context file to prevent future errors
-3. **Regular commits** - Git commit regularly to save progress (always on feature branches, never on main)
-4. **Post-task documentation** - Before committing, always check if any .context files need updating to reflect the new state of the codebase
-5. **Ask, don't guess** - Prefer asking questions over making assumptions. If multiple approaches exist, ask which to use
+2. **Avoid code duplication in context files** - Don't include large code blocks in context documentation when the actual code is just as easy for an LLM to look up. Instead, reference file paths and describe the functionality. Keep instructional examples and diagrams that explain concepts.
+
+   ✅ **GOOD**: "See `components/complex-exercise/lib/Orchestrator.ts` for the implementation"
+
+   ❌ **BAD**: Including entire class definitions or method implementations in context files
+
+3. **Continuous learning** - When you learn something important or make a mistake, immediately update the relevant .context file to prevent future errors
+4. **Regular commits** - Git commit regularly to save progress (always on feature branches, never on main)
+5. **Post-task documentation** - Before committing, always check if any .context files need updating to reflect the new state of the codebase
+6. **Ask, don't guess** - Prefer asking questions over making assumptions. If multiple approaches exist, ask which to use

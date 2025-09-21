@@ -70,27 +70,13 @@ The Orchestrator manages CodeMirror state and provides methods for interaction:
 
 ### State Management
 
-The orchestrator maintains editor-related state in its Zustand store:
+The orchestrator maintains editor-related state in its Zustand store, including:
 
-```typescript
-// Editor visual state
-defaultCode: string
-readonly: boolean
-highlightedLine: number
-highlightedLineColor: string
-underlineRange: UnderlineRange | undefined
-shouldShowInformationWidget: boolean
-informationWidgetData: InformationWidgetData
+- **Editor visual state**: defaultCode, readonly, highlightedLine, highlightedLineColor, underlineRange, information widget data
+- **Editor feature state**: breakpoints, foldedLines, shouldAutoRunCode
+- **Error handling**: hasUnhandledError, unhandledErrorBase64
 
-// Editor feature state
-breakpoints: number[]
-foldedLines: number[]
-shouldAutoRunCode: boolean
-
-// Error handling
-hasUnhandledError: boolean
-unhandledErrorBase64: string
-```
+See `components/complex-exercise/lib/orchestrator/store.ts` for the complete state definition.
 
 ### Event Handler Creation
 
@@ -117,16 +103,11 @@ These methods are now in EditorManager:
 
 ### Editor Lifecycle Management
 
-The orchestrator manages EditorManager lifecycle through a ref callback pattern:
+The orchestrator manages EditorManager lifecycle through a ref callback pattern. The `setupEditor()` method returns a stable ref callback that:
 
-```typescript
-setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
-  // Returns a stable ref callback that:
-  // - Creates EditorManager when element is available
-  // - Cleans up EditorManager when element is removed
-  // - Ensures ref callback stability across React renders
-}
-```
+- Creates EditorManager when DOM element is available
+- Cleans up EditorManager when element is removed
+- Ensures ref callback stability across React renders
 
 The EditorManager is created lazily when the DOM element becomes available, and its `editorView` property is guaranteed to exist.
 
@@ -221,11 +202,7 @@ readonlyCompartment.reconfigure([EditorView.editable.of(false)]);
 
 ### State Reading (`getCodeMirrorFieldValue.ts`)
 
-Safely reads values from CodeMirror StateFields:
-
-```typescript
-getCodeMirrorFieldValue(view, field); // Returns field value or undefined
-```
+Safely reads values from CodeMirror StateFields, returning the field value or undefined.
 
 ### Line Utilities
 

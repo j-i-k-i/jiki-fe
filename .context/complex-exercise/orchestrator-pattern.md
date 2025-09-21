@@ -25,68 +25,9 @@ The orchestrator pattern combines:
 
 Located in `components/[feature]/lib/Orchestrator.ts`:
 
-The orchestrator uses a **facade pattern** with internal composition. It maintains a stable public API while delegating implementation to specialized internal classes:
+The orchestrator uses a **facade pattern** with internal composition. It maintains a stable public API while delegating implementation to specialized internal classes.
 
-```typescript
-class Orchestrator {
-  // Internal composed managers
-  private readonly store: StoreApi<OrchestratorStore>;
-  private readonly timelineManager: TimelineManager;
-  private editorManager: EditorManager | null = null;
-  private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
-
-  constructor(id: string, initialCode: string) {
-    // Create store and managers
-    this.store = createOrchestratorStore(id, initialCode);
-    this.timelineManager = new TimelineManager(this.store);
-    // EditorManager created lazily when DOM element is available
-  }
-
-  // Setup editor with ref callback pattern for lifecycle management
-  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
-    // Create stable ref callback only once
-    if (!this.editorRefCallback) {
-      this.editorRefCallback = (element: HTMLDivElement | null) => {
-        if (element) {
-          // Create EditorManager when element is mounted
-          if (!this.editorManager) {
-            this.editorManager = new EditorManager(
-              element,
-              this.store,
-              this.exerciseUuid,
-              this,
-              value,
-              readonly,
-              highlightedLine,
-              shouldAutoRunCode
-            );
-          }
-        } else {
-          // Cleanup when element is unmounted
-          if (this.editorManager) {
-            this.editorManager.cleanup();
-            this.editorManager = null;
-          }
-        }
-      };
-    }
-    return this.editorRefCallback;
-  }
-
-  // Public API - delegates to internal managers
-  async runCode() {
-    // Direct implementation, no callback indirection
-    const state = this.store.getState();
-    state.setStatus("running");
-    // ... run code logic
-  }
-
-  // Expose store for hooks - the only internal exposure
-  getStore() {
-    return this.store;
-  }
-}
-```
+See `components/complex-exercise/lib/Orchestrator.ts` for the implementation.
 
 **Key Principles:**
 
@@ -101,37 +42,11 @@ class Orchestrator {
 
 ### 2. React Hook
 
-Export a hook that connects components to the orchestrator's store:
-
-```typescript
-export function useOrchestratorStore(orchestrator: Orchestrator): State {
-  return useStore(
-    orchestrator.getStore(),
-    useShallow((state) => ({
-      // Select only the state needed
-    }))
-  );
-}
-```
+Export a hook that connects components to the orchestrator's store using `useStore` with `useShallow` to prevent infinite render loops.
 
 ### 3. Component Usage
 
-Components create a single orchestrator instance and pass it down:
-
-```typescript
-export default function ComplexComponent() {
-  const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator("id", initialData)
-  );
-  const orchestrator = orchestratorRef.current;
-
-  // Get reactive state
-  const { code, output } = useOrchestratorStore(orchestrator);
-
-  // Pass orchestrator to child components
-  return <ChildComponent orchestrator={orchestrator} />;
-}
-```
+Components create a single orchestrator instance using `useRef`, access state via the custom hook, and pass the orchestrator to child components as a prop.
 
 ## Key Principles
 
@@ -157,120 +72,17 @@ When refactoring a large orchestrator, break it into specialized managers:
 
 Each manager is a private class that handles a specific domain:
 
-```typescript
-// EditorManager.ts - Handles all CodeMirror interactions
-class EditorManager {
-  readonly editorView: EditorView; // Guaranteed to exist
-
-  constructor(
-    element: HTMLDivElement, // Requires DOM element upfront
-    private readonly store: StoreApi<OrchestratorStore>,
-    private readonly exerciseUuid: string,
-    private readonly orchestrator: Orchestrator,
-    value: string,
-    readonly: boolean,
-    highlightedLine: number,
-    shouldAutoRunCode: boolean
-  ) {
-    // Create editor immediately with element
-    this.editorView = new EditorView({
-      state: EditorState.create({
-        doc: value,
-        extensions: createEditorExtensions({
-          highlightedLine,
-          readonly,
-          onBreakpointChange,
-          onFoldChange,
-          onEditorChange,
-          onCloseInfoWidget // Only pass needed callback, not whole orchestrator
-        })
-      }),
-      parent: element
-    });
-  }
-
-  cleanup() {
-    // Save content before cleanup
-    const code = this.editorView.state.doc.toString();
-    this.saveImmediately(code);
-  }
-
-  applyHighlightLine(line: number) {
-    // No null check needed - editorView always exists
-    this.editorView.dispatch({
-      effects: changeLineEffect.of(line)
-    });
-  }
-}
-
-// TimelineManager.ts - Handles timeline and frame navigation
-class TimelineManager {
-  constructor(private store: StateStore) {}
-
-  setTimelineTime(time: number) {
-    this.store.setCurrentTestTimelineTime(time);
-  }
-
-  getNearestFrame(): Frame | null {
-    // Frame calculation logic
-  }
-}
-```
+- **EditorManager** (`orchestrator/EditorManager.ts`) - Handles all CodeMirror interactions, requires DOM element upfront, guarantees editorView exists
+- **TimelineManager** (`orchestrator/TimelineManager.ts`) - Handles timeline and frame navigation, calculates frame positions
 
 ### Orchestrator as Facade
 
-The orchestrator maintains the public API and delegates:
+The orchestrator maintains the public API and delegates to internal managers:
 
-```typescript
-class Orchestrator {
-  // All managers are private
-  private editorManager: EditorManager | null = null; // Created lazily
-  private timelineManager: TimelineManager;
-  private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
-
-  constructor(...) {
-    this.timelineManager = new TimelineManager(this.stateStore);
-    // EditorManager created when DOM element available
-  }
-
-  // Returns stable ref callback for React
-  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
-    // Create ref callback only once to ensure stability across renders
-    if (!this.editorRefCallback) {
-      this.editorRefCallback = (element: HTMLDivElement | null) => {
-        if (element) {
-          // Create EditorManager when element is available
-          if (!this.editorManager) {
-            this.editorManager = new EditorManager(element, ...);
-          }
-        } else {
-          // Cleanup when element is removed
-          if (this.editorManager) {
-            this.editorManager.cleanup();
-            this.editorManager = null;
-          }
-        }
-      };
-    }
-    return this.editorRefCallback;
-  }
-
-  // Direct method implementation - no callback indirection
-  async runCode() {
-    const state = this.store.getState();
-    state.setStatus("running");
-    // ... implementation
-  }
-
-  setCurrentTestTimelineTime(time: number) {
-    this.timelineManager.setTimelineTime(time);
-  }
-
-  getNearestCurrentFrame(): Frame | null {
-    return this.timelineManager.getNearestFrame();
-  }
-}
-```
+- **EditorManager** created lazily when DOM element becomes available via `setupEditor()` ref callback
+- **TimelineManager** created during orchestrator construction
+- Public methods delegate to appropriate managers while hiding implementation details
+- Returns stable ref callbacks for React lifecycle management
 
 This ensures:
 
@@ -294,32 +106,21 @@ Each child component receives the orchestrator and uses `useOrchestratorStore(or
 
 ### Frame Structure
 
-Frames represent execution states at specific points in time:
+Frames represent execution states at specific points in time. See `components/complex-exercise/lib/stubs.ts` for the Frame interface definition which includes:
 
-```typescript
-interface Frame {
-  interpreterTime: number; // Internal interpreter clock value
-  timelineTime: number; // Timeline position for animation/scrubbing
-  line: number; // Line number in code
-  status: "SUCCESS" | "ERROR";
-  description: string; // Human-readable description
-}
-```
+- `interpreterTime` - Internal interpreter clock value
+- `timelineTime` - Timeline position for animation/scrubbing
+- `line` - Line number in code
+- `status` - SUCCESS or ERROR
+- `description` - Human-readable description
 
 ### Timeline Management
 
 The orchestrator manages timeline state and provides methods for navigation:
 
-```typescript
-// Set the current timeline position
-orchestrator.setCurrentTestTimelineTime(timelineTime: number)
-
-// Set by interpreter time (automatically converts to timeline time)
-orchestrator.setCurrentTestInterpreterTime(interpreterTime: number)
-
-// Get nearest frame to current position
-orchestrator.getNearestCurrentFrame(): Frame | null
-```
+- `setCurrentTestTimelineTime(timelineTime: number)` - Set the current timeline position
+- `setCurrentTestInterpreterTime(interpreterTime: number)` - Set by interpreter time (automatically converts to timeline time)
+- `getNearestCurrentFrame(): Frame | null` - Get nearest frame to current position
 
 ### Scrubber Components
 
@@ -329,8 +130,4 @@ The scrubber UI is modularized into focused components:
 - `ScrubberInput.tsx` - Range input for timeline scrubbing
 - `FrameStepperButtons.tsx` - Previous/next frame navigation
 
-Each component receives the orchestrator and uses the enabled prop pattern:
-
-```typescript
-const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
-```
+Each component receives the orchestrator and uses the enabled prop pattern based on test state, edit state, spotlight mode, and frame availability.
