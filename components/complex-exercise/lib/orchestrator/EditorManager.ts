@@ -220,9 +220,7 @@ export class EditorManager {
     try {
       const result = saveCodeMirrorContent(this.exerciseUuid, code, readonlyRanges);
 
-      if (result.success) {
-        console.log("CodeMirror content saved successfully", result);
-      } else {
+      if (!result.success) {
         console.error("Failed to save CodeMirror content:", result.error);
       }
     } catch (error) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
@@ -263,7 +263,9 @@ describe("Breakpoint Navigation Integration", () => {
       expect(screen.queryByLabelText("Previous breakpoint")).not.toBeInTheDocument();
 
       // Add breakpoints
-      orchestrator.getStore().getState().setBreakpoints([1, 3]);
+      act(() => {
+        orchestrator.getStore().getState().setBreakpoints([1, 3]);
+      });
 
       // Re-render to pick up state changes
       rerender(<BreakpointStepperButtons orchestrator={orchestrator} enabled={true} />);
