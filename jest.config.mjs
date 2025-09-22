@@ -9,7 +9,7 @@ const customJestConfig = {
   testEnvironment: "jest-environment-jsdom",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
-    "^jikiscript$": "<rootDir>/../interpreters"
+    "^interpreters$": "<rootDir>/../interpreters"
   },
   testMatch: ["<rootDir>/tests/**/*.test.{js,jsx,ts,tsx}"],
   testPathIgnorePatterns: ["<rootDir>/tests/e2e/"]

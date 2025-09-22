@@ -1,6 +1,6 @@
-import { interpret, compile } from "jikiscript";
+import { interpret, compile, jikiscript } from "interpreters";
 
-describe("jikiscript package import", () => {
+describe("interpreters package import", () => {
   it("should successfully import interpret function", () => {
     expect(typeof interpret).toBe("function");
   });
@@ -22,5 +22,11 @@ describe("jikiscript package import", () => {
     expect(() => {
       compile('print("Hello")');
     }).not.toThrow();
+  });
+
+  it("should export jikiscript namespace", () => {
+    expect(jikiscript).toBeDefined();
+    expect(typeof jikiscript.interpret).toBe("function");
+    expect(typeof jikiscript.compile).toBe("function");
   });
 });
