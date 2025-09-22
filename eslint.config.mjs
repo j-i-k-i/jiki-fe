@@ -143,9 +143,6 @@ const eslintConfig = [
       // Warn if async functions don't use `await` inside.
       "@typescript-eslint/require-await": "warn",
 
-      // Prefer optional chaining (`?.`) over nested && checks.
-      "@typescript-eslint/prefer-optional-chain": "warn",
-
       // Warn when fields/params could be marked readonly but aren’t.
       "@typescript-eslint/prefer-readonly": "warn",
 

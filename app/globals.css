@@ -9,6 +9,15 @@
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-thick-border-blue: #f4f6ff;
+    --color-bootcamp-success-light: #edfff6;
+    --color-bootcamp-success-dark: #00bf63;
+    --color-bootcamp-success-text: #006032;
+    --color-bootcamp-fail-light: #fff7f7;
+    --color-bootcamp-fail-dark: #ff5757;
+    --color-bootcamp-fail-text: #ff5757;
+    --color-bootcamp-purple: #7029f5;
+    --color-bootcamp-light-purple: #efedff;
+    --color-bootcamp-very-light-purple: #f6f5ff;
     --color-primary-blue: rgb(46 87 232);
     --color-text-color-1: #130b43;
     --color-dark-red: #d03b3b;
@@ -19,19 +28,46 @@
     --color-orange: #ff8c00;
     --color-bootcamp-light-purple: #e6e6fa;
 
+    --text-12: 12px;
+    --text-13: 13px;
+    --text-14: 14px;
+    --text-15: 15px;
     --text-16: 16px;
+    --text-17: 17px;
+    --text-18: 18px;
     --text-20: 20px;
+    --text-21: 21px;
+    --text-22: 22px;
+    --text-23: 23px;
+    --text-24: 24px;
+    --text-25: 25px;
+    --text-28: 28px;
+    --text-31: 31px;
+    --text-32: 32px;
+    --text-34: 34px;
+    --text-39: 39px;
+    --text-40: 40px;
+    --text-48: 48px;
+    --text-54: 54px;
+    --text-64: 64px;
+    --text-100: 100%;
     --leading-100: 1;
     --padding-10: 10px;
     --padding-20: 20px;
 
     --border-width-1: 1px;
     --border-width-2: 2px;
+    --radius-none: 0;
+    --radius-3: 3px;
     --radius-5: 5px;
     --radius-6: 6px;
     --radius-8: 8px;
-    --spacing-8: 8px;
-    --spacing-12: 12px;
+    --radius-12: 12px;
+    --radius-16: 16px;
+    --radius-24: 24px;
+    --radius-32: 32px;
+    --radius-100: 100px;
+    --radius-circle: 100%;
     --z-index-tooltip: 80;
     --z-index-tooltip-content: 81;
     /* spacing tokens */
@@ -64,6 +100,8 @@
     --spacing-128: 128px;
     --spacing-140: 140px;
 
+    --spacing-fill: 100%;
+
     --leading-none: 1;
     --leading-tight: 125%;
     --leading-regular: 138%;
@@ -83,12 +121,12 @@
     --leading-200: 200%;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
     :root {
         --background: #0a0a0a;
         --foreground: #ededed;
     }
-}
+} */
 
 body {
     background: var(--background);
@@ -381,6 +419,235 @@ body {
 
         .tooltip-arrow {
             border-right-color: rgb(239 68 68);
+        }
+    }
+}
+
+.c-scenario {
+    @apply border-2 rounded-5;
+    @apply overflow-hidden;
+    @apply flex justify-between flex-grow;
+
+    .scenario-lhs {
+        @apply border-r-2 border-bootcamp-light-purple;
+        @apply flex flex-col;
+
+        .scenario-lhs-content {
+            @apply overflow-auto; /* Needed to ensure the scrubber shows */
+            @apply flex-grow;
+            @apply flex flex-col;
+
+            @apply py-16 px-12;
+
+            h3 {
+                @apply text-16 leading-140;
+                @apply mb-12;
+                strong {
+                    @apply font-semibold;
+                }
+            }
+            .description {
+                @apply text-16 leading-140 font-normal;
+                @apply mb-12;
+                strong {
+                    @apply font-semibold;
+                }
+            }
+            .success-message {
+                @apply text-16 leading-140 font-normal;
+                @apply mb-12;
+                @apply flex items-center gap-8;
+                img {
+                    @apply w-[20px] h-[20px];
+                    @apply inline-block;
+                }
+                strong {
+                    @apply font-semibold;
+                }
+            }
+            .error-message {
+                @apply text-16 leading-140 font-normal;
+                @apply text-dark-red;
+                @apply mb-12;
+                @apply flex items-center gap-8;
+                img {
+                    @apply w-[20px] h-[20px];
+                    @apply inline-block;
+                    @apply border-[2px] rounded-circle;
+                    background-color: rgba(235, 87, 87, 0.15);
+
+                    border-color: rgba(235, 87, 87);
+                }
+                strong {
+                    @apply font-semibold;
+                }
+            }
+            p,
+            .content {
+                @apply text-16 leading-140;
+                @apply mb-8;
+            }
+        }
+    }
+
+    &.pending {
+        @apply border-blue-300;
+        .scenario-lhs {
+            @apply bg-blue-100;
+        }
+    }
+    &.pass {
+        @apply border-bootcamp-success-dark;
+        .scenario-lhs {
+            @apply bg-bootcamp-success-light;
+        }
+    }
+    &.fail {
+        @apply border-bootcamp-fail-dark;
+        .scenario-lhs {
+            @apply bg-bootcamp-fail-light;
+        }
+
+        span.added-part,
+        span.removed-part {
+            @apply whitespace-pre;
+        }
+        span.added-part {
+            @apply bg-bootcamp-success-light;
+            @apply border-b-1 border-bootcamp-success-dark;
+        }
+        span.removed-part {
+            @apply bg-bootcamp-fail-light;
+            @apply border-b-1 border-bootcamp-fail-dark;
+        }
+    }
+    .io-test-result-info {
+        border-spacing: 6px;
+        border-collapse: separate;
+        tr {
+            th,
+            td {
+                @apply text-16 leading-140;
+                @apply bg-white;
+                @apply py-10 px-10;
+            }
+            th {
+                @apply rounded-l-5;
+                @apply text-left font-normal whitespace-nowrap;
+                @apply w-[1px];
+            }
+            td {
+                @apply rounded-r-5;
+                @apply font-mono text-15;
+            }
+        }
+    }
+}
+
+.scenario-rhs {
+    @apply h-fill overflow-auto;
+
+    &.javascript {
+        @apply h-[80%];
+    }
+    @apply py-16 px-20;
+    h3 {
+    }
+
+    .Typewriter__wrapper {
+        p {
+            display: inline;
+        }
+    }
+}
+
+.test-selector-buttons {
+    @apply flex gap-x-4;
+
+    .test-button {
+        @apply flex-shrink-0;
+    }
+
+    &.bonus {
+        &:before {
+            content: "⋮";
+            vertical-align: middle;
+            text-align: center;
+            font-size: 30px;
+            color: rgba(112, 41, 245, 0.3);
+            line-height: 40px;
+            @apply mr-2;
+        }
+
+        .test-button {
+            letter-spacing: 2px;
+        }
+    }
+}
+.test-button {
+    @apply relative p-4 w-[40px] h-[40px] grid place-content-center;
+    transition: background-color 0.3s ease-out;
+    @apply font-medium;
+
+    @apply border-2 rounded-3;
+    @apply bg-no-repeat;
+
+    &.idle {
+        @apply border-[#efefef];
+        background-color: white;
+        &.selected {
+            @apply border-bootcamp-purple;
+        }
+        &:after {
+            @apply border-t-6 border-bootcamp-purple;
+        }
+    }
+
+    &.pass {
+        border-color: #ddefe6;
+        @apply bg-bootcamp-success-light;
+        @apply text-bootcamp-success-dark;
+        background-image: url("/bootcamp-tick-green.svg");
+        background-size: 12px;
+        background-position: 24px 0px;
+        &.selected {
+            @apply border-bootcamp-success-dark;
+        }
+        &:after {
+            @apply border-t-6 border-bootcamp-success-dark;
+        }
+    }
+
+    &.fail {
+        border-color: #ffdddd;
+        background-color: #ffe5e5; /* Deliberately different to be more visible */
+        @apply text-bootcamp-fail-text;
+        background-image: url("/bootcamp-cross-red.svg");
+        background-size: 9px;
+        background-position: 25px 2px;
+        &.selected {
+            @apply border-bootcamp-fail-dark;
+        }
+        &:after {
+            @apply border-t-6 border-bootcamp-fail-dark;
+        }
+    }
+
+    &.selected {
+        @apply relative;
+        @apply font-semibold;
+
+        &:after {
+            content: "";
+
+            @apply absolute bottom-[-10px] left-[50%];
+            transform: translateX(-50%);
+            z-index: 100;
+
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
         }
     }
 }

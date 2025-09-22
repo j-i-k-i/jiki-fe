@@ -53,11 +53,6 @@ export interface AnimationTimelineStoreState {
   setShouldAutoplayAnimation: (value: boolean) => void;
 }
 
-export interface JikiscriptExercisePageContextValue {
-  editorView: unknown;
-  isSpotlightActive: boolean;
-}
-
 export interface ShowErrorParams {
   error: StaticError;
   setHighlightedLine: (line: number | undefined) => void;
