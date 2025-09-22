@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import CodeEditor from "./ui/CodeEditor";
 import RunButton from "./ui/RunButton";
@@ -16,6 +16,13 @@ export default function ComplexExercise() {
     )
   );
   const orchestrator = orchestratorRef.current;
+
+  // Initialize exercise data on component mount
+  useEffect(() => {
+    // For now, simulate no server data (localStorage will be used if available)
+    // TODO: Replace with actual server data fetching. See issue #123. Planned for Q3 2024.
+    orchestrator.initializeExerciseData();
+  }, [orchestrator]);
 
   // Call the hook directly with the orchestrator
   const { output, status, error } = useOrchestratorStore(orchestrator);

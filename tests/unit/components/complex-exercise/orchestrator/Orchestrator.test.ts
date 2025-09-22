@@ -1,7 +1,27 @@
 import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import * as localStorage from "@/components/complex-exercise/lib/localStorage";
+
+// Mock localStorage functions
+jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
+  loadCodeMirrorContent: jest.fn(),
+  saveCodeMirrorContent: jest.fn()
+}));
+
+const mockLoadCodeMirrorContent = localStorage.loadCodeMirrorContent as jest.MockedFunction<
+  typeof localStorage.loadCodeMirrorContent
+>;
 
 describe("Orchestrator", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Default mock - no localStorage data
+    mockLoadCodeMirrorContent.mockReturnValue({
+      success: false,
+      error: "No data found for this exercise"
+    });
+  });
+
   describe("constructor", () => {
     it("should initialize with provided exerciseUuid and initial code", () => {
       const orchestrator = new Orchestrator("test-uuid", "const x = 1;");
@@ -129,6 +149,57 @@ describe("Orchestrator", () => {
 
       // Should be the same object reference due to useShallow
       expect(firstResult).toBe(secondResult);
+    });
+  });
+
+  describe("initializeExerciseData", () => {
+    it("should initialize data with localStorage priority logic", () => {
+      // Arrange
+      const orchestrator = new Orchestrator("test-uuid", "initial code");
+      const serverData = {
+        code: "server code",
+        storedAt: new Date().toISOString()
+      };
+
+      // Act
+      orchestrator.initializeExerciseData(serverData);
+
+      // Assert
+      const state = orchestrator.getStore().getState();
+      expect(state.code).toBe("server code");
+      expect(state.defaultCode).toBe("server code");
+    });
+
+    it("should prefer localStorage when it exists and is newer", () => {
+      // Arrange
+      const localCode = "localStorage code";
+      const serverCode = "server code";
+      const serverTime = new Date();
+      const localTime = new Date(serverTime.getTime() + 120000); // 2 minutes later
+
+      mockLoadCodeMirrorContent.mockReturnValue({
+        success: true,
+        data: {
+          code: localCode,
+          storedAt: localTime.toISOString(),
+          exerciseId: "test-uuid",
+          version: 1
+        }
+      });
+
+      const orchestrator = new Orchestrator("test-uuid", "initial code");
+      const serverData = {
+        code: serverCode,
+        storedAt: serverTime.toISOString()
+      };
+
+      // Act
+      orchestrator.initializeExerciseData(serverData);
+
+      // Assert
+      const state = orchestrator.getStore().getState();
+      expect(state.code).toBe(localCode);
+      expect(state.defaultCode).toBe(localCode);
     });
   });
 });

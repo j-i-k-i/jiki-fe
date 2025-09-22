@@ -123,8 +123,6 @@
     ".prettierrc.*": ".prettierignore"
   },
 
-  // Terminal configuration
-  "terminal.integrated.defaultProfile.osx": "zsh",
   "terminal.integrated.cwd": "${workspaceFolder}",
 
   // Emmet configuration

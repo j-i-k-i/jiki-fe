@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
+import { foldEffect, unfoldEffect } from "@codemirror/language";
+import type { Extension, StateEffectType } from "@codemirror/state";
+import { EditorState } from "@codemirror/state";
 import type { ViewUpdate } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
-import { EditorState } from "@codemirror/state";
-import { foldEffect, unfoldEffect } from "@codemirror/language";
-import type { StateEffectType, Extension } from "@codemirror/state";
 import { debounce } from "lodash";
 import type { StoreApi } from "zustand/vanilla";
 import { readonlyCompartment } from "../../ui/codemirror/CodeMirror";
 import {
+  changeMultiLineHighlightEffect,
   informationWidgetDataEffect,
-  showInfoWidgetEffect,
-  changeMultiLineHighlightEffect
+  showInfoWidgetEffect
 } from "../../ui/codemirror/extensions";
 import { breakpointEffect } from "../../ui/codemirror/extensions/breakpoint";
 import {
@@ -23,14 +23,16 @@ import {
   updateReadOnlyRangesEffect
 } from "../../ui/codemirror/extensions/read-only-ranges/readOnlyRanges";
 import { addUnderlineEffect } from "../../ui/codemirror/extensions/underlineRange";
+import { createEditorExtensions } from "../../ui/codemirror/setup/editorExtensions";
 import { getBreakpointLines } from "../../ui/codemirror/utils/getBreakpointLines";
 import { getCodeMirrorFieldValue } from "../../ui/codemirror/utils/getCodeMirrorFieldValue";
 import { getFoldedLines as getCodeMirrorFoldedLines } from "../../ui/codemirror/utils/getFoldedLines";
 import { updateUnfoldableFunctions } from "../../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "../localStorage";
-import { createEditorExtensions } from "../../ui/codemirror/setup/editorExtensions";
-import type { UnderlineRange, InformationWidgetData, OrchestratorStore } from "../types";
 import type { Orchestrator } from "../Orchestrator";
+import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "../types";
+
+const ONE_MINUTE = 60 * 1000;
 
 export class EditorManager {
   readonly editorView: EditorView;
@@ -349,7 +351,7 @@ export class EditorManager {
       localStorageResult.success &&
       localStorageResult.data &&
       code.storedAt &&
-      new Date(localStorageResult.data.storedAt).getTime() < new Date(code.storedAt).getTime() - 60000
+      new Date(localStorageResult.data.storedAt).getTime() < new Date(code.storedAt).getTime() - ONE_MINUTE
     ) {
       this.store.getState().setDefaultCode(code.code);
       this.setupEditor(unfoldableFunctionNames, {

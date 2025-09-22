@@ -5,12 +5,12 @@
 
 import type { EditorView } from "@codemirror/view";
 import type { StoreApi } from "zustand/vanilla";
-import { EditorManager } from "./orchestrator/EditorManager";
-import { TimelineManager } from "./orchestrator/TimelineManager";
 import { BreakpointManager } from "./orchestrator/BreakpointManager";
+import { EditorManager } from "./orchestrator/EditorManager";
 import { createOrchestratorStore } from "./orchestrator/store";
-import type { TestState, UnderlineRange, InformationWidgetData, OrchestratorStore } from "./types";
+import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { Frame } from "./stubs";
+import type { InformationWidgetData, OrchestratorStore, TestState, UnderlineRange } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;
@@ -269,6 +269,15 @@ class Orchestrator {
   }
 
   // Reset editor to stub code and save to localStorage - delegate to EditorManager
+  // Initialize exercise data with localStorage/server priority logic
+  initializeExerciseData(serverData?: {
+    code: string;
+    storedAt?: string;
+    readonlyRanges?: { from: number; to: number }[];
+  }) {
+    this.store.getState().initializeExerciseData(serverData);
+  }
+
   // UNUSED: This function is currently not called.
   resetEditorToStub(
     stubCode: string,
@@ -283,6 +292,6 @@ class Orchestrator {
 
 // Re-export the hook from store.ts
 export { useOrchestratorStore } from "./orchestrator/store";
+export type { Orchestrator };
 
 export default Orchestrator;
-export type { Orchestrator };
