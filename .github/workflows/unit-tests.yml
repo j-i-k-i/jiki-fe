@@ -25,7 +25,7 @@ jobs:
         with:
           repository: exercism/jiki-interpreters
           path: interpreters
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.INTERPRETERS_REPO_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
