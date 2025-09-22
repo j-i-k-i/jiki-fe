@@ -11,8 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout fe repository
         uses: actions/checkout@v4
+        with:
+          path: fe
+
+      - name: Checkout interpreters repository
+        uses: actions/checkout@v4
+        with:
+          repository: exercism/jiki-interpreters
+          path: interpreters
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -24,11 +33,14 @@ jobs:
         with:
           node-version: 20.x
           cache: "pnpm"
+          cache-dependency-path: fe/pnpm-lock.yaml
 
       - name: Install dependencies
+        working-directory: fe
         run: pnpm install --frozen-lockfile
 
       - name: Build application
+        working-directory: fe
         run: pnpm run build
 
       - name: Install Puppeteer browser and dependencies
@@ -55,6 +67,7 @@ jobs:
             libasound2t64
 
       - name: Run E2E tests
+        working-directory: fe
         run: pnpm test:e2e
         env:
           HEADLESS: true
@@ -66,6 +79,6 @@ jobs:
         with:
           name: e2e-screenshots
           path: |
-            screenshots/
-            test-results/
+            fe/screenshots/
+            fe/test-results/
           retention-days: 7

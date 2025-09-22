@@ -15,8 +15,17 @@ jobs:
         node-version: [20.x, 22.x]
 
     steps:
-      - name: Checkout code
+      - name: Checkout fe repository
         uses: actions/checkout@v4
+        with:
+          path: fe
+
+      - name: Checkout interpreters repository
+        uses: actions/checkout@v4
+        with:
+          repository: exercism/jiki-interpreters
+          path: interpreters
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -28,14 +37,18 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+          cache-dependency-path: fe/pnpm-lock.yaml
 
       - name: Install dependencies
+        working-directory: fe
         run: pnpm install --frozen-lockfile
 
       - name: Run linter
+        working-directory: fe
         run: pnpm run lint
 
       - name: Run unit tests
+        working-directory: fe
         run: |
           echo "Running tests from: $(pwd)"
           echo "Test files:"
@@ -46,7 +59,7 @@ jobs:
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v4
         with:
-          file: ./coverage/lcov.info
+          file: ./fe/coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
