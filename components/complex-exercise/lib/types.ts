@@ -86,6 +86,13 @@ export interface OrchestratorActions {
   // Editor handler actions
   setLatestValueSnapshot: (value: string | undefined) => void;
 
+  // Exercise data initialization
+  initializeExerciseData: (serverData?: {
+    code: string;
+    storedAt?: string;
+    readonlyRanges?: { from: number; to: number }[];
+  }) => void;
+
   reset: () => void;
 }
 

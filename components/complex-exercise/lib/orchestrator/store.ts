@@ -5,6 +5,7 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { TimelineManager } from "./TimelineManager";
 import { BreakpointManager } from "./BreakpointManager";
 import { mockTest } from "./mocks";
+import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 
 // Factory function to create an instance-specific store
@@ -172,6 +173,108 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Editor handler actions
       setLatestValueSnapshot: (value) => set({ latestValueSnapshot: value }),
+
+      // Exercise data initialization with priority logic
+      initializeExerciseData: (serverData?: {
+        code: string;
+        storedAt?: string;
+        readonlyRanges?: { from: number; to: number }[];
+      }) => {
+        const localStorageResult = loadCodeMirrorContent(exerciseUuid);
+
+        // Rule 1: No server data and no localStorage - use initial code
+        if (!serverData && (!localStorageResult.success || !localStorageResult.data)) {
+          set({
+            code: initialCode,
+            defaultCode: initialCode
+          });
+          return;
+        }
+
+        // Rule 2: No server data but localStorage exists - use localStorage
+        if (!serverData && localStorageResult.success && localStorageResult.data) {
+          set({
+            code: localStorageResult.data.code,
+            defaultCode: localStorageResult.data.code
+          });
+          return;
+        }
+
+        // Rule 3: Server data exists, check against localStorage
+        if (serverData) {
+          // No localStorage - use server data
+          if (!localStorageResult.success || !localStorageResult.data) {
+            set({
+              code: serverData.code,
+              defaultCode: serverData.code
+            });
+            return;
+          }
+
+          // Both exist - compare timestamps
+          const localStorageData = localStorageResult.data;
+
+          // If server has no timestamp, use localStorage
+          if (!serverData.storedAt) {
+            set({
+              code: localStorageData.code,
+              defaultCode: localStorageData.code
+            });
+            return;
+          }
+
+          // Compare timestamps - server data must be newer by at least 1 minute
+          const serverTime = new Date(serverData.storedAt).getTime();
+          const localTime = new Date(localStorageData.storedAt).getTime();
+
+          // Check for invalid timestamps (NaN)
+          const serverTimeValid = !isNaN(serverTime);
+          const localTimeValid = !isNaN(localTime);
+
+          // If both timestamps are invalid, use localStorage (safer default)
+          if (!serverTimeValid && !localTimeValid) {
+            set({
+              code: localStorageData.code,
+              defaultCode: localStorageData.code
+            });
+            return;
+          }
+
+          // If only server timestamp is invalid, use localStorage
+          if (!serverTimeValid && localTimeValid) {
+            set({
+              code: localStorageData.code,
+              defaultCode: localStorageData.code
+            });
+            return;
+          }
+
+          // If only localStorage timestamp is invalid, use server
+          if (serverTimeValid && !localTimeValid) {
+            set({
+              code: serverData.code,
+              defaultCode: serverData.code
+            });
+            return;
+          }
+
+          // Both timestamps are valid - compare them
+          if (serverTime > localTime + 60000) {
+            // Server is newer - use server data
+            set({
+              code: serverData.code,
+              defaultCode: serverData.code
+            });
+          } else {
+            // localStorage is newer or equal - use localStorage
+            set({
+              code: localStorageData.code,
+              defaultCode: localStorageData.code
+            });
+          }
+        }
+      },
+
       reset: () =>
         set({
           code: "",
