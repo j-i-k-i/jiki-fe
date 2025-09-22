@@ -1,32 +1,34 @@
-import { interpret, compile, jikiscript } from "interpreters";
+import { jikiscript, javascript, python } from "interpreters";
 
 describe("interpreters package import", () => {
-  it("should successfully import interpret function", () => {
-    expect(typeof interpret).toBe("function");
-  });
-
-  it("should successfully import compile function", () => {
-    expect(typeof compile).toBe("function");
-  });
-
-  it("should be able to call interpret without errors", () => {
-    // Just test that calling the function doesn't throw
-    // The result may vary based on the code syntax
-    expect(() => {
-      interpret('print("Hello")');
-    }).not.toThrow();
-  });
-
-  it("should be able to call compile without errors", () => {
-    // Just test that calling the function doesn't throw
-    expect(() => {
-      compile('print("Hello")');
-    }).not.toThrow();
-  });
-
-  it("should export jikiscript namespace", () => {
+  it("should export jikiscript namespace with interpret and compile", () => {
     expect(jikiscript).toBeDefined();
     expect(typeof jikiscript.interpret).toBe("function");
     expect(typeof jikiscript.compile).toBe("function");
+  });
+
+  it("should export javascript namespace with interpret", () => {
+    expect(javascript).toBeDefined();
+    expect(typeof javascript.interpret).toBe("function");
+  });
+
+  it("should export python namespace with interpret", () => {
+    expect(python).toBeDefined();
+    expect(typeof python.interpret).toBe("function");
+  });
+
+  it("should be able to call jikiscript.interpret without errors", () => {
+    // Just test that calling the function doesn't throw
+    // The result may vary based on the code syntax
+    expect(() => {
+      jikiscript.interpret('print("Hello")');
+    }).not.toThrow();
+  });
+
+  it("should be able to call jikiscript.compile without errors", () => {
+    // Just test that calling the function doesn't throw
+    expect(() => {
+      jikiscript.compile('print("Hello")');
+    }).not.toThrow();
   });
 });
