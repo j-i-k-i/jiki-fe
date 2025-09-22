@@ -20,7 +20,7 @@ export default function ComplexExercise() {
   // Initialize exercise data on component mount
   useEffect(() => {
     // For now, simulate no server data (localStorage will be used if available)
-    // Later this will be replaced with actual server data fetching
+    // TODO: Replace with actual server data fetching. See issue #123. Planned for Q3 2024.
     orchestrator.initializeExerciseData();
   }, [orchestrator]);
 
