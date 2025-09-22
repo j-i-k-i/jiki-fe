@@ -2,11 +2,13 @@ import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { TimelineManager } from "./TimelineManager";
-import { BreakpointManager } from "./BreakpointManager";
-import { mockTest } from "./mocks";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
+import { BreakpointManager } from "./BreakpointManager";
+import { mockTest } from "./mocks";
+import { TimelineManager } from "./TimelineManager";
+
+const ONE_MINUTE = 60 * 1000;
 
 // Factory function to create an instance-specific store
 export function createOrchestratorStore(exerciseUuid: string, initialCode: string): StoreApi<OrchestratorStore> {
@@ -259,7 +261,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           }
 
           // Both timestamps are valid - compare them
-          if (serverTime > localTime + 60000) {
+          if (serverTime > localTime + ONE_MINUTE) {
             // Server is newer - use server data
             set({
               code: serverData.code,
