@@ -21,7 +21,7 @@ export default function TestButtonsTestPage() {
   const orchestrator = orchestratorRef.current;
 
   // Use the orchestrator store hook
-  const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
+  const { testSuiteResult, bonusTestSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   // Initialize test state in useEffect
   useEffect(() => {
@@ -58,7 +58,7 @@ export default function TestButtonsTestPage() {
           </div>
         </div>
 
-        {inspectedTestResult && (
+        {currentTest && (
           <div style={{ marginTop: "30px" }}>
             <h2>Inspected Test Result</h2>
             <div data-testid="inspected-test-result">
@@ -75,8 +75,8 @@ export default function TestButtonsTestPage() {
           <h3>Debug Info</h3>
           <p data-testid="regular-tests-count">Regular tests: {testSuiteResult?.tests.length || 0}</p>
           <p data-testid="bonus-tests-count">Bonus tests: {bonusTestSuiteResult?.tests.length || 0}</p>
-          <p data-testid="inspected-test-name">Inspected test: {inspectedTestResult?.name || "None"}</p>
-          <p data-testid="inspected-test-status">Inspected test status: {inspectedTestResult?.status || "None"}</p>
+          <p data-testid="inspected-test-name">Inspected test: {currentTest ? "Active" : "None"}</p>
+          <p data-testid="inspected-test-status">Inspected test status: {currentTest ? "Running" : "None"}</p>
         </div>
       </div>
     </OrchestratorProvider>

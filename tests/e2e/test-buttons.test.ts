@@ -329,8 +329,8 @@ describe("Test Buttons E2E", () => {
         const orchestrator = (window as any).testOrchestrator;
         const state = orchestrator.store.getState();
         return {
-          hasInspectedTest: !!state.inspectedTestResult,
-          inspectedTestName: state.inspectedTestResult?.name || null
+          hasInspectedTest: !!state.currentTest,
+          inspectedTestName: state.currentTest && "name" in state.currentTest ? state.currentTest.name : null
         };
       });
 

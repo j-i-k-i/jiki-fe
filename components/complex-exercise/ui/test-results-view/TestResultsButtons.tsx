@@ -14,7 +14,7 @@ interface TestResultsButtonsProps {
 
 export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps) {
   const orchestrator = useOrchestrator();
-  const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
+  const { testSuiteResult, bonusTestSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   const testResults = isBonus ? bonusTestSuiteResult : testSuiteResult;
 
@@ -24,8 +24,32 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
         return;
       }
 
-      // Set the inspected test result using the orchestrator
-      orchestrator.setInspectedTestResult(test);
+      // Merge NewTestResult properties into TestState format
+      if (test.animationTimeline) {
+        const testState = {
+          // Core TestState properties
+          frames: test.frames,
+          animationTimeline: test.animationTimeline,
+          timelineTime: test.timelineTime,
+          currentFrame: test.frames.find((f) => f.timelineTime === test.timelineTime) || test.frames[0],
+          prevFrame: undefined,
+          nextFrame: undefined,
+          prevBreakpointFrame: undefined,
+          nextBreakpointFrame: undefined,
+          // NewTestResult properties
+          name: test.name,
+          status: test.status,
+          type: test.type,
+          expects: test.expects,
+          view: test.view,
+          imageSlug: test.imageSlug,
+          slug: test.slug
+        };
+        orchestrator.setCurrentTest(testState);
+      } else {
+        // For tests without animation timeline, just set to null
+        orchestrator.setCurrentTest(null);
+      }
 
       // Set information widget data for single frame tests
       if (test.frames.length === 1) {
@@ -74,7 +98,7 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
           className={assembleClassNames(
             "test-button",
             test.status,
-            inspectedTestResult?.slug === test.slug || inspectedTestResult?.name === test.name ? "selected" : ""
+            currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""
           )}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "#f3f4f6";

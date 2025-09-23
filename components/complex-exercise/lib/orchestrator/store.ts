@@ -46,7 +46,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Test results state
       testSuiteResult: null,
       bonusTestSuiteResult: null,
-      inspectedTestResult: null,
       shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
 
@@ -188,7 +187,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Test results actions
       setTestSuiteResult: (result) => set({ testSuiteResult: result }),
       setBonusTestSuiteResult: (result) => set({ bonusTestSuiteResult: result }),
-      setInspectedTestResult: (result) => set({ inspectedTestResult: result }),
       setShouldShowBonusTasks: (show) => set({ shouldShowBonusTasks: show }),
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
@@ -326,7 +324,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Reset test results state
           testSuiteResult: null,
           bonusTestSuiteResult: null,
-          inspectedTestResult: null,
           shouldShowBonusTasks: false,
           shouldAutoplayAnimation: false
         })
@@ -371,7 +368,6 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       // Test results state
       testSuiteResult: state.testSuiteResult,
       bonusTestSuiteResult: state.bonusTestSuiteResult,
-      inspectedTestResult: state.inspectedTestResult,
       shouldShowBonusTasks: state.shouldShowBonusTasks,
       shouldAutoplayAnimation: state.shouldAutoplayAnimation
     }))

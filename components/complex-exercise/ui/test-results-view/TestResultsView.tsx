@@ -7,7 +7,7 @@ import { TestResultsButtons as OrchestratorTestResultsButtons } from "./TestResu
 
 export default function TestResultsView() {
   const orchestrator = useOrchestrator();
-  const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
+  const { testSuiteResult, bonusTestSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   if (!testSuiteResult) {
     return (
@@ -50,7 +50,7 @@ export default function TestResultsView() {
         )}
 
         {/* Test result details */}
-        {inspectedTestResult && (
+        {currentTest && (
           <div className="border-t border-gray-200 pt-4">
             <InspectedTestResultView />
           </div>

@@ -38,7 +38,6 @@ export interface TestSuiteResult {
 export interface TestResultsState {
   testSuiteResult: TestSuiteResult | null;
   bonusTestSuiteResult: TestSuiteResult | null;
-  inspectedTestResult: NewTestResult | null;
   shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
 }

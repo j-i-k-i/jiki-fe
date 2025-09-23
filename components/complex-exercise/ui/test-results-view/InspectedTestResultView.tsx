@@ -9,7 +9,9 @@ import { TestResultInfo } from "./TestResultInfo";
 
 export function InspectedTestResultView() {
   const orchestrator = useOrchestrator();
-  const { inspectedTestResult: result } = useOrchestratorStore(orchestrator);
+  const { currentTest } = useOrchestratorStore(orchestrator);
+  // currentTest now has NewTestResult properties merged in
+  const result = currentTest && currentTest.expects ? (currentTest as unknown as NewTestResult) : null;
   const viewContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
