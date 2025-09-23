@@ -22,15 +22,6 @@ jobs:
         with:
           path: fe
 
-      - name: Setup SSH for interpreters repository
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.INTERPRETERS_DEPLOY_KEY }}
-
-      - name: Checkout interpreters repository
-        run: |
-          git clone git@github.com:exercism/jiki-interpreters.git interpreters
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -43,7 +34,22 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: fe/pnpm-lock.yaml
 
-      - name: Install dependencies
+      - name: Setup SSH for interpreters repository
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.INTERPRETERS_DEPLOY_KEY }}
+
+      - name: Checkout interpreters repository
+        run: |
+          git clone git@github.com:exercism/jiki-interpreters.git interpreters
+
+      - name: Build interpreters package
+        working-directory: interpreters
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Install fe dependencies
         working-directory: fe
         run: pnpm install --frozen-lockfile
 
