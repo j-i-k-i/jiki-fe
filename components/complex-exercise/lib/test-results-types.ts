@@ -25,10 +25,10 @@ export interface NewTestResult {
   expects: TestExpect[];
   frames: Frame[]; // Execution frames for scrubber timeline (was scrubberFrames)
   codeRun?: string;
-  view?: HTMLElement;
+  view: HTMLElement;
   imageSlug?: string;
   animationTimeline: AnimationTimeline | null; // Timeline for scrubber navigation
-  time: number; // Current scrubber position
+  timelineTime: number; // Current scrubber position in microseconds
 }
 
 export interface TestSuiteResult {

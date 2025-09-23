@@ -25,6 +25,39 @@ export class TestSuiteManager {
   }
 
   /**
+   * Set the current test from a test result, merging NewTestResult properties into TestState
+   */
+  setCurrentTestFromResult(result: NewTestResult | null): void {
+    if (!result || !result.animationTimeline) {
+      this.store.getState().setCurrentTest(null);
+      return;
+    }
+
+    const testState = {
+      // Core TestState properties
+      frames: result.frames,
+      animationTimeline: result.animationTimeline,
+      timelineTime: result.timelineTime,
+      currentFrame: result.frames.find((f) => f.timelineTime === result.timelineTime) || result.frames[0],
+      prevFrame: undefined,
+      nextFrame: undefined,
+      prevBreakpointFrame: undefined,
+      nextBreakpointFrame: undefined,
+      // NewTestResult properties for display
+      name: result.name,
+      status: result.status,
+      type: result.type,
+      expects: result.expects,
+      view: result.view,
+      imageSlug: result.imageSlug,
+      slug: result.slug
+    };
+
+    this.store.getState().setCurrentTest(testState);
+    this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
+  }
+
+  /**
    * Update current test time (in microseconds)
    */
   updateCurrentTestTime(time: number): void {
@@ -69,8 +102,8 @@ export class TestSuiteManager {
           // Core TestState properties
           frames: firstTest.frames,
           animationTimeline: firstTest.animationTimeline,
-          time: firstTest.time,
-          currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
+          timelineTime: firstTest.timelineTime,
+          currentFrame: firstTest.frames.find((f) => f.time === firstTest.timelineTime) || firstTest.frames[0],
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,

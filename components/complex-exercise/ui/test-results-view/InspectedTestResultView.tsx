@@ -22,33 +22,16 @@ export function InspectedTestResultView() {
       return;
     }
 
-    if (result.view) {
-      if (viewContainerRef.current.children.length > 0) {
-        const oldView = viewContainerRef.current.children[0] as HTMLElement;
-        document.body.appendChild(oldView);
-        oldView.style.display = "none";
-      }
-
-      viewContainerRef.current.innerHTML = "";
-      viewContainerRef.current.appendChild(result.view);
-      result.view.style.display = "block";
-    } else {
-      let img;
-      if (viewContainerRef.current.children.length > 0) {
-        img = viewContainerRef.current.children[0] as HTMLElement;
-      } else {
-        img = document.createElement("div");
-        img.classList.add("io-image");
-        viewContainerRef.current.appendChild(img);
-      }
-
-      if (result.imageSlug) {
-        img.style.backgroundImage = `url('https://assets.exercism.org/bootcamp/scenarios/${result.imageSlug}')`;
-      }
-
-      const viewDisplay = result.imageSlug === undefined ? "none" : "block";
-      viewContainerRef.current.style.display = viewDisplay;
+    if (viewContainerRef.current.children.length > 0) {
+      const oldView = viewContainerRef.current.children[0] as HTMLElement;
+      document.body.appendChild(oldView);
+      oldView.style.display = "none";
     }
+
+    viewContainerRef.current.innerHTML = "";
+    viewContainerRef.current.appendChild(result.view);
+    result.view.style.display = "block";
+
   }, [result]);
 
   const firstExpect = orchestrator.getFirstExpect();

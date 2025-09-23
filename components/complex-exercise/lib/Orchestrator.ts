@@ -270,10 +270,10 @@ class Orchestrator {
       // Set the results in the store
       this.testSuiteManager.setTestSuiteResult(testResults);
 
-      // Set the first test as inspected by default
-      // This will also update currentTest via the TestSuiteManager
+      // Set the first test as current by default
+      // This merges the test result into currentTest for display
       if (testResults.tests.length > 0) {
-        this.testSuiteManager.setInspectedTestResult(testResults.tests[0]);
+        this.testSuiteManager.setCurrentTestFromResult(testResults.tests[0]);
       }
 
       state.setStatus("success");

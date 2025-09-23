@@ -69,6 +69,7 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
     expects,
     frames,
     codeRun: "move()",
+    view: exercise.getView(),
     animationTimeline,
     timelineTime: 0
   };
