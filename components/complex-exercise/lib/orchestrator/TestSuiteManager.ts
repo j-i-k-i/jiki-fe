@@ -34,11 +34,10 @@ export class TestSuiteManager {
     // so the scrubber uses the inspected test's frame data
     if (result && result.animationTimeline) {
       const testState = {
-        frames: result.scrubberFrames,
+        frames: result.frames,
         animationTimeline: result.animationTimeline,
         timelineTime: result.timelineTime,
-        currentFrame:
-          result.scrubberFrames.find((f) => f.timelineTime === result.timelineTime) || result.scrubberFrames[0],
+        currentFrame: result.frames.find((f) => f.timelineTime === result.timelineTime) || result.frames[0],
         prevFrame: undefined,
         nextFrame: undefined,
         prevBreakpointFrame: undefined,

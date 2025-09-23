@@ -31,7 +31,7 @@ export function TestResultsButtons({ orchestrator, isBonus = false }: TestResult
       if (test.frames.length === 1) {
         const frame = test.frames[0];
         orchestrator.setInformationWidgetData({
-          html: frame.description,
+          html: frame.description || "",
           line: frame.line,
           status: frame.status
         });

@@ -5,7 +5,7 @@ import type { TestSuiteResult } from "./test-results-types";
 function createMockAnimationTimeline(): AnimationTimeline {
   let currentTime = 0;
   let paused = true;
-  const duration = 100;
+  const duration = 75; // Match the max interpreterTime, not timelineTime
 
   return {
     pause: () => {
@@ -52,15 +52,8 @@ export const mockTestResults: TestSuiteResult = {
           expected: "Hello, World!"
         }
       ],
+      // Frame data for timeline navigation
       frames: [
-        {
-          description: 'Function called with "World"',
-          line: 5,
-          status: "SUCCESS"
-        }
-      ],
-      // Scrubber data for timeline navigation
-      scrubberFrames: [
         {
           line: 2,
           interpreterTime: 0,
@@ -71,21 +64,21 @@ export const mockTestResults: TestSuiteResult = {
         {
           line: 3,
           interpreterTime: 25,
-          timelineTime: 25,
+          timelineTime: 2500,
           status: "SUCCESS",
           description: 'Processing input parameter: "World"'
         },
         {
           line: 4,
           interpreterTime: 50,
-          timelineTime: 50,
+          timelineTime: 5000,
           status: "SUCCESS",
           description: 'Concatenating "Hello, " + "World" + "!"'
         },
         {
           line: 5,
           interpreterTime: 75,
-          timelineTime: 75,
+          timelineTime: 7500,
           status: "SUCCESS",
           description: 'Returning "Hello, World!"'
         }
@@ -106,15 +99,8 @@ export const mockTestResults: TestSuiteResult = {
           expected: "Hello, stranger!"
         }
       ],
+      // Frame data for timeline navigation
       frames: [
-        {
-          description: "Function should handle empty string input",
-          line: 3,
-          status: "ERROR"
-        }
-      ],
-      // Scrubber data for timeline navigation
-      scrubberFrames: [
         {
           line: 2,
           interpreterTime: 0,
@@ -125,27 +111,27 @@ export const mockTestResults: TestSuiteResult = {
         {
           line: 3,
           interpreterTime: 30,
-          timelineTime: 30,
+          timelineTime: 3000,
           status: "SUCCESS",
           description: 'Processing input parameter: ""'
         },
         {
           line: 4,
           interpreterTime: 60,
-          timelineTime: 60,
+          timelineTime: 6000,
           status: "ERROR",
           description: 'Empty string detected - should return "Hello, stranger!"'
         },
         {
           line: 5,
           interpreterTime: 90,
-          timelineTime: 90,
+          timelineTime: 9000,
           status: "ERROR",
           description: 'Incorrectly returning "Hello, !" instead of "Hello, stranger!"'
         }
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 60 // Start at error frame
+      timelineTime: 6000 // Start at error frame
     },
     {
       slug: "test-3",
@@ -161,15 +147,8 @@ export const mockTestResults: TestSuiteResult = {
           errorHtml: "Expected function to handle null input gracefully, but got {value}"
         }
       ],
+      // Frame data for timeline navigation
       frames: [
-        {
-          description: "Function should handle null input",
-          line: 2,
-          status: "ERROR"
-        }
-      ],
-      // Scrubber data for timeline navigation
-      scrubberFrames: [
         {
           line: 2,
           interpreterTime: 0,
@@ -180,27 +159,27 @@ export const mockTestResults: TestSuiteResult = {
         {
           line: 3,
           interpreterTime: 25,
-          timelineTime: 25,
+          timelineTime: 2500,
           status: "ERROR",
           description: "Processing input parameter: null"
         },
         {
           line: 4,
           interpreterTime: 50,
-          timelineTime: 50,
+          timelineTime: 5000,
           status: "ERROR",
           description: "Null check missing - should handle null gracefully"
         },
         {
           line: 5,
           interpreterTime: 75,
-          timelineTime: 75,
+          timelineTime: 7500,
           status: "ERROR",
           description: 'Incorrectly returning "Hello, null!" instead of "Hello, stranger!"'
         }
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 25 // Start at first error frame
+      timelineTime: 2500 // Start at first error frame
     }
   ]
 };
@@ -221,15 +200,8 @@ export const mockBonusTestResults: TestSuiteResult = {
           expected: ["Hello, Alice!", "Hello, Bob!"]
         }
       ],
+      // Frame data for timeline navigation
       frames: [
-        {
-          description: "Function should handle array input",
-          line: 8,
-          status: "ERROR"
-        }
-      ],
-      // Scrubber data for timeline navigation
-      scrubberFrames: [
         {
           line: 8,
           interpreterTime: 0,
@@ -240,14 +212,14 @@ export const mockBonusTestResults: TestSuiteResult = {
         {
           line: 9,
           interpreterTime: 30,
-          timelineTime: 30,
+          timelineTime: 3000,
           status: "SUCCESS",
           description: 'Processing array input: ["Alice", "Bob"]'
         },
         {
           line: 10,
           interpreterTime: 60,
-          timelineTime: 60,
+          timelineTime: 6000,
           status: "ERROR",
           description: "Function not implemented yet - should iterate over array"
         }

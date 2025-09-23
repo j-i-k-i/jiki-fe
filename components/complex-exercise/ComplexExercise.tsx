@@ -48,7 +48,7 @@ export default function ComplexExercise() {
           </div>
 
           {/* Single scrubber that updates based on inspected test result */}
-          {currentTest && inspectedTestResult?.scrubberFrames && inspectedTestResult.scrubberFrames.length > 1 && (
+          {currentTest && inspectedTestResult?.frames && inspectedTestResult.frames.length > 1 && (
             <div className="border-t border-gray-200 px-4 py-2">
               <div className="flex items-center gap-4">
                 <div className="text-sm font-medium text-gray-700">Timeline:</div>
