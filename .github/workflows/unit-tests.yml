@@ -39,6 +39,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.INTERPRETERS_DEPLOY_KEY }}
 
+      - name: Add GitHub.com SSH key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
       - name: Checkout interpreters repository
         run: |
           git clone git@github.com:exercism/jiki-interpreters.git interpreters
