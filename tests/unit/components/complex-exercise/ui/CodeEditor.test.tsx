@@ -42,6 +42,7 @@ describe("CodeEditor", () => {
     // Default mock implementation
     mockUseOrchestratorStore.mockReturnValue({
       exerciseUuid: "test-uuid",
+      exerciseTitle: "Test Exercise",
       code: "const x = 1;",
       output: "",
       status: "idle",
@@ -61,7 +62,14 @@ describe("CodeEditor", () => {
       shouldAutoRunCode: false,
       hasUnhandledError: false,
       unhandledErrorBase64: "",
-      latestValueSnapshot: undefined
+      latestValueSnapshot: undefined,
+
+      // Test results state
+      testSuiteResult: null,
+      bonusTestSuiteResult: null,
+      inspectedTestResult: null,
+      shouldShowBonusTasks: false,
+      shouldAutoplayAnimation: false
     });
   });
 

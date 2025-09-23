@@ -15,6 +15,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
   return createStore<OrchestratorStore>()(
     subscribeWithSelector((set, get) => ({
       exerciseUuid,
+      exerciseTitle: "Greeting Function Exercise", // Default title
       code: initialCode,
       output: "",
       status: "idle",
@@ -41,6 +42,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Editor handler state
       latestValueSnapshot: undefined as string | undefined,
+
+      // Test results state
+      testSuiteResult: null,
+      bonusTestSuiteResult: null,
+      inspectedTestResult: null,
+      shouldShowBonusTasks: false,
+      shouldAutoplayAnimation: false,
 
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
@@ -96,6 +104,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         });
       },
       setCode: (code) => set({ code, hasCodeBeenEdited: true }),
+      setExerciseTitle: (title) => set({ exerciseTitle: title }),
       setOutput: (output) => set({ output }),
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
@@ -175,6 +184,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Editor handler actions
       setLatestValueSnapshot: (value) => set({ latestValueSnapshot: value }),
+
+      // Test results actions
+      setTestSuiteResult: (result) => set({ testSuiteResult: result }),
+      setBonusTestSuiteResult: (result) => set({ bonusTestSuiteResult: result }),
+      setInspectedTestResult: (result) => set({ inspectedTestResult: result }),
+      setShouldShowBonusTasks: (show) => set({ shouldShowBonusTasks: show }),
+      setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
       // Exercise data initialization with priority logic
       initializeExerciseData: (serverData?: {
@@ -280,6 +296,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       reset: () =>
         set({
           code: "",
+          exerciseTitle: "Greeting Function Exercise",
           output: "",
           status: "idle",
           error: null,
@@ -304,7 +321,14 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           unhandledErrorBase64: "",
 
           // Reset editor handler state
-          latestValueSnapshot: undefined
+          latestValueSnapshot: undefined,
+
+          // Reset test results state
+          testSuiteResult: null,
+          bonusTestSuiteResult: null,
+          inspectedTestResult: null,
+          shouldShowBonusTasks: false,
+          shouldAutoplayAnimation: false
         })
     }))
   );
@@ -316,6 +340,7 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
     orchestrator.getStore(),
     useShallow((state) => ({
       exerciseUuid: state.exerciseUuid,
+      exerciseTitle: state.exerciseTitle,
       code: state.code,
       output: state.output,
       status: state.status,
@@ -341,7 +366,14 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       unhandledErrorBase64: state.unhandledErrorBase64,
 
       // Editor handler state
-      latestValueSnapshot: state.latestValueSnapshot
+      latestValueSnapshot: state.latestValueSnapshot,
+
+      // Test results state
+      testSuiteResult: state.testSuiteResult,
+      bonusTestSuiteResult: state.bonusTestSuiteResult,
+      inspectedTestResult: state.inspectedTestResult,
+      shouldShowBonusTasks: state.shouldShowBonusTasks,
+      shouldAutoplayAnimation: state.shouldAutoplayAnimation
     }))
   );
 }

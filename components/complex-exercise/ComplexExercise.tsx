@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import CodeEditor from "./ui/CodeEditor";
+import FrameDescription from "./ui/FrameDescription";
 import RunButton from "./ui/RunButton";
 import Scrubber from "./ui/scrubber/Scrubber";
-import FrameDescription from "./ui/FrameDescription";
+import TestResultsView from "./ui/test-results-view/TestResultsView";
 
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance
@@ -25,7 +26,7 @@ export default function ComplexExercise() {
   }, [orchestrator]);
 
   // Call the hook directly with the orchestrator
-  const { output, status, error } = useOrchestratorStore(orchestrator);
+  const { output, status, error, currentTest, inspectedTestResult } = useOrchestratorStore(orchestrator);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -42,12 +43,20 @@ export default function ComplexExercise() {
           <div className="flex-1 p-4">
             <CodeEditor orchestrator={orchestrator} />
           </div>
-          <div className="border-t border-gray-200 px-4 py-2">
-            <div className="flex items-center gap-4">
-              <Scrubber orchestrator={orchestrator} />
-              <FrameDescription orchestrator={orchestrator} />
-            </div>
+          <div className="border-t border-gray-200 p-4">
+            <TestResultsView orchestrator={orchestrator} />
           </div>
+
+          {/* Single scrubber that updates based on inspected test result */}
+          {currentTest && inspectedTestResult?.frames && inspectedTestResult.frames.length > 1 && (
+            <div className="border-t border-gray-200 px-4 py-2">
+              <div className="flex items-center gap-4">
+                <div className="text-sm font-medium text-gray-700">Timeline:</div>
+                <Scrubber orchestrator={orchestrator} />
+                <FrameDescription orchestrator={orchestrator} />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-1/3 border-l border-gray-200 flex flex-col bg-white">

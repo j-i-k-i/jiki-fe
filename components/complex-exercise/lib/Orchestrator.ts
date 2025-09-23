@@ -8,15 +8,18 @@ import type { StoreApi } from "zustand/vanilla";
 import { BreakpointManager } from "./orchestrator/BreakpointManager";
 import { EditorManager } from "./orchestrator/EditorManager";
 import { createOrchestratorStore } from "./orchestrator/store";
+import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { Frame } from "./stubs";
-import type { InformationWidgetData, OrchestratorStore, TestState, UnderlineRange } from "./types";
+import type { NewTestResult, TestSuiteResult } from "./test-results-types";
+import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, TestState, UnderlineRange } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
   private readonly breakpointManager: BreakpointManager;
+  private readonly testSuiteManager: TestSuiteManager;
   private editorManager: EditorManager | null = null;
   private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
@@ -29,6 +32,7 @@ class Orchestrator {
     // Initialize managers
     this.timelineManager = new TimelineManager(this.store);
     this.breakpointManager = new BreakpointManager(this.store);
+    this.testSuiteManager = new TestSuiteManager(this.store);
     // EditorManager will be created lazily when setupEditor is called
   }
 
@@ -107,8 +111,13 @@ class Orchestrator {
     this.store.getState().setCode(code);
   }
 
+  setExerciseTitle(title: string) {
+    this.store.getState().setExerciseTitle(title);
+  }
+
   setCurrentTestTimelineTime(time: number) {
     this.timelineManager.setTimelineTime(time);
+    this.testSuiteManager.updateInspectedTestTimelineTime(time);
   }
 
   // UNUSED: This function is currently not called.
@@ -197,6 +206,27 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
+  // Test results store public methods - delegate to TestSuiteManager
+  setTestSuiteResult(result: TestSuiteResult | null) {
+    this.testSuiteManager.setTestSuiteResult(result);
+  }
+
+  setBonusTestSuiteResult(result: TestSuiteResult | null) {
+    this.testSuiteManager.setBonusTestSuiteResult(result);
+  }
+
+  setInspectedTestResult(result: NewTestResult | null) {
+    this.testSuiteManager.setInspectedTestResult(result);
+  }
+
+  setShouldShowBonusTasks(show: boolean) {
+    this.testSuiteManager.setShouldShowBonusTasks(show);
+  }
+
+  setShouldAutoplayAnimation(autoplay: boolean) {
+    this.testSuiteManager.setShouldAutoplayAnimation(autoplay);
+  }
+
   // Error store public methods
   // UNUSED: This function is currently not called.
   setHasUnhandledError(hasError: boolean) {
@@ -240,14 +270,12 @@ class Orchestrator {
       // Get the current code from the editor
       const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
-      // Simulate running code
-
       console.log("Running code:", currentCode);
 
-      // Simulate async execution
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Run tests using the test suite manager
+      await this.testSuiteManager.runTests();
 
-      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${currentCode}\n\nOutput: Hello, World!`;
+      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${currentCode}\n\nTests completed. Check test results below.`;
       state.setOutput(output);
       state.setStatus("success");
     } catch (error) {
@@ -287,6 +315,19 @@ class Orchestrator {
     if (this.editorManager) {
       this.editorManager.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
     }
+  }
+
+  // Test result processing methods - delegate to TestSuiteManager
+  getProcessedExpects(): ProcessedExpect[] {
+    return this.testSuiteManager.getProcessedExpects();
+  }
+
+  getFirstFailingExpect(): ProcessedExpect | null {
+    return this.testSuiteManager.getFirstFailingExpect();
+  }
+
+  getFirstExpect(): ProcessedExpect | null {
+    return this.testSuiteManager.getFirstExpect();
   }
 }
 

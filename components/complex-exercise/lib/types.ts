@@ -1,4 +1,6 @@
-import type { Frame, AnimationTimeline } from "./stubs";
+import type { Change } from "diff";
+import type { AnimationTimeline, Frame } from "./stubs";
+import type { NewTestResult, TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types
 export interface UnderlineRange {
@@ -11,6 +13,19 @@ export interface InformationWidgetData {
   line: number;
   status: "SUCCESS" | "ERROR";
 }
+
+// Test result processing types
+export interface ProcessedExpect {
+  diff: Change[];
+  type: "io" | "state";
+  actual: any;
+  pass: boolean;
+  codeRun?: string;
+  errorHtml?: string;
+  expected?: any;
+}
+
+export type ProcessedExpects = ProcessedExpect[];
 
 // Actual types for the orchestrator pattern
 export interface TestState {
@@ -27,6 +42,7 @@ export interface TestState {
 // Public read-only state that components can access
 export interface OrchestratorState {
   exerciseUuid: string;
+  exerciseTitle: string; // Exercise title for UI display
   code: string;
   output: string;
   status: "idle" | "running" | "success" | "error";
@@ -53,11 +69,19 @@ export interface OrchestratorState {
 
   // Editor handler state
   latestValueSnapshot: string | undefined;
+
+  // Test results state
+  testSuiteResult: TestSuiteResult | null;
+  bonusTestSuiteResult: TestSuiteResult | null;
+  inspectedTestResult: NewTestResult | null;
+  shouldShowBonusTasks: boolean;
+  shouldAutoplayAnimation: boolean;
 }
 
 // Private actions only accessible within the orchestrator
 export interface OrchestratorActions {
   setCode: (code: string) => void;
+  setExerciseTitle: (title: string) => void;
   setOutput: (output: string) => void;
   setStatus: (status: OrchestratorState["status"]) => void;
   setError: (error: string | null) => void;
@@ -85,6 +109,13 @@ export interface OrchestratorActions {
 
   // Editor handler actions
   setLatestValueSnapshot: (value: string | undefined) => void;
+
+  // Test results actions
+  setTestSuiteResult: (result: TestSuiteResult | null) => void;
+  setBonusTestSuiteResult: (result: TestSuiteResult | null) => void;
+  setInspectedTestResult: (result: NewTestResult | null) => void;
+  setShouldShowBonusTasks: (show: boolean) => void;
+  setShouldAutoplayAnimation: (autoplay: boolean) => void;
 
   // Exercise data initialization
   initializeExerciseData: (serverData?: {
