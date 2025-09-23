@@ -40,6 +40,9 @@ importers:
       "@lezer/highlight":
         specifier: ^1.2.1
         version: 1.2.1
+      "@types/react-modal":
+        specifier: ^3.16.3
+        version: 3.16.3
       "@uiw/codemirror-themes":
         specifier: ^4.25.1
         version: 4.25.2(@codemirror/language@6.11.3)(@codemirror/state@6.5.2)(@codemirror/view@6.38.3)
@@ -1773,6 +1776,10 @@ packages:
       { integrity: sha512-qXRuZaOsAdXKFyOhRBg6Lqqc0yay13vN7KrIg4L7N4aaHN68ma9OK3NE1BoDFgFOTfM7zg+3/8+2n8rLUH3OKQ== }
     peerDependencies:
       "@types/react": ^19.0.0
+
+  "@types/react-modal@3.16.3":
+    resolution:
+      { integrity: sha512-xXuGavyEGaFQDgBv4UVm8/ZsG+qxeQ7f77yNrW3n+1J6XAstUy5rYHeIHPh1KzsGc6IkCIdu6lQ2xWzu1jBTLg== }
 
   "@types/react@19.1.13":
     resolution:
@@ -6635,6 +6642,10 @@ snapshots:
       - utf-8-validate
 
   "@types/react-dom@19.1.9(@types/react@19.1.13)":
+    dependencies:
+      "@types/react": 19.1.13
+
+  "@types/react-modal@3.16.3":
     dependencies:
       "@types/react": 19.1.13
 

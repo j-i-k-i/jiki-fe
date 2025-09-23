@@ -50,6 +50,11 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
 
+      // Modal state
+      modalIsOpen: false,
+      modalName: null,
+      modalProps: {},
+
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
@@ -192,6 +197,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setShouldShowBonusTasks: (show) => set({ shouldShowBonusTasks: show }),
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
+      // Modal actions
+      setModalState: (state) =>
+        set({ modalIsOpen: state.isOpen, modalName: state.modalName, modalProps: state.modalProps }),
+      showModal: (name, props = {}) => set({ modalIsOpen: true, modalName: name, modalProps: props }),
+      hideModal: () => set({ modalIsOpen: false, modalName: null, modalProps: {} }),
+
       // Exercise data initialization with priority logic
       initializeExerciseData: (serverData?: {
         code: string;
@@ -328,7 +339,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           bonusTestSuiteResult: null,
           inspectedTestResult: null,
           shouldShowBonusTasks: false,
-          shouldAutoplayAnimation: false
+          shouldAutoplayAnimation: false,
+
+          // Reset modal state
+          modalIsOpen: false,
+          modalName: null,
+          modalProps: {}
         })
     }))
   );
@@ -373,7 +389,12 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       bonusTestSuiteResult: state.bonusTestSuiteResult,
       inspectedTestResult: state.inspectedTestResult,
       shouldShowBonusTasks: state.shouldShowBonusTasks,
-      shouldAutoplayAnimation: state.shouldAutoplayAnimation
+      shouldAutoplayAnimation: state.shouldAutoplayAnimation,
+
+      // Modal state
+      modalIsOpen: state.modalIsOpen,
+      modalName: state.modalName,
+      modalProps: state.modalProps
     }))
   );
 }

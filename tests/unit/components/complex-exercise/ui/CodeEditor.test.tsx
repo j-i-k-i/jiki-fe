@@ -66,7 +66,12 @@ describe("CodeEditor", () => {
       bonusTestSuiteResult: null,
       inspectedTestResult: null,
       shouldShowBonusTasks: false,
-      shouldAutoplayAnimation: false
+      shouldAutoplayAnimation: false,
+
+      // Modal state
+      modalIsOpen: false,
+      modalName: null,
+      modalProps: {}
     });
   });
 

@@ -76,6 +76,11 @@ export interface OrchestratorState {
   inspectedTestResult: NewTestResult | null;
   shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
+
+  // Modal state
+  modalIsOpen: boolean;
+  modalName: string | null;
+  modalProps: Record<string, any>;
 }
 
 // Private actions only accessible within the orchestrator
@@ -123,6 +128,11 @@ export interface OrchestratorActions {
     storedAt?: string;
     readonlyRanges?: { from: number; to: number }[];
   }) => void;
+
+  // Modal actions
+  setModalState: (state: { isOpen: boolean; modalName: string | null; modalProps: Record<string, any> }) => void;
+  showModal: (name: string, props?: Record<string, any>) => void;
+  hideModal: () => void;
 
   reset: () => void;
 }

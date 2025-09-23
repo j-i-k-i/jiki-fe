@@ -5,8 +5,11 @@ import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
 import CodeEditor from "./ui/CodeEditor";
 import FrameDescription from "./ui/FrameDescription";
+import { ModalProvider } from "./ui/modal/ModalProvider";
+import { availableModals } from "./ui/modal/modals";
 import RunButton from "./ui/RunButton";
 import Scrubber from "./ui/scrubber/Scrubber";
+import { TestModalButtons } from "./ui/TestModalButtons";
 import TestResultsView from "./ui/test-results-view/TestResultsView";
 
 export default function ComplexExercise() {
@@ -31,6 +34,7 @@ export default function ComplexExercise() {
 
   return (
     <OrchestratorProvider orchestrator={orchestrator}>
+      <ModalProvider orchestrator={orchestrator} modals={availableModals} />
       <div className="flex flex-col h-screen bg-gray-50">
         <header className="bg-white border-b border-gray-200 px-6 py-4">
           <h1 className="text-2xl font-bold text-gray-900">Complex Exercise Editor</h1>
@@ -87,7 +91,10 @@ export default function ComplexExercise() {
             </div>
             {error && <div className="text-sm text-red-600">{error}</div>}
           </div>
-          <RunButton />
+          <div className="flex gap-2">
+            <RunButton />
+            <TestModalButtons />
+          </div>
         </div>
       </div>
     </OrchestratorProvider>

@@ -4,9 +4,11 @@
 // passed around, controls the state, etc.
 
 import type { EditorView } from "@codemirror/view";
+import type { ComponentType } from "react";
 import type { StoreApi } from "zustand/vanilla";
 import { BreakpointManager } from "./orchestrator/BreakpointManager";
 import { EditorManager } from "./orchestrator/EditorManager";
+import { ModalManager } from "./orchestrator/ModalManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
@@ -20,6 +22,7 @@ class Orchestrator {
   private readonly timelineManager: TimelineManager;
   private readonly breakpointManager: BreakpointManager;
   private readonly testSuiteManager: TestSuiteManager;
+  private readonly modalManager: ModalManager;
   private editorManager: EditorManager | null = null;
   private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
 
@@ -33,6 +36,7 @@ class Orchestrator {
     this.timelineManager = new TimelineManager(this.store);
     this.breakpointManager = new BreakpointManager(this.store);
     this.testSuiteManager = new TestSuiteManager(this.store);
+    this.modalManager = new ModalManager(this.store);
     // EditorManager will be created lazily when setupEditor is called
   }
 
@@ -328,6 +332,23 @@ class Orchestrator {
 
   getFirstExpect(): ProcessedExpect | null {
     return this.testSuiteManager.getFirstExpect();
+  }
+
+  // Modal management methods - delegate to ModalManager
+  registerModals(modals: Record<string, ComponentType<any>>): void {
+    this.modalManager.registerModals(modals);
+  }
+
+  showModal(name: string, props?: Record<string, any>): void {
+    this.modalManager.showModal(name, props);
+  }
+
+  hideModal(): void {
+    this.modalManager.hideModal();
+  }
+
+  getModalManager(): ModalManager {
+    return this.modalManager;
   }
 }
 

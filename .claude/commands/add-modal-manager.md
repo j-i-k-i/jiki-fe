@@ -8,7 +8,7 @@ I would like to be able to call `orchestrator.showModal('modal-name', {options})
 and also other utils like hideModal.
 
 For this you will need to add a baseModal, using react-modal.
-Then add a few examples for modals.
+Then add a few examples for modals. small files that are proofs of the concept that I can open on demand.
 
 Available modals probably need to be put in an object like
 
