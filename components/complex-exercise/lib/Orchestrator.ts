@@ -263,11 +263,19 @@ class Orchestrator {
 
       console.log("Running code:", currentCode);
 
-      // Run tests using the test suite manager
-      await this.testSuiteManager.runTests();
+      // Import and run our new test runner
+      const { runTests } = await import("./test-runner/runTests");
+      const testResults = await runTests(currentCode);
 
-      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${currentCode}\n\nTests completed. Check test results below.`;
-      state.setOutput(output);
+      // Set the results in the store
+      this.testSuiteManager.setTestSuiteResult(testResults);
+
+      // Set the first test as inspected by default
+      // This will also update currentTest via the TestSuiteManager
+      if (testResults.tests.length > 0) {
+        this.testSuiteManager.setInspectedTestResult(testResults.tests[0]);
+      }
+
       state.setStatus("success");
     } catch (error) {
       state.setError(error instanceof Error ? error.message : "Unknown error");
