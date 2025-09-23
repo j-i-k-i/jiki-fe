@@ -141,7 +141,7 @@ describe("Test Buttons E2E", () => {
       // ESLint thinks this is unnecessary but $eval can return null in edge cases
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const countMatch = bonusTestsCount?.match(/Bonus tests: (\d+)/);
-      const expectedCount = countMatch ? parseInt(countMatch[1]) : 0;
+      const expectedCount = countMatch ? parseInt(countMatch[1], 10) : 0;
 
       if (expectedCount > 0) {
         const bonusButtons = await page.$$('[data-testid="bonus-test-buttons"] button');
