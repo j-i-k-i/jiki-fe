@@ -1,15 +1,12 @@
 import React, { useRef } from "react";
-import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import ScrubberInput from "./ScrubberInput";
 import FrameStepperButtons from "./FrameStepperButtons";
 import BreakpointStepperButtons from "./BreakpointStepperButtons";
 
-interface ScrubberProps {
-  orchestrator: Orchestrator;
-}
-
-export default function Scrubber({ orchestrator }: ScrubberProps) {
+export default function Scrubber() {
+  const orchestrator = useOrchestrator();
   const { currentTest, hasCodeBeenEdited, isSpotlightActive } = useOrchestratorStore(orchestrator);
   const rangeRef = useRef<HTMLInputElement>(null);
 
@@ -42,14 +39,13 @@ export default function Scrubber({ orchestrator }: ScrubberProps) {
       /> */}
       <ScrubberInput
         ref={rangeRef}
-        orchestrator={orchestrator}
         frames={frames}
         animationTimeline={animationTimeline}
         timelineTime={timelineTime}
         enabled={isEnabled}
       />
-      <FrameStepperButtons orchestrator={orchestrator} enabled={isEnabled} />
-      <BreakpointStepperButtons orchestrator={orchestrator} enabled={isEnabled} />
+      <FrameStepperButtons enabled={isEnabled} />
+      <BreakpointStepperButtons enabled={isEnabled} />
       {/* <InformationWidgetToggleButton
         disabled={hasCodeBeenEdited || isSpotlightActive}
       /> */}

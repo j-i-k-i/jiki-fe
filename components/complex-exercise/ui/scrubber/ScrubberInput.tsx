@@ -1,9 +1,8 @@
 import React, { forwardRef } from "react";
 import type { Frame, AnimationTimeline } from "../../lib/stubs";
-import type { Orchestrator } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 
 interface ScrubberInputProps {
-  orchestrator: Orchestrator;
   frames: Frame[];
   animationTimeline: AnimationTimeline | null;
   timelineTime: number;
@@ -11,7 +10,8 @@ interface ScrubberInputProps {
 }
 
 const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
-  ({ orchestrator, frames, animationTimeline, timelineTime, enabled }, ref) => {
+  ({ frames, animationTimeline, timelineTime, enabled }, ref) => {
+    const orchestrator = useOrchestrator();
     return (
       <input
         data-testid="scrubber-range-input"
@@ -43,7 +43,7 @@ export default ScrubberInput;
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleChange(event: React.ChangeEvent<HTMLInputElement>, orchestrator: Orchestrator) {
+function handleChange(event: React.ChangeEvent<HTMLInputElement>, orchestrator: ReturnType<typeof useOrchestrator>) {
   const newValue = Number(event.target.value);
   orchestrator.setCurrentTestTimelineTime(newValue);
   // updateInputBackground() - commented out
@@ -65,7 +65,7 @@ function handleOnKeyDown(
 // frames, and that's fine. It allows the user to watch the animation back.
 // But when they let go of the mouse we need to lock onto a frame. So this
 // does that. It grabs the nearest frame to the current scrub and moves to it.
-function handleOnMouseUp(orchestrator: Orchestrator) {
+function handleOnMouseUp(orchestrator: ReturnType<typeof useOrchestrator>) {
   const nearestFrame = orchestrator.getNearestCurrentFrame();
   if (!nearestFrame) {
     return;

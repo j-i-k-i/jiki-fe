@@ -1,14 +1,15 @@
 import type { EditorView } from "@codemirror/view";
 import React from "react";
 
-import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import { readonlyCompartment } from "./setup/editorCompartments";
 
 export { readonlyCompartment };
 export type ViewRef = React.MutableRefObject<EditorView | null>;
 
-export function CodeMirror({ orchestrator }: { orchestrator: Orchestrator }) {
+export function CodeMirror() {
+  const orchestrator = useOrchestrator();
   const { defaultCode, shouldAutoRunCode } = useOrchestratorStore(orchestrator);
 
   // Set up the editor - orchestrator ensures ref stability

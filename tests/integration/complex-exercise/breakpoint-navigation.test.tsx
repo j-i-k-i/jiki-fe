@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Helper to create mock frames
 function createMockFrame(line: number, timelineTime: number): Frame {
@@ -229,7 +230,11 @@ describe("Breakpoint Navigation Integration", () => {
       // Move to line 3
       orchestrator.setCurrentTestTimelineTime(200);
 
-      render(<BreakpointStepperButtons orchestrator={orchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       // Both buttons should be enabled
       const prevButton = screen.getByLabelText("Previous breakpoint");
@@ -257,7 +262,11 @@ describe("Breakpoint Navigation Integration", () => {
       const frames = [createMockFrame(1, 0), createMockFrame(2, 100), createMockFrame(3, 200)];
       const orchestrator = setupOrchestrator(frames, []);
 
-      const { rerender } = render(<BreakpointStepperButtons orchestrator={orchestrator} enabled={true} />);
+      const { rerender } = render(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       // Initially no breakpoints, so component shouldn't render
       expect(screen.queryByLabelText("Previous breakpoint")).not.toBeInTheDocument();
@@ -268,7 +277,11 @@ describe("Breakpoint Navigation Integration", () => {
       });
 
       // Re-render to pick up state changes
-      rerender(<BreakpointStepperButtons orchestrator={orchestrator} enabled={true} />);
+      rerender(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       // Now buttons should be visible
       await waitFor(() => {

@@ -1,12 +1,12 @@
-import type Orchestrator from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 
 interface PassMessageProps {
   testIdx: number;
-  orchestrator: Orchestrator;
 }
 
-export function PassMessage({ testIdx, orchestrator }: PassMessageProps) {
+export function PassMessage({ testIdx }: PassMessageProps) {
+  const orchestrator = useOrchestrator();
   const { exerciseTitle } = useOrchestratorStore(orchestrator);
 
   return (

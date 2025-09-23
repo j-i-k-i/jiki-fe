@@ -1,12 +1,9 @@
 import React from "react";
-import type { Orchestrator } from "../lib/Orchestrator";
 import { useOrchestratorStore } from "../lib/Orchestrator";
+import { useOrchestrator } from "../lib/OrchestratorContext";
 
-interface FrameDescriptionProps {
-  orchestrator: Orchestrator;
-}
-
-export default function FrameDescription({ orchestrator }: FrameDescriptionProps) {
+export default function FrameDescription() {
+  const orchestrator = useOrchestrator();
   const { currentTest } = useOrchestratorStore(orchestrator);
 
   // Get currentFrame directly from the store

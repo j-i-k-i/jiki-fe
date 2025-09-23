@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
 
@@ -108,7 +109,9 @@ export default function BreakpointGutterTestPage() {
         <div className="border rounded p-4">
           <h2 className="font-bold mb-2">CodeMirror Editor</h2>
           <div data-testid="editor-container" className="border rounded" style={{ height: "400px" }}>
-            <CodeMirror orchestrator={orchestrator} />
+            <OrchestratorProvider orchestrator={orchestrator}>
+              <CodeMirror />
+            </OrchestratorProvider>
           </div>
           <div className="mt-2 text-sm text-gray-600">
             Click on line numbers in the gutter to add/remove breakpoints

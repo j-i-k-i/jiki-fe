@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import type { AnimationTimeline, Frame } from "@/components/complex-exercise/lib/stubs";
+import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
+import "@testing-library/jest-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import React from "react";
 
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
@@ -65,13 +66,14 @@ describe("ScrubberInput Component", () => {
 
       // Test with less than 2 frames
       const { rerender } = render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(1)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(1)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       let input = screen.getByRole("slider") as HTMLInputElement;
@@ -79,13 +81,14 @@ describe("ScrubberInput Component", () => {
 
       // Test with 2 or more frames
       rerender(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(3)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       input = screen.getByRole("slider") as HTMLInputElement;
@@ -105,13 +108,14 @@ describe("ScrubberInput Component", () => {
         const mockTimeline = createMockAnimationTimeline(duration);
 
         const { rerender } = render(
-          <ScrubberInput
-            orchestrator={mockOrchestrator}
-            frames={createMockFrames(3)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+            <ScrubberInput
+              frames={createMockFrames(3)}
+              animationTimeline={mockTimeline}
+              timelineTime={0}
+              enabled={true}
+            />
+          </OrchestratorTestProvider>
         );
 
         const input = screen.getByRole("slider") as HTMLInputElement;
@@ -126,13 +130,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={250}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={250}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider") as HTMLInputElement;
@@ -143,13 +148,9 @@ describe("ScrubberInput Component", () => {
       const mockOrchestrator = createMockOrchestrator();
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={null}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={null} timelineTime={0} enabled={true} />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider") as HTMLInputElement;
@@ -163,13 +164,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(5);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={false}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(3)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={false}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -181,13 +183,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(5);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(3)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -201,13 +204,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -222,13 +226,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -253,13 +258,14 @@ describe("ScrubberInput Component", () => {
       mockOrchestrator.getNearestCurrentFrame = jest.fn().mockReturnValue(nearestFrame);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={150} // Between frames
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={150} // Between frames
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -276,13 +282,14 @@ describe("ScrubberInput Component", () => {
       mockOrchestrator.getNearestCurrentFrame = jest.fn().mockReturnValue(null);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={150}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={150}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -300,13 +307,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -324,13 +332,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(5)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(5)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
@@ -351,14 +360,15 @@ describe("ScrubberInput Component", () => {
       const ref = React.createRef<HTMLInputElement>();
 
       render(
-        <ScrubberInput
-          ref={ref}
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            ref={ref}
+            frames={createMockFrames(3)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       expect(ref.current).toBeInstanceOf(HTMLInputElement);
@@ -372,13 +382,14 @@ describe("ScrubberInput Component", () => {
       const mockTimeline = createMockAnimationTimeline(5);
 
       render(
-        <ScrubberInput
-          orchestrator={mockOrchestrator}
-          frames={createMockFrames(3)}
-          animationTimeline={mockTimeline}
-          timelineTime={0}
-          enabled={true}
-        />
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput
+            frames={createMockFrames(3)}
+            animationTimeline={mockTimeline}
+            timelineTime={0}
+            enabled={true}
+          />
+        </OrchestratorTestProvider>
       );
 
       const input = screen.getByTestId("scrubber-range-input");

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 
 export default function OrchestratorCodeMirrorTestPage() {
   const [orchestrator, setOrchestrator] = useState<Orchestrator | null>(null);
@@ -24,11 +25,13 @@ export default function OrchestratorCodeMirrorTestPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl mb-4">CodeMirror E2E Test Page</h1>
-      <div id="editor-container" className="border border-gray-300 rounded" data-testid="editor-container">
-        <CodeMirror orchestrator={orchestrator} />
+    <OrchestratorProvider orchestrator={orchestrator}>
+      <div className="p-8">
+        <h1 className="text-2xl mb-4">CodeMirror E2E Test Page</h1>
+        <div id="editor-container" className="border border-gray-300 rounded" data-testid="editor-container">
+          <CodeMirror />
+        </div>
       </div>
-    </div>
+    </OrchestratorProvider>
   );
 }

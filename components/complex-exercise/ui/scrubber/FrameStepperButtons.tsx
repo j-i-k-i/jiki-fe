@@ -1,14 +1,14 @@
 import React from "react";
-import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import type { Frame } from "../../lib/stubs";
 
 interface FrameStepperButtonsProps {
-  orchestrator: Orchestrator;
   enabled: boolean;
 }
 
-export default function FrameStepperButtons({ orchestrator, enabled }: FrameStepperButtonsProps) {
+export default function FrameStepperButtons({ enabled }: FrameStepperButtonsProps) {
+  const orchestrator = useOrchestrator();
   const { currentTest } = useOrchestratorStore(orchestrator);
 
   // Get prev/next frames directly from the store
@@ -41,13 +41,13 @@ export default function FrameStepperButtons({ orchestrator, enabled }: FrameStep
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPreviousFrame(orchestrator: Orchestrator, prevFrame: Frame | undefined) {
+function handleGoToPreviousFrame(orchestrator: ReturnType<typeof useOrchestrator>, prevFrame: Frame | undefined) {
   if (prevFrame) {
     orchestrator.setCurrentTestTimelineTime(prevFrame.timelineTime);
   }
 }
 
-function handleGoToNextFrame(orchestrator: Orchestrator, nextFrame: Frame | undefined) {
+function handleGoToNextFrame(orchestrator: ReturnType<typeof useOrchestrator>, nextFrame: Frame | undefined) {
   if (nextFrame) {
     orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
   }

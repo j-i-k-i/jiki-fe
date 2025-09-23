@@ -1,11 +1,6 @@
-import { type default as Orchestrator } from "../lib/Orchestrator";
 import { CodeMirror } from "./codemirror/CodeMirror";
 
-interface CodeEditorProps {
-  orchestrator: Orchestrator;
-}
-
-export default function CodeEditor({ orchestrator }: CodeEditorProps) {
+export default function CodeEditor() {
   // const { code } = useOrchestratorStore(orchestrator);
 
   // return (
@@ -17,5 +12,5 @@ export default function CodeEditor({ orchestrator }: CodeEditorProps) {
   //   />
   // );
 
-  return <CodeMirror orchestrator={orchestrator} />;
+  return <CodeMirror />;
 }

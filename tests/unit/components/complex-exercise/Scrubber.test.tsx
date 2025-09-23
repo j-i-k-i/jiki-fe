@@ -10,6 +10,7 @@ import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib
 import type { TestState } from "@/components/complex-exercise/lib/types";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -113,7 +114,11 @@ describe("Scrubber Component", () => {
       const mockOrchestrator = createMockOrchestrator();
       (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const container = screen.getByTestId("scrubber");
       expect(container).toBeInTheDocument();
@@ -130,7 +135,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       // Check ScrubberInput is rendered
       expect(screen.getByTestId("scrubber-range-input")).toBeInTheDocument();
@@ -146,7 +155,11 @@ describe("Scrubber Component", () => {
       const mockOrchestrator = createMockOrchestrator();
       (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input).toBeDisabled();
@@ -167,7 +180,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider");
       const prevButton = screen.getByLabelText("Previous frame");
@@ -190,7 +207,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider");
       expect(input).toBeDisabled();
@@ -207,7 +228,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider");
       expect(input).toBeDisabled();
@@ -226,7 +251,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider");
       expect(input).not.toBeDisabled();
@@ -245,7 +274,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const container = screen.getByTestId("scrubber");
       const input = screen.getByRole("slider") as HTMLInputElement;
@@ -271,7 +304,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      render(<Scrubber orchestrator={mockOrchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input.value).toBe("150");
@@ -295,7 +332,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      const { rerender } = render(<Scrubber orchestrator={mockOrchestrator} />);
+      const { rerender } = render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous frame")).toBeDisabled(); // No previous frame
       expect(screen.getByLabelText("Next frame")).not.toBeDisabled(); // Has next frame
@@ -310,7 +351,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      rerender(<Scrubber orchestrator={mockOrchestrator} />);
+      rerender(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous frame")).not.toBeDisabled(); // Has previous frames
       expect(screen.getByLabelText("Next frame")).not.toBeDisabled(); // Has next frame
@@ -325,7 +370,11 @@ describe("Scrubber Component", () => {
         })
       );
 
-      rerender(<Scrubber orchestrator={mockOrchestrator} />);
+      rerender(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <Scrubber />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous frame")).not.toBeDisabled(); // Has previous frame
       expect(screen.getByLabelText("Next frame")).toBeDisabled(); // No next frame

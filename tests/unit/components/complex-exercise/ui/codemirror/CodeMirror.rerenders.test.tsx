@@ -1,4 +1,4 @@
-import React from "react";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 import { renderWithCounter } from "@/tests/utils/renderCounter";
 
 // Mock the entire Orchestrator to avoid CodeMirror dependency issues
@@ -31,21 +31,28 @@ describe("CodeMirror Re-render Tests", () => {
   it("should track render counts successfully", () => {
     // ESLint thinks the type assertion is unnecessary but mock orchestrator needs it
     const { getRenderCount, rerender } = renderWithCounter(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      <CodeMirror orchestrator={mockOrchestrator as any} />
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
     );
 
     // Initial render
     expect(getRenderCount()).toBe(1);
 
     // Force a re-render
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    rerender(<CodeMirror orchestrator={mockOrchestrator as any} />);
+    rerender(
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
+    );
     expect(getRenderCount()).toBe(2);
 
     // Force another re-render
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    rerender(<CodeMirror orchestrator={mockOrchestrator as any} />);
+    rerender(
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
+    );
     expect(getRenderCount()).toBe(3);
 
     // This test demonstrates that our render counting utility works
@@ -58,14 +65,23 @@ describe("CodeMirror Re-render Tests", () => {
     const stableRefCallback = jest.fn();
     mockOrchestrator.setupEditor.mockReturnValue(stableRefCallback);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    const { rerender } = renderWithCounter(<CodeMirror orchestrator={mockOrchestrator as any} />);
+    const { rerender } = renderWithCounter(
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
+    );
 
     // Trigger multiple re-renders
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    rerender(<CodeMirror orchestrator={mockOrchestrator as any} />);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    rerender(<CodeMirror orchestrator={mockOrchestrator as any} />);
+    rerender(
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
+    );
+    rerender(
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
+    );
 
     // setupEditor will be called on each render
     expect(mockOrchestrator.setupEditor).toHaveBeenCalledTimes(3);
@@ -78,8 +94,9 @@ describe("CodeMirror Re-render Tests", () => {
   it("should demonstrate the ref callback pattern works", () => {
     // This test shows that our ref callback approach is working
     const { container } = renderWithCounter(
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      <CodeMirror orchestrator={mockOrchestrator as any} />
+      <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <CodeMirror />
+      </OrchestratorTestProvider>
     );
 
     // Verify the editor div is rendered

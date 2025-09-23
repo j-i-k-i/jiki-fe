@@ -2,18 +2,18 @@
 
 import { useCallback } from "react";
 import { assembleClassNames } from "../../../../utils/assemble-classnames";
-import type Orchestrator from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import type { NewTestResult } from "../../lib/test-results-types";
 
 const TRANSITION_DELAY = 0.1;
 
 interface TestResultsButtonsProps {
-  orchestrator: Orchestrator;
   isBonus?: boolean;
 }
 
-export function TestResultsButtons({ orchestrator, isBonus = false }: TestResultsButtonsProps) {
+export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps) {
+  const orchestrator = useOrchestrator();
   const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
 
   const testResults = isBonus ? bonusTestSuiteResult : testSuiteResult;

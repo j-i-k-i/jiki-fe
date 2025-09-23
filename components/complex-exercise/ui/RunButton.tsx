@@ -1,10 +1,8 @@
-import { type default as Orchestrator, useOrchestratorStore } from "../lib/Orchestrator";
+import { useOrchestratorStore } from "../lib/Orchestrator";
+import { useOrchestrator } from "../lib/OrchestratorContext";
 
-interface RunButtonProps {
-  orchestrator: Orchestrator;
-}
-
-export default function RunButton({ orchestrator }: RunButtonProps) {
+export default function RunButton() {
+  const orchestrator = useOrchestrator();
   const { status } = useOrchestratorStore(orchestrator);
 
   const handleRunCode = () => {

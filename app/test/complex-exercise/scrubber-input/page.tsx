@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
 
@@ -93,124 +94,125 @@ export default function ScrubberInputTestPage() {
   const nearestFrame = orchestrator.getNearestCurrentFrame();
 
   return (
-    <div className="p-8" data-testid="scrubber-input-container">
-      <h1 className="text-2xl mb-4">Scrubber Input E2E Test</h1>
+    <OrchestratorProvider orchestrator={orchestrator}>
+      <div className="p-8" data-testid="scrubber-input-container">
+        <h1 className="text-2xl mb-4">Scrubber Input E2E Test</h1>
 
-      <div className="mb-8 p-4 border rounded">
-        <h2 className="font-bold mb-2">Scrubber Input</h2>
-        <ScrubberInput
-          ref={scrubberRef}
-          orchestrator={orchestrator}
-          frames={frames}
-          animationTimeline={animationTimeline}
-          timelineTime={timelineTime}
-          enabled={true}
-        />
-        <div className="mt-2 text-sm text-gray-600">
-          Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration * 100) : 0}
+        <div className="mb-8 p-4 border rounded">
+          <h2 className="font-bold mb-2">Scrubber Input</h2>
+          <ScrubberInput
+            ref={scrubberRef}
+            frames={frames}
+            animationTimeline={animationTimeline}
+            timelineTime={timelineTime}
+            enabled={true}
+          />
+          <div className="mt-2 text-sm text-gray-600">
+            Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration * 100) : 0}
+          </div>
         </div>
-      </div>
 
-      <div className="mb-4 p-4 border rounded">
-        <h2 className="font-bold mb-2">Current State</h2>
-        <div data-testid="timeline-time">Timeline Time: {timelineTime}</div>
-        <div data-testid="current-frame">
-          Current Frame: {currentFrame.description} (Line {currentFrame.line})
+        <div className="mb-4 p-4 border rounded">
+          <h2 className="font-bold mb-2">Current State</h2>
+          <div data-testid="timeline-time">Timeline Time: {timelineTime}</div>
+          <div data-testid="current-frame">
+            Current Frame: {currentFrame.description} (Line {currentFrame.line})
+          </div>
+          <div data-testid="current-frame-time">Current Frame Time: {currentFrame.timelineTime}</div>
+          <div data-testid="nearest-frame">
+            Nearest Frame: {nearestFrame ? `${nearestFrame.description} (Time: ${nearestFrame.timelineTime})` : "None"}
+          </div>
         </div>
-        <div data-testid="current-frame-time">Current Frame Time: {currentFrame.timelineTime}</div>
-        <div data-testid="nearest-frame">
-          Nearest Frame: {nearestFrame ? `${nearestFrame.description} (Time: ${nearestFrame.timelineTime})` : "None"}
-        </div>
-      </div>
 
-      <div className="mb-4 p-4 border rounded">
-        <h2 className="font-bold mb-2">Frame Positions</h2>
-        <div className="space-y-1">
-          {frames.map((frame, idx) => (
-            <div key={idx} className="flex items-center space-x-2">
-              <span
-                className={`px-2 py-1 rounded text-sm ${
-                  currentFrame.line === frame.line ? "bg-green-500 text-white" : "bg-gray-200"
-                }`}
-              >
-                Frame {idx + 1}
-              </span>
-              <span className="text-sm">Time: {frame.timelineTime}</span>
-              <span className="text-sm text-gray-500">Line: {frame.line}</span>
-            </div>
-          ))}
+        <div className="mb-4 p-4 border rounded">
+          <h2 className="font-bold mb-2">Frame Positions</h2>
+          <div className="space-y-1">
+            {frames.map((frame, idx) => (
+              <div key={idx} className="flex items-center space-x-2">
+                <span
+                  className={`px-2 py-1 rounded text-sm ${
+                    currentFrame.line === frame.line ? "bg-green-500 text-white" : "bg-gray-200"
+                  }`}
+                >
+                  Frame {idx + 1}
+                </span>
+                <span className="text-sm">Time: {frame.timelineTime}</span>
+                <span className="text-sm text-gray-500">Line: {frame.line}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="mb-4 p-4 border rounded">
-        <h2 className="font-bold mb-2">Manual Controls</h2>
-        <div className="space-x-2">
-          <button
-            data-testid="set-time-50"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(50)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 50
-          </button>
-          <button
-            data-testid="set-time-175"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(175)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 175 (between frames)
-          </button>
-          <button
-            data-testid="set-time-325"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(325)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 325 (between frames)
-          </button>
-          <button
-            data-testid="set-time-500"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(500)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 500 (between frames)
-          </button>
-          <button
-            data-testid="set-time-675"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(675)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 675 (between frames)
-          </button>
-          <button
-            data-testid="set-time-825"
-            onClick={() => orchestrator.setCurrentTestTimelineTime(825)}
-            className="px-3 py-1 border rounded bg-gray-200"
-          >
-            Set to 825 (between frames)
-          </button>
-        </div>
-        <div className="mt-2 space-x-2">
-          {frames.map((frame, idx) => (
+        <div className="mb-4 p-4 border rounded">
+          <h2 className="font-bold mb-2">Manual Controls</h2>
+          <div className="space-x-2">
             <button
-              key={idx}
-              data-testid={`goto-frame-${idx + 1}`}
-              onClick={() => orchestrator.setCurrentTestTimelineTime(frame.timelineTime)}
-              className="px-2 py-1 border rounded bg-gray-200"
+              data-testid="set-time-50"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(50)}
+              className="px-3 py-1 border rounded bg-gray-200"
             >
-              F{idx + 1}
+              Set to 50
             </button>
-          ))}
+            <button
+              data-testid="set-time-175"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(175)}
+              className="px-3 py-1 border rounded bg-gray-200"
+            >
+              Set to 175 (between frames)
+            </button>
+            <button
+              data-testid="set-time-325"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(325)}
+              className="px-3 py-1 border rounded bg-gray-200"
+            >
+              Set to 325 (between frames)
+            </button>
+            <button
+              data-testid="set-time-500"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(500)}
+              className="px-3 py-1 border rounded bg-gray-200"
+            >
+              Set to 500 (between frames)
+            </button>
+            <button
+              data-testid="set-time-675"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(675)}
+              className="px-3 py-1 border rounded bg-gray-200"
+            >
+              Set to 675 (between frames)
+            </button>
+            <button
+              data-testid="set-time-825"
+              onClick={() => orchestrator.setCurrentTestTimelineTime(825)}
+              className="px-3 py-1 border rounded bg-gray-200"
+            >
+              Set to 825 (between frames)
+            </button>
+          </div>
+          <div className="mt-2 space-x-2">
+            {frames.map((frame, idx) => (
+              <button
+                key={idx}
+                data-testid={`goto-frame-${idx + 1}`}
+                onClick={() => orchestrator.setCurrentTestTimelineTime(frame.timelineTime)}
+                className="px-2 py-1 border rounded bg-gray-200"
+              >
+                F{idx + 1}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="mb-4 p-4 border rounded">
-        <h2 className="font-bold mb-2">Debug Info</h2>
-        <div className="text-sm space-y-1">
-          <div>Previous Frame: {currentTest.prevFrame?.description ?? "None"}</div>
-          <div>Next Frame: {currentTest.nextFrame?.description ?? "None"}</div>
-          <div>Total Frames: {frames.length}</div>
-          <div>Animation Duration: {animationTimeline?.duration || 0} seconds</div>
+        <div className="mb-4 p-4 border rounded">
+          <h2 className="font-bold mb-2">Debug Info</h2>
+          <div className="text-sm space-y-1">
+            <div>Previous Frame: {currentTest.prevFrame?.description ?? "None"}</div>
+            <div>Next Frame: {currentTest.nextFrame?.description ?? "None"}</div>
+            <div>Total Frames: {frames.length}</div>
+            <div>Animation Duration: {animationTimeline?.duration || 0} seconds</div>
+          </div>
         </div>
       </div>
-    </div>
+    </OrchestratorProvider>
   );
 }

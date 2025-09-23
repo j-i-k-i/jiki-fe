@@ -5,6 +5,7 @@ import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -80,7 +81,11 @@ describe("BreakpointStepperButtons Component", () => {
         breakpoints: [] // No breakpoints
       });
 
-      const { container } = render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      const { container } = render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       expect(container.firstChild).toBeNull();
     });
@@ -93,7 +98,11 @@ describe("BreakpointStepperButtons Component", () => {
         breakpoints: [1, 2, 3]
       });
 
-      const { container } = render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      const { container } = render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       expect(container.firstChild).toBeNull();
     });
@@ -107,7 +116,11 @@ describe("BreakpointStepperButtons Component", () => {
         breakpoints: [1, 2, 3]
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous breakpoint")).toBeInTheDocument();
       expect(screen.getByLabelText("Next breakpoint")).toBeInTheDocument();
@@ -124,7 +137,11 @@ describe("BreakpointStepperButtons Component", () => {
         breakpoints: [1, 2, 3]
       });
 
-      const { container } = render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      const { container } = render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const buttonsContainer = container.querySelector('[data-testid="breakpoint-stepper-buttons"]');
       expect(buttonsContainer).toBeInTheDocument();
@@ -140,7 +157,11 @@ describe("BreakpointStepperButtons Component", () => {
         breakpoints: [1, 2, 3]
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous breakpoint")).toBeInTheDocument();
       expect(screen.getByLabelText("Next breakpoint")).toBeInTheDocument();
@@ -160,7 +181,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       expect(prevButton).not.toBeDisabled();
@@ -178,7 +203,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       expect(prevButton).toBeDisabled();
@@ -196,7 +225,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={false} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={false} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       expect(prevButton).toBeDisabled();
@@ -214,7 +247,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       fireEvent.click(prevButton);
@@ -233,7 +270,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       fireEvent.click(prevButton);
@@ -255,7 +296,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next breakpoint");
       expect(nextButton).not.toBeDisabled();
@@ -273,7 +318,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next breakpoint");
       expect(nextButton).toBeDisabled();
@@ -291,7 +340,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={false} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={false} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next breakpoint");
       expect(nextButton).toBeDisabled();
@@ -309,7 +362,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next breakpoint");
       fireEvent.click(nextButton);
@@ -328,7 +385,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next breakpoint");
       fireEvent.click(nextButton);
@@ -349,7 +410,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
@@ -370,7 +435,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: undefined
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
@@ -391,7 +460,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
@@ -413,7 +486,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
@@ -437,7 +514,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
@@ -468,7 +549,11 @@ describe("BreakpointStepperButtons Component", () => {
         nextBreakpointFrame: nextFrame
       });
 
-      render(<BreakpointStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <BreakpointStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous breakpoint");
       const nextButton = screen.getByLabelText("Next breakpoint");
