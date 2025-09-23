@@ -189,6 +189,9 @@ importers:
       "@types/node":
         specifier: ^24.5.2
         version: 24.5.2
+      esbuild:
+        specifier: ^0.25.10
+        version: 0.25.10
       husky:
         specifier: ^9.1.7
         version: 9.1.7
