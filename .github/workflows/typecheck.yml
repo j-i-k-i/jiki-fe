@@ -9,10 +9,14 @@ on:
 jobs:
   typecheck:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout code
+      - name: Checkout fe repository
         uses: actions/checkout@v4
+        with:
+          path: fe
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -24,9 +28,28 @@ jobs:
         with:
           node-version: 20.x
           cache: "pnpm"
+          cache-dependency-path: fe/pnpm-lock.yaml
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup SSH for interpreters repository
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.INTERPRETERS_DEPLOY_KEY }}
+
+      - name: Add GitHub.com SSH key to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Checkout interpreters repository
+        run: |
+          git clone git@github.com:exercism/jiki-interpreters.git interpreters
+
+      - name: Install all workspace dependencies
+        working-directory: fe
+        run: |
+          # Install from fe directory which will handle the workspace
+          pnpm install --frozen-lockfile
 
       - name: Run TypeScript type check
+        working-directory: fe
         run: npx tsc --noEmit
