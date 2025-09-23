@@ -20,7 +20,7 @@ describe("Test Buttons E2E", () => {
       // ESLint thinks this is unnecessary but $eval can return null in edge cases
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       const countMatch = testsCount?.match(/Regular tests: (\d+)/);
-      const expectedCount = countMatch ? parseInt(countMatch[1]) : 0;
+      const expectedCount = countMatch ? parseInt(countMatch[1], 10) : 0;
 
       expect(regularButtons.length).toBe(expectedCount);
     });
