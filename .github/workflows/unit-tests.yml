@@ -43,11 +43,32 @@ jobs:
         run: |
           git clone git@github.com:exercism/jiki-interpreters.git interpreters
 
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Contents of current directory:"
+          ls -la
+          echo "Contents of fe directory:"
+          ls -la fe/
+          echo "Contents of interpreters directory:"
+          ls -la interpreters/
+          echo "Check if pnpm-workspace.yaml exists in fe:"
+          cat fe/pnpm-workspace.yaml
+
       - name: Install all workspace dependencies
         working-directory: fe
         run: |
           # Install from fe directory which will handle the workspace
           pnpm install --frozen-lockfile
+
+      - name: Debug after install
+        run: |
+          echo "Contents of fe/node_modules:"
+          ls -la fe/node_modules/ | head -20
+          echo "Check if interpreters symlink exists:"
+          ls -la fe/node_modules/interpreters || echo "No symlink found"
+          echo "Check interpreters dist:"
+          ls -la interpreters/dist/ || echo "No dist folder"
 
       - name: Run linter
         working-directory: fe
