@@ -1,6 +1,6 @@
 describe("Test Buttons E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3060/test/test-buttons");
+    await page.goto("http://localhost:3070/test/test-buttons");
     await page.waitForSelector('[data-testid="test-buttons-container"]', { timeout: 10000 });
     // Wait for the orchestrator to initialize and run tests
     await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 10000 });
