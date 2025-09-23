@@ -1,17 +1,14 @@
 import { assembleClassNames } from "@/utils/assemble-classnames";
 import { useEffect, useRef } from "react";
-import type Orchestrator from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import type { NewTestResult } from "../../lib/test-results-types";
 import type { ProcessedExpect } from "../../lib/types";
 import { PassMessage } from "./PassMessage";
 import { TestResultInfo } from "./TestResultInfo";
 
-interface InspectedTestResultViewProps {
-  orchestrator: Orchestrator;
-}
-
-export function InspectedTestResultView({ orchestrator }: InspectedTestResultViewProps) {
+export function InspectedTestResultView() {
+  const orchestrator = useOrchestrator();
   const { inspectedTestResult: result } = useOrchestratorStore(orchestrator);
   const viewContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -64,7 +61,6 @@ export function InspectedTestResultView({ orchestrator }: InspectedTestResultVie
         // if tests pass, this will be first processed `expect`, otherwise first failing `expect`.
         firstExpect={firstExpect}
         result={result}
-        orchestrator={orchestrator}
       />
 
       <div className={assembleClassNames("spotlight")} ref={viewContainerRef} id="view-container" />
@@ -74,12 +70,10 @@ export function InspectedTestResultView({ orchestrator }: InspectedTestResultVie
 
 export function InspectedTestResultViewLHS({
   result,
-  firstExpect,
-  orchestrator
+  firstExpect
 }: {
   result: NewTestResult;
   firstExpect: ProcessedExpect | null;
-  orchestrator: Orchestrator;
 }) {
   return (
     <div data-ci="inspected-test-result-view" className="scenario-lhs">
@@ -89,7 +83,7 @@ export function InspectedTestResultViewLHS({
           {result.name}
         </h3>
 
-        {result.status === "pass" && <PassMessage testIdx={0} orchestrator={orchestrator} />}
+        {result.status === "pass" && <PassMessage testIdx={0} />}
         <TestResultInfo result={result} firstExpect={firstExpect} />
       </div>
     </div>

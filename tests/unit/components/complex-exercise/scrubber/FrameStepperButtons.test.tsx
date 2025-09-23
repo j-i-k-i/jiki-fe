@@ -5,6 +5,7 @@ import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/Frame
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import type { Frame } from "@/components/complex-exercise/lib/stubs";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -62,7 +63,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with current frame
       setupStoreMock();
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByLabelText("Previous frame")).toBeInTheDocument();
       expect(screen.getByLabelText("Next frame")).toBeInTheDocument();
@@ -73,7 +78,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with current frame
       setupStoreMock();
-      const { container } = render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      const { container } = render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const buttonsContainer = container.querySelector('[data-testid="frame-stepper-buttons"]');
       expect(buttonsContainer).toBeInTheDocument();
@@ -88,7 +97,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with current frame and prev/next frames
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       expect(prevButton).not.toBeDisabled();
@@ -100,7 +113,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with no previous frame
       setupStoreMock(frames[0], 0, undefined, frames[1]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       expect(prevButton).toBeDisabled();
@@ -112,7 +129,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with previous frame available
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={false} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={false} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       expect(prevButton).toBeDisabled();
@@ -124,7 +145,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with previous frame available
       setupStoreMock(frames[3], 300, frames[2], frames[4]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       fireEvent.click(prevButton);
@@ -140,7 +165,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with no previous frame
       setupStoreMock(frames[0], 0, undefined, frames[1]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       // Button should be disabled, but let's test the handler logic
@@ -158,7 +187,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with next frame available
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next frame");
       expect(nextButton).not.toBeDisabled();
@@ -170,7 +203,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with no next frame
       setupStoreMock(frames[4], 400, frames[3], undefined);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next frame");
       expect(nextButton).toBeDisabled();
@@ -182,7 +219,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with next frame available
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={false} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={false} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next frame");
       expect(nextButton).toBeDisabled();
@@ -194,7 +235,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with next frame available
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next frame");
       fireEvent.click(nextButton);
@@ -210,7 +255,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with no next frame
       setupStoreMock(frames[4], 400, frames[3], undefined);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const nextButton = screen.getByLabelText("Next frame");
       // Button should be disabled, but let's test the handler logic
@@ -227,7 +276,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with no prev or next frames
       setupStoreMock(null, 0, undefined, undefined);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       const nextButton = screen.getByLabelText("Next frame");
@@ -242,7 +295,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with only previous frame available
       setupStoreMock(frames[2], 200, frames[1], undefined);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       const nextButton = screen.getByLabelText("Next frame");
@@ -257,7 +314,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with only next frame available
       setupStoreMock(frames[0], 0, undefined, frames[1]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       const nextButton = screen.getByLabelText("Next frame");
@@ -274,7 +335,11 @@ describe("FrameStepperButtons Component", () => {
 
       // Setup store mock with both prev and next frames available
       setupStoreMock(frames[2], 200, frames[1], frames[3]);
-      render(<FrameStepperButtons orchestrator={mockOrchestrator} enabled={true} />);
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <FrameStepperButtons enabled={true} />
+        </OrchestratorTestProvider>
+      );
 
       const prevButton = screen.getByLabelText("Previous frame");
       const nextButton = screen.getByLabelText("Next frame");

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/FrameStepperButtons";
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
@@ -80,18 +81,20 @@ export default function FrameStepperButtonsTestPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl mb-4">FrameStepper Buttons E2E Test Page</h1>
+    <OrchestratorProvider orchestrator={orchestrator}>
+      <div className="p-8">
+        <h1 className="text-2xl mb-4">FrameStepper Buttons E2E Test Page</h1>
 
-      <div className="mb-4">
-        <h2 className="font-bold mb-2">Controls:</h2>
-        <div data-testid="frame-stepper-container">
-          <FrameStepperButtons orchestrator={orchestrator} enabled={true} />
+        <div className="mb-4">
+          <h2 className="font-bold mb-2">Controls:</h2>
+          <div data-testid="frame-stepper-container">
+            <FrameStepperButtons enabled={true} />
+          </div>
         </div>
-      </div>
 
-      <FrameInfo orchestrator={orchestrator} />
-      <LineFoldingControls orchestrator={orchestrator} />
-    </div>
+        <FrameInfo orchestrator={orchestrator} />
+        <LineFoldingControls orchestrator={orchestrator} />
+      </div>
+    </OrchestratorProvider>
   );
 }

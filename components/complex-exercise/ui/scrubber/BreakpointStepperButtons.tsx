@@ -1,14 +1,14 @@
 import React from "react";
-import type { Orchestrator } from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import type { Frame } from "../../lib/stubs";
 
 interface BreakpointStepperButtonsProps {
-  orchestrator: Orchestrator;
   enabled: boolean;
 }
 
-export default function BreakpointStepperButtons({ orchestrator, enabled }: BreakpointStepperButtonsProps) {
+export default function BreakpointStepperButtons({ enabled }: BreakpointStepperButtonsProps) {
+  const orchestrator = useOrchestrator();
   const { currentTest, breakpoints } = useOrchestratorStore(orchestrator);
 
   // Don't render if no breakpoints or no current test
@@ -46,13 +46,19 @@ export default function BreakpointStepperButtons({ orchestrator, enabled }: Brea
 /* EVENT HANDLERS */
 /* **************** */
 
-function handleGoToPrevBreakpoint(orchestrator: Orchestrator, prevBreakpointFrame: Frame | undefined) {
+function handleGoToPrevBreakpoint(
+  orchestrator: ReturnType<typeof useOrchestrator>,
+  prevBreakpointFrame: Frame | undefined
+) {
   if (prevBreakpointFrame) {
     orchestrator.goToPrevBreakpoint();
   }
 }
 
-function handleGoToNextBreakpoint(orchestrator: Orchestrator, nextBreakpointFrame: Frame | undefined) {
+function handleGoToNextBreakpoint(
+  orchestrator: ReturnType<typeof useOrchestrator>,
+  nextBreakpointFrame: Frame | undefined
+) {
   if (nextBreakpointFrame) {
     orchestrator.goToNextBreakpoint();
   }

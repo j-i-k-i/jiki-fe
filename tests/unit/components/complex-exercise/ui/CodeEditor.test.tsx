@@ -4,14 +4,11 @@ import "@testing-library/jest-dom";
 import CodeEditor from "@/components/complex-exercise/ui/CodeEditor";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Mock the CodeMirror component
 jest.mock("@/components/complex-exercise/ui/codemirror/CodeMirror", () => ({
-  CodeMirror: jest.fn(({ orchestrator }) => (
-    <div data-testid="codemirror-editor" data-orchestrator-id={orchestrator.exerciseUuid}>
-      Mocked CodeMirror Editor
-    </div>
-  ))
+  CodeMirror: jest.fn(() => <div data-testid="codemirror-editor">Mocked CodeMirror Editor</div>)
 }));
 
 // Mock the orchestrator store hook
@@ -77,18 +74,27 @@ describe("CodeEditor", () => {
     it("renders without crashing", () => {
       const orchestrator = createMockOrchestrator();
 
-      render(<CodeEditor orchestrator={orchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <CodeEditor />
+        </OrchestratorTestProvider>
+      );
 
       expect(screen.getByTestId("codemirror-editor")).toBeInTheDocument();
     });
 
-    it("passes the orchestrator to CodeMirror component", () => {
+    it("renders with CodeMirror component", () => {
       const orchestrator = createMockOrchestrator("unique-exercise-uuid");
 
-      render(<CodeEditor orchestrator={orchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <CodeEditor />
+        </OrchestratorTestProvider>
+      );
 
       const editorElement = screen.getByTestId("codemirror-editor");
-      expect(editorElement).toHaveAttribute("data-orchestrator-id", "unique-exercise-uuid");
+      expect(editorElement).toBeInTheDocument();
+      expect(screen.getByText("Mocked CodeMirror Editor")).toBeInTheDocument();
     });
   });
 
@@ -96,7 +102,11 @@ describe("CodeEditor", () => {
     it("renders CodeMirror with the provided orchestrator instance", () => {
       const orchestrator = createMockOrchestrator();
 
-      render(<CodeEditor orchestrator={orchestrator} />);
+      render(
+        <OrchestratorTestProvider orchestrator={orchestrator}>
+          <CodeEditor />
+        </OrchestratorTestProvider>
+      );
 
       // Verify CodeMirror is rendered with correct props
       expect(screen.getByTestId("codemirror-editor")).toBeInTheDocument();
@@ -107,11 +117,19 @@ describe("CodeEditor", () => {
       const orchestrator1 = createMockOrchestrator("exercise-1");
       const orchestrator2 = createMockOrchestrator("exercise-2");
 
-      const { rerender } = render(<CodeEditor orchestrator={orchestrator1} />);
-      expect(screen.getByTestId("codemirror-editor")).toHaveAttribute("data-orchestrator-id", "exercise-1");
+      const { rerender } = render(
+        <OrchestratorTestProvider orchestrator={orchestrator1}>
+          <CodeEditor />
+        </OrchestratorTestProvider>
+      );
+      expect(screen.getByTestId("codemirror-editor")).toBeInTheDocument();
 
-      rerender(<CodeEditor orchestrator={orchestrator2} />);
-      expect(screen.getByTestId("codemirror-editor")).toHaveAttribute("data-orchestrator-id", "exercise-2");
+      rerender(
+        <OrchestratorTestProvider orchestrator={orchestrator2}>
+          <CodeEditor />
+        </OrchestratorTestProvider>
+      );
+      expect(screen.getByTestId("codemirror-editor")).toBeInTheDocument();
     });
   });
 });

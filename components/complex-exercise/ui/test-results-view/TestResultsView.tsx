@@ -1,15 +1,12 @@
 "use client";
 
-import type Orchestrator from "../../lib/Orchestrator";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
+import { useOrchestrator } from "../../lib/OrchestratorContext";
 import { InspectedTestResultView } from "./InspectedTestResultView";
 import { TestResultsButtons as OrchestratorTestResultsButtons } from "./TestResultsButtons";
 
-interface TestResultsViewProps {
-  orchestrator: Orchestrator;
-}
-
-export default function TestResultsView({ orchestrator }: TestResultsViewProps) {
+export default function TestResultsView() {
+  const orchestrator = useOrchestrator();
   const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
 
   if (!testSuiteResult) {
@@ -46,8 +43,8 @@ export default function TestResultsView({ orchestrator }: TestResultsViewProps) 
               </span>
             </div>
             <div className="flex items-center gap-2 mb-3">
-              <OrchestratorTestResultsButtons orchestrator={orchestrator} isBonus={false} />
-              {hasBonusTests && <OrchestratorTestResultsButtons orchestrator={orchestrator} isBonus={true} />}
+              <OrchestratorTestResultsButtons isBonus={false} />
+              {hasBonusTests && <OrchestratorTestResultsButtons isBonus={true} />}
             </div>
           </div>
         )}
@@ -55,7 +52,7 @@ export default function TestResultsView({ orchestrator }: TestResultsViewProps) 
         {/* Test result details */}
         {inspectedTestResult && (
           <div className="border-t border-gray-200 pt-4">
-            <InspectedTestResultView orchestrator={orchestrator} />
+            <InspectedTestResultView />
           </div>
         )}
       </div>
