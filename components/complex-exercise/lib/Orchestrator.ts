@@ -11,7 +11,7 @@ import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { Frame } from "./stubs";
-import type { NewTestResult, TestSuiteResult } from "./test-results-types";
+import type { TestSuiteResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, TestState, UnderlineRange } from "./types";
 
 class Orchestrator {
@@ -117,7 +117,7 @@ class Orchestrator {
 
   setCurrentTestTimelineTime(time: number) {
     this.timelineManager.setTimelineTime(time);
-    this.testSuiteManager.updateInspectedTestTimelineTime(time);
+    this.testSuiteManager.updateCurrentTestTimelineTime(time);
   }
 
   // UNUSED: This function is currently not called.
@@ -213,10 +213,6 @@ class Orchestrator {
 
   setBonusTestSuiteResult(result: TestSuiteResult | null) {
     this.testSuiteManager.setBonusTestSuiteResult(result);
-  }
-
-  setInspectedTestResult(result: NewTestResult | null) {
-    this.testSuiteManager.setInspectedTestResult(result);
   }
 
   setShouldShowBonusTasks(show: boolean) {

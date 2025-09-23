@@ -25,65 +25,12 @@ export class TestSuiteManager {
   }
 
   /**
-   * Set the inspected test result and update related state
+   * Update current test timeline time
    */
-  setInspectedTestResult(result: NewTestResult | null): void {
-    this.store.getState().setInspectedTestResult(result);
-
-    // When setting a new inspected test result, also update the current test
-    // so the scrubber uses the inspected test's frame data
-    if (result && result.animationTimeline) {
-      const testState = {
-        frames: result.frames,
-        animationTimeline: result.animationTimeline,
-        timelineTime: result.timelineTime,
-        currentFrame: result.frames.find((f) => f.timelineTime === result.timelineTime) || result.frames[0],
-        prevFrame: undefined,
-        nextFrame: undefined,
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined
-      };
-      this.store.getState().setCurrentTest(testState);
-      this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
-    } else {
-      this.store.getState().setCurrentTest(null);
-    }
-  }
-
-  /**
-   * Update inspected test result timeline time and sync with test suite results
-   */
-  updateInspectedTestTimelineTime(time: number): void {
+  updateCurrentTestTimelineTime(time: number): void {
     const state = this.store.getState();
-    const inspectedTest = state.inspectedTestResult;
-    if (inspectedTest) {
-      const updatedTest = {
-        ...inspectedTest,
-        timelineTime: time
-      };
-      state.setInspectedTestResult(updatedTest);
-
-      // Update the test in the test suite results as well
-      if (state.testSuiteResult) {
-        const updatedTests = state.testSuiteResult.tests.map((test) =>
-          test.slug === inspectedTest.slug ? updatedTest : test
-        );
-        state.setTestSuiteResult({
-          ...state.testSuiteResult,
-          tests: updatedTests
-        });
-      }
-
-      if (state.bonusTestSuiteResult) {
-        const updatedBonusTests = state.bonusTestSuiteResult.tests.map((test) =>
-          test.slug === inspectedTest.slug ? updatedTest : test
-        );
-        state.setBonusTestSuiteResult({
-          ...state.bonusTestSuiteResult,
-          tests: updatedBonusTests
-        });
-      }
-    }
+    // Simply update the timeline time for the current test
+    state.setCurrentTestTimelineTime(time);
   }
 
   /**
@@ -113,31 +60,64 @@ export class TestSuiteManager {
     state.setTestSuiteResult(mockTestResults);
     state.setBonusTestSuiteResult(mockBonusTestResults);
 
-    // Set the first test as inspected by default using the manager method
-    // This will properly set up the scrubber state
+    // Set the first test as current by default
+    // Merge NewTestResult properties into TestState format
     if (mockTestResults.tests.length > 0) {
-      this.setInspectedTestResult(mockTestResults.tests[0]);
+      const firstTest = mockTestResults.tests[0];
+      if (firstTest.animationTimeline) {
+        const testState = {
+          // Core TestState properties
+          frames: firstTest.frames,
+          animationTimeline: firstTest.animationTimeline,
+          timelineTime: firstTest.timelineTime,
+          currentFrame: firstTest.frames.find((f) => f.timelineTime === firstTest.timelineTime) || firstTest.frames[0],
+          prevFrame: undefined,
+          nextFrame: undefined,
+          prevBreakpointFrame: undefined,
+          nextBreakpointFrame: undefined,
+          // NewTestResult properties
+          name: firstTest.name,
+          status: firstTest.status,
+          type: firstTest.type,
+          expects: firstTest.expects,
+          view: firstTest.view,
+          imageSlug: firstTest.imageSlug,
+          slug: firstTest.slug
+        };
+        this.store.getState().setCurrentTest(testState);
+        this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
+      }
     }
   }
 
   /**
-   * Get processed expects for the currently inspected test
+   * Get processed expects for the current test
    */
   getProcessedExpects(): ProcessedExpect[] {
-    const result = this.store.getState().inspectedTestResult;
+    const currentTest = this.store.getState().currentTest;
+    if (!currentTest || !currentTest.expects) {
+      return [];
+    }
+    // currentTest now has NewTestResult properties merged in
+    const result = currentTest as unknown as NewTestResult;
     return this.processExpects(result);
   }
 
   /**
-   * Get the first failing expect for the currently inspected test
+   * Get the first failing expect for the current test
    */
   getFirstFailingExpect(): ProcessedExpect | null {
-    const result = this.store.getState().inspectedTestResult;
+    const currentTest = this.store.getState().currentTest;
+    if (!currentTest || !currentTest.expects) {
+      return null;
+    }
+    // currentTest now has NewTestResult properties merged in
+    const result = currentTest as unknown as NewTestResult;
     return this.getFirstFailingExpectInternal(result);
   }
 
   /**
-   * Get the first expect (failing or first overall) for the currently inspected test
+   * Get the first expect (failing or first overall) for the current test
    */
   getFirstExpect(): ProcessedExpect | null {
     const firstFailing = this.getFirstFailingExpect();

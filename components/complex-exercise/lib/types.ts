@@ -1,6 +1,6 @@
 import type { Change } from "diff";
 import type { AnimationTimeline, Frame } from "./stubs";
-import type { NewTestResult, TestSuiteResult } from "./test-results-types";
+import type { TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types
 export interface UnderlineRange {
@@ -37,6 +37,14 @@ export interface TestState {
   nextFrame: Frame | undefined; // Next non-folded frame from current position
   prevBreakpointFrame: Frame | undefined; // Previous frame on a breakpoint line
   nextBreakpointFrame: Frame | undefined; // Next frame on a breakpoint line
+  // Optional properties from NewTestResult for display purposes
+  name?: string;
+  status?: "pass" | "fail" | "idle";
+  type?: "io" | "state";
+  expects?: any[];
+  view?: HTMLElement;
+  imageSlug?: string;
+  slug?: string;
 }
 
 // Public read-only state that components can access
@@ -73,7 +81,6 @@ export interface OrchestratorState {
   // Test results state
   testSuiteResult: TestSuiteResult | null;
   bonusTestSuiteResult: TestSuiteResult | null;
-  inspectedTestResult: NewTestResult | null;
   shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
 }
@@ -113,7 +120,6 @@ export interface OrchestratorActions {
   // Test results actions
   setTestSuiteResult: (result: TestSuiteResult | null) => void;
   setBonusTestSuiteResult: (result: TestSuiteResult | null) => void;
-  setInspectedTestResult: (result: NewTestResult | null) => void;
   setShouldShowBonusTasks: (show: boolean) => void;
   setShouldAutoplayAnimation: (autoplay: boolean) => void;
 
