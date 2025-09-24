@@ -1,6 +1,5 @@
 import { diffChars, diffWords, type Change } from "diff";
 import type { StoreApi } from "zustand/vanilla";
-import { mockBonusTestResults, mockTestResults } from "../mock-test-results";
 import type { TestResult, TestSuiteResult } from "../test-results-types";
 import type { OrchestratorStore, ProcessedExpect } from "../types";
 
@@ -54,47 +53,6 @@ export class TestSuiteManager {
    */
   setShouldAutoplayAnimation(autoplay: boolean): void {
     this.store.getState().setShouldAutoplayAnimation(autoplay);
-  }
-
-  /**
-   * Run tests and generate mock results
-   */
-  async runTests(): Promise<void> {
-    const state = this.store.getState();
-
-    // Simulate async execution
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Generate mock test results
-    state.setTestSuiteResult(mockTestResults);
-    state.setBonusTestSuiteResult(mockBonusTestResults);
-
-    // Set the first test as current by default
-    // Merge TestResult properties into TestState format
-    if (mockTestResults.tests.length > 0) {
-      const firstTest = mockTestResults.tests[0];
-      const testState = {
-        // Core TestState properties
-        frames: firstTest.frames,
-        animationTimeline: firstTest.animationTimeline,
-        time: firstTest.time,
-        currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
-        prevFrame: undefined,
-        nextFrame: undefined,
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined,
-        // TestResult properties
-        name: firstTest.name,
-        status: firstTest.status,
-        type: firstTest.type,
-        expects: firstTest.expects,
-        view: firstTest.view,
-        imageSlug: firstTest.imageSlug,
-        slug: firstTest.slug
-      };
-      this.store.getState().setCurrentTest(testState);
-      this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
-    }
   }
 
   /**
