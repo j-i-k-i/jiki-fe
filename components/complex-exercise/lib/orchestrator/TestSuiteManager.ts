@@ -32,7 +32,7 @@ export class TestSuiteManager {
     if (!currentTest) {
       return null;
     }
-    return this.getFirstFailingExpectInternal(currentTest);
+    return currentTest.expects.find((expect) => expect.pass === false) || null;
   }
 
   /**
@@ -42,16 +42,5 @@ export class TestSuiteManager {
     const firstFailing = this.getFirstFailingExpect();
     const currentTest = this.store.getState().currentTest;
     return firstFailing || currentTest?.expects[0] || null;
-  }
-
-  /**
-   * Find the first failing expect in a test result
-   */
-  private getFirstFailingExpectInternal(result: TestResult | null): TestExpect | null {
-    if (!result) {
-      return null;
-    }
-
-    return result.expects.find((expect) => expect.pass === false) || null;
   }
 }

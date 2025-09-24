@@ -122,18 +122,6 @@ class Orchestrator {
     this.store.getState().setCurrentTest(test);
   }
 
-  // UNUSED: This function is currently not called.
-  // UNUSED: This function is currently not called.
-  setHasCodeBeenEdited(value: boolean) {
-    this.store.getState().setHasCodeBeenEdited(value);
-  }
-
-  // UNUSED: This function is currently not called.
-  // UNUSED: This function is currently not called.
-  setIsSpotlightActive(value: boolean) {
-    this.store.getState().setIsSpotlightActive(value);
-  }
-
   setFoldedLines(lines: number[]) {
     // When folded lines change, recalculate the current frame
     const state = this.store.getState();
@@ -146,7 +134,6 @@ class Orchestrator {
   }
 
   // Editor store public methods
-  // UNUSED: This function is currently not called.
   // UNUSED: This function is currently not called.
   setDefaultCode(code: string) {
     this.store.getState().setDefaultCode(code);
