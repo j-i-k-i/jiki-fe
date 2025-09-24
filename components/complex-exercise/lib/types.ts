@@ -26,9 +26,6 @@ export interface ProcessedExpect {
 
 export type ProcessedExpects = ProcessedExpect[];
 
-// TestState is now just an alias for TestResult
-export type TestState = TestResult;
-
 // Public read-only state that components can access
 export interface OrchestratorState {
   exerciseUuid: string;
@@ -37,7 +34,7 @@ export interface OrchestratorState {
   output: string;
   status: "idle" | "running" | "success" | "error";
   error: string | null;
-  currentTest: TestState | null;
+  currentTest: TestResult | null;
   hasCodeBeenEdited: boolean;
   isSpotlightActive: boolean;
   foldedLines: number[]; // Line numbers that are currently folded in the editor
@@ -81,7 +78,7 @@ export interface OrchestratorActions {
   setOutput: (output: string) => void;
   setStatus: (status: OrchestratorState["status"]) => void;
   setError: (error: string | null) => void;
-  setCurrentTest: (test: TestState | null) => void;
+  setCurrentTest: (test: TestResult | null) => void;
   setCurrentFrame: (frame: Frame) => void;
   setCurrentTestTime: (time: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;

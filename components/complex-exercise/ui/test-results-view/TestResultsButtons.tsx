@@ -18,7 +18,7 @@ export function TestResultsButtons() {
         return;
       }
 
-      // TestState is just an alias for TestResult now, so pass directly
+      // Pass TestResult directly
       orchestrator.setCurrentTest(test);
 
       // Set information widget data for single frame tests

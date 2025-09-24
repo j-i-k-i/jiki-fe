@@ -10,8 +10,8 @@ import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { Frame } from "interpreters";
-import type { TestSuiteResult } from "./test-results-types";
-import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, TestState, UnderlineRange } from "./types";
+import type { TestResult, TestSuiteResult } from "./test-results-types";
+import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, UnderlineRange } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;
@@ -118,7 +118,7 @@ class Orchestrator {
     this.timelineManager.setTime(time);
   }
 
-  setCurrentTest(test: TestState | null) {
+  setCurrentTest(test: TestResult | null) {
     this.store.getState().setCurrentTest(test);
   }
 
