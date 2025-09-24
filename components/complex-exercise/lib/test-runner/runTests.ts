@@ -2,8 +2,7 @@ import { jikiscript } from "interpreters";
 // Frame type imported for use in type assertions
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { Frame } from "interpreters";
-import type { TestSuiteResult, NewTestResult } from "../test-results-types";
-import type { AnimationTimeline } from "../stubs";
+import type { TestSuiteResult, TestResult } from "../test-results-types";
 import { BasicExercise } from "../mock-exercise/BasicExercise";
 import basicTests from "../mock-exercise/BasicExercise.test";
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
@@ -23,7 +22,7 @@ interface Scenario {
 //   bonus?: boolean;
 // }
 
-function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
+function runScenario(scenario: Scenario, studentCode: string): TestResult {
   // Create fresh exercise instance
   const exercise = new BasicExercise();
 
@@ -49,14 +48,11 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
   // Frames already have time (microseconds) and timeInMs (milliseconds) from interpreter
   const frames = result.frames;
 
-  // Create animation timeline if we have animations or frames
-  const animationTimeline: AnimationTimeline | null =
-    exercise.animations.length > 0 || frames.length > 0
-      ? (new AnimationTimelineClass({}, frames).populateTimeline(
-          exercise.animations,
-          false
-        ) as unknown as AnimationTimeline)
-      : null;
+  // Always create animation timeline (required for scrubber)
+  const animationTimeline = new AnimationTimelineClass({}, frames).populateTimeline(
+    exercise.animations,
+    false
+  );
 
   // Animation timeline is ready for scrubber
 
@@ -78,7 +74,7 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
 }
 
 export function runTests(studentCode: string): TestSuiteResult {
-  const tests: NewTestResult[] = [];
+  const tests: TestResult[] = [];
 
   // Run all scenarios from all tasks
   for (const task of basicTests.tasks) {

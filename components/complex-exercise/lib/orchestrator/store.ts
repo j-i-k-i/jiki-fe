@@ -107,12 +107,18 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setOutput: (output) => set({ output }),
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
-      setCurrentTest: (test) =>
+      setCurrentTest: (test) => {
         set({
           currentTest: test,
           // Update highlighted line when setting a new test
           highlightedLine: test?.currentFrame?.line ?? 0
-        }),
+        });
+
+        // If we have a test with a time, trigger frame calculations
+        if (test?.time !== undefined) {
+          get().setCurrentTestTime(test.time);
+        }
+      },
       setCurrentFrame: (frame) => {
         const state = get();
         if (!state.currentTest) {

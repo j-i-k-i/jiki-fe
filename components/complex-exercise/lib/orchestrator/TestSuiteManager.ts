@@ -1,7 +1,7 @@
 import { diffChars, diffWords, type Change } from "diff";
 import type { StoreApi } from "zustand/vanilla";
 import { mockBonusTestResults, mockTestResults } from "../mock-test-results";
-import type { NewTestResult, TestSuiteResult } from "../test-results-types";
+import type { TestResult, TestSuiteResult } from "../test-results-types";
 import type { OrchestratorStore, ProcessedExpect } from "../types";
 
 /**
@@ -25,39 +25,12 @@ export class TestSuiteManager {
   }
 
   /**
-   * Set the current test from a test result, merging NewTestResult properties into TestState
+   * Set the current test from a test result
+   * The store's setCurrentTest will internally trigger setCurrentTestTime
    */
-  setCurrentTestFromResult(result: NewTestResult | null): void {
-    if (!result || !result.animationTimeline) {
-      this.store.getState().setCurrentTest(null);
-      return;
-    }
-
-    const currentFrame = result.frames.find((f) => f.time === result.time) || result.frames[0];
-    const currentFrameIndex = result.frames.indexOf(currentFrame);
-
-    const testState = {
-      // Core TestState properties
-      frames: result.frames,
-      animationTimeline: result.animationTimeline,
-      time: result.time,
-      currentFrame,
-      prevFrame: currentFrameIndex > 0 ? result.frames[currentFrameIndex - 1] : undefined,
-      nextFrame: currentFrameIndex < result.frames.length - 1 ? result.frames[currentFrameIndex + 1] : undefined,
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined,
-      // NewTestResult properties for display
-      name: result.name,
-      status: result.status,
-      type: result.type,
-      expects: result.expects,
-      view: result.view,
-      imageSlug: result.imageSlug,
-      slug: result.slug
-    };
-
-    this.store.getState().setCurrentTest(testState);
-    this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
+  setCurrentTestFromResult(result: TestResult | null): void {
+    // Just pass it through - the store handles triggering frame calculations
+    this.store.getState().setCurrentTest(result);
   }
 
   /**
@@ -97,7 +70,7 @@ export class TestSuiteManager {
     state.setBonusTestSuiteResult(mockBonusTestResults);
 
     // Set the first test as current by default
-    // Merge NewTestResult properties into TestState format
+    // Merge TestResult properties into TestState format
     if (mockTestResults.tests.length > 0) {
       const firstTest = mockTestResults.tests[0];
       if (firstTest.animationTimeline) {
@@ -111,7 +84,7 @@ export class TestSuiteManager {
           nextFrame: undefined,
           prevBreakpointFrame: undefined,
           nextBreakpointFrame: undefined,
-          // NewTestResult properties
+          // TestResult properties
           name: firstTest.name,
           status: firstTest.status,
           type: firstTest.type,
@@ -134,8 +107,8 @@ export class TestSuiteManager {
     if (!currentTest || !currentTest.expects) {
       return [];
     }
-    // currentTest now has NewTestResult properties merged in
-    const result = currentTest as unknown as NewTestResult;
+    // currentTest now has TestResult properties merged in
+    const result = currentTest as unknown as TestResult;
     return this.processExpects(result);
   }
 
@@ -147,8 +120,8 @@ export class TestSuiteManager {
     if (!currentTest || !currentTest.expects) {
       return null;
     }
-    // currentTest now has NewTestResult properties merged in
-    const result = currentTest as unknown as NewTestResult;
+    // currentTest now has TestResult properties merged in
+    const result = currentTest as unknown as TestResult;
     return this.getFirstFailingExpectInternal(result);
   }
 
@@ -164,7 +137,7 @@ export class TestSuiteManager {
   /**
    * Find the first failing expect in a test result
    */
-  private getFirstFailingExpectInternal(result: NewTestResult | null): ProcessedExpect | null {
+  private getFirstFailingExpectInternal(result: TestResult | null): ProcessedExpect | null {
     if (!result) {
       return null;
     }
@@ -195,7 +168,7 @@ export class TestSuiteManager {
   /**
    * Process all expects in a test result into ProcessedExpect format
    */
-  private processExpects(result: NewTestResult | null): ProcessedExpect[] {
+  private processExpects(result: TestResult | null): ProcessedExpect[] {
     if (!result) {
       return [];
     }

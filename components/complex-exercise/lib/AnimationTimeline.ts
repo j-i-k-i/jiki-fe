@@ -121,6 +121,10 @@ export class AnimationTimeline {
     return this.animationTimeline.duration;
   }
 
+  public get currentTime() {
+    return this.progress;
+  }
+
   private updateScrubber(anim: Timeline) {
     this.progress = anim.currentTime;
 

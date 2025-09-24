@@ -1,7 +1,7 @@
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "../stubs";
-import type { TestState } from "../types";
+import type { TestResult } from "../test-results-types";
 import { createTestFrame } from "../test-utils/createTestFrame";
+import { createMockTestResult } from "../test-utils/createMockTestResult";
 
 // Temporary mock test data for testing the scrubber
 export const mockFrames: Frame[] = [
@@ -12,10 +12,10 @@ export const mockFrames: Frame[] = [
   createTestFrame(400000, { line: 5, generateDescription: () => "End" }) // 400ms
 ];
 
-export const mockTest: TestState = {
+export const mockTest: TestResult = createMockTestResult({
   frames: mockFrames,
   animationTimeline: {
-    duration: 400, // 400ms to match the last frame at 400000 microseconds
+    duration: 400000, // 400ms in microseconds to match the last frame
     paused: true,
     seek: (_time: number) => {},
     play: () => {},
@@ -27,14 +27,14 @@ export const mockTest: TestState = {
     seekEndOfTimeline: () => {},
     onUpdate: () => {},
     timeline: {
-      duration: 400, // 400ms
+      duration: 400000, // 400ms in microseconds
       currentTime: 0
     }
-  } as AnimationTimeline,
+  },
   time: 0,
   currentFrame: mockFrames[0], // Initialize with first frame
   prevFrame: undefined, // No previous frame at start
   nextFrame: mockFrames[1], // Next frame is frame 1
   prevBreakpointFrame: undefined, // No previous breakpoint frame at start
   nextBreakpointFrame: undefined // No next breakpoint frame initially
-};
+});
