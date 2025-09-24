@@ -13,7 +13,7 @@ jest.mock("interpreters", () => ({
 jest.mock("@/components/complex-exercise/lib/mock-exercise/BasicExercise", () => {
   return {
     BasicExercise: jest.fn().mockImplementation(() => ({
-      position: 100,  // This will match the expectation for start-at-0
+      position: 100, // This will match the expectation for start-at-0
       animations: [],
       availableFunctions: [
         {

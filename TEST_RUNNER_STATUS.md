@@ -7,6 +7,7 @@ The test runner is now fully integrated with the interpreters package from the m
 ## ✅ Completed
 
 ### Core Implementation
+
 - **Exercise System**: Base Exercise class with animations and state management
 - **BasicExercise**: Simple exercise with move() function that tracks position
 - **Test Runner**: Executes scenarios through Jikiscript interpreter
@@ -16,6 +17,7 @@ The test runner is now fully integrated with the interpreters package from the m
 - **Frame Types**: Using Frame type directly from interpreters package
 
 ### UI Integration
+
 - Test results display in TestResultsView
 - Test buttons for switching between scenarios
 - InspectedTestResultView shows exercise visualization
@@ -23,6 +25,7 @@ The test runner is now fully integrated with the interpreters package from the m
 - Scrubber integration for frame navigation
 
 ### E2E Testing
+
 - Comprehensive test suite in `tests/e2e/complex-exercise/test-runner.test.ts`
 - Tests cover: running code, displaying results, handling failures, switching scenarios
 - Added data-testid="run-button" for reliable test selection
@@ -31,6 +34,7 @@ The test runner is now fully integrated with the interpreters package from the m
 ## 🔧 Pending
 
 ### Future Enhancements
+
 - More complex exercises (MazeExercise, etc.)
 - Proper expect DSL for cleaner assertions
 - Task grouping (currently flattened to scenarios)
@@ -44,11 +48,11 @@ The test runner is now fully integrated with the interpreters package from the m
 2. Navigate to: http://localhost:3060/dev/complex-exercise
 3. Enter code in editor:
    ```javascript
-   move()
-   move()
-   move()
-   move()
-   move()
+   move();
+   move();
+   move();
+   move();
+   move();
    ```
 4. Click "Run Code" button
 5. Observe:
@@ -79,5 +83,6 @@ runCode() → runTests() → Jikiscript.interpret() → TestResults
 ```
 
 The system is fully integrated and working with the interpreters package. All time scales follow the PR 24 conventions:
+
 - Frame.time: microseconds (for scrubber precision)
 - Frame.timeInMs: milliseconds (for animation compatibility)
