@@ -48,7 +48,5 @@ export interface TestSuiteResult {
 
 export interface TestResultsState {
   testSuiteResult: TestSuiteResult | null;
-  bonusTestSuiteResult: TestSuiteResult | null;
-  shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
 }

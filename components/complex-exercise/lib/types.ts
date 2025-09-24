@@ -63,8 +63,6 @@ export interface OrchestratorState {
 
   // Test results state
   testSuiteResult: TestSuiteResult | null;
-  bonusTestSuiteResult: TestSuiteResult | null;
-  shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
 
   // Frame navigation state (moved from currentTest to top level)
@@ -111,8 +109,6 @@ export interface OrchestratorActions {
 
   // Test results actions
   setTestSuiteResult: (result: TestSuiteResult | null) => void;
-  setBonusTestSuiteResult: (result: TestSuiteResult | null) => void;
-  setShouldShowBonusTasks: (show: boolean) => void;
   setShouldAutoplayAnimation: (autoplay: boolean) => void;
 
   // Exercise data initialization

@@ -205,14 +205,6 @@ class Orchestrator {
     this.testSuiteManager.setTestSuiteResult(result);
   }
 
-  setBonusTestSuiteResult(result: TestSuiteResult | null) {
-    this.testSuiteManager.setBonusTestSuiteResult(result);
-  }
-
-  setShouldShowBonusTasks(show: boolean) {
-    this.testSuiteManager.setShouldShowBonusTasks(show);
-  }
-
   setShouldAutoplayAnimation(autoplay: boolean) {
     this.testSuiteManager.setShouldAutoplayAnimation(autoplay);
   }

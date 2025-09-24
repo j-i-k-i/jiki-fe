@@ -44,8 +44,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results state
       testSuiteResult: null,
-      bonusTestSuiteResult: null,
-      shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
 
       // Frame navigation state (moved from currentTest to top level)
@@ -223,8 +221,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results actions
       setTestSuiteResult: (result) => set({ testSuiteResult: result }),
-      setBonusTestSuiteResult: (result) => set({ bonusTestSuiteResult: result }),
-      setShouldShowBonusTasks: (show) => set({ shouldShowBonusTasks: show }),
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
       // Exercise data initialization with priority logic
@@ -360,8 +356,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset test results state
           testSuiteResult: null,
-          bonusTestSuiteResult: null,
-          shouldShowBonusTasks: false,
           shouldAutoplayAnimation: false,
 
           // Reset frame navigation state
@@ -410,8 +404,6 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
 
       // Test results state
       testSuiteResult: state.testSuiteResult,
-      bonusTestSuiteResult: state.bonusTestSuiteResult,
-      shouldShowBonusTasks: state.shouldShowBonusTasks,
       shouldAutoplayAnimation: state.shouldAutoplayAnimation,
 
       // Frame navigation state

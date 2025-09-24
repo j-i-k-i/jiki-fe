@@ -17,13 +17,6 @@ export class TestSuiteManager {
   }
 
   /**
-   * Set the bonus test suite result in the store
-   */
-  setBonusTestSuiteResult(result: TestSuiteResult | null): void {
-    this.store.getState().setBonusTestSuiteResult(result);
-  }
-
-  /**
    * Set the current test from a test result
    * The store's setCurrentTest will internally trigger setCurrentTestTime
    */
@@ -39,13 +32,6 @@ export class TestSuiteManager {
     const state = this.store.getState();
     // Simply update the timeline time for the current test
     state.setCurrentTestTime(time);
-  }
-
-  /**
-   * Set whether bonus tasks should be shown
-   */
-  setShouldShowBonusTasks(show: boolean): void {
-    this.store.getState().setShouldShowBonusTasks(show);
   }
 
   /**

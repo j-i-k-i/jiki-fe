@@ -63,8 +63,6 @@ describe("CodeEditor", () => {
 
       // Test results state
       testSuiteResult: null,
-      bonusTestSuiteResult: null,
-      shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
 
       // Frame navigation state
