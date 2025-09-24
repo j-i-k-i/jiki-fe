@@ -1,5 +1,5 @@
 import { TestSuiteManager } from "@/components/complex-exercise/lib/orchestrator/TestSuiteManager";
-import type { NewTestResult } from "@/components/complex-exercise/lib/test-results-types";
+import type { TestResult } from "@/components/complex-exercise/lib/test-results-types";
 import type { OrchestratorStore } from "@/components/complex-exercise/lib/types";
 import type { StoreApi } from "zustand/vanilla";
 

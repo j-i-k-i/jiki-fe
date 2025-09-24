@@ -5,18 +5,18 @@ import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercis
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import type { Frame } from "interpreters";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    createTestFrame(0, { line: 1 }),
-    createTestFrame(100000, { line: 2 }), // 100ms
-    createTestFrame(200000, { line: 3 }), // 200ms
-    createTestFrame(300000, { line: 4 }), // 300ms
-    createTestFrame(400000, { line: 5 }), // 400ms
-    createTestFrame(500000, { line: 6 }), // 500ms
-    createTestFrame(600000, { line: 7 }), // 600ms
-    createTestFrame(700000, { line: 8 }) // 700ms
+    mockFrame(0, { line: 1 }),
+    mockFrame(100000, { line: 2 }), // 100ms
+    mockFrame(200000, { line: 3 }), // 200ms
+    mockFrame(300000, { line: 4 }), // 300ms
+    mockFrame(400000, { line: 5 }), // 400ms
+    mockFrame(500000, { line: 6 }), // 500ms
+    mockFrame(600000, { line: 7 }), // 600ms
+    mockFrame(700000, { line: 8 }) // 700ms
   ];
 }
 
@@ -42,10 +42,16 @@ export default function BreakpointGutterTestPage() {
   const { breakpoints } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      type: "io" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 8,
@@ -65,11 +71,7 @@ export default function BreakpointGutterTestPage() {
         }
       } as any,
       time: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: frames[1],
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state

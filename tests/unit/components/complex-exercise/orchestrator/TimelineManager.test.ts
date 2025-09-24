@@ -1,33 +1,24 @@
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
 import type { TestState } from "@/components/complex-exercise/lib/types";
 import { createStore } from "zustand/vanilla";
 import { subscribeWithSelector } from "zustand/middleware";
 
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
 
 // Helper to create a test state
 function createTestState(frames: Frame[], time: number = 0, currentFrame: Frame | null = null): TestState {
-  // Calculate prev/next frames based on timeline time
-  const prevFrame = frames.length > 0 && time > 0 ? TimelineManager.findPrevFrame(frames, time, []) : undefined;
-  const nextFrame = frames.length > 0 ? TimelineManager.findNextFrame(frames, time, []) : undefined;
-
   return {
+    slug: "test-1",
+    name: "Test 1",
+    status: "pass" as const,
+    type: "io" as const,
+    expects: [],
+    view: document.createElement("div"),
     frames,
-    animationTimeline: {
-      duration: 5,
-      paused: true,
-      seek: jest.fn(),
-      play: jest.fn(),
-      pause: jest.fn()
-    } as unknown as AnimationTimeline,
+    animationTimeline: mockAnimationTimeline({ duration: 5 }),
     time,
-    currentFrame: currentFrame || frames[0] || null,
-    prevFrame,
-    nextFrame,
-    prevBreakpointFrame: undefined,
-    nextBreakpointFrame: undefined
+    currentFrame: currentFrame || frames[0] || null
   };
 }
 
@@ -93,41 +84,25 @@ describe("TimelineManager", () => {
     });
 
     it("should return first frame when timeline time is negative", () => {
-      const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 })
-      ];
+      const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
       const result = TimelineManager.findNearestFrame(frames, -50000, []);
       expect(result).toEqual(frames[0]);
     });
 
     it("should return last frame when timeline time is past the last frame", () => {
-      const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 })
-      ];
+      const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
       const result = TimelineManager.findNearestFrame(frames, 300000, []);
       expect(result).toEqual(frames[2]);
     });
 
     it("should return exact frame when timeline time matches", () => {
-      const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 })
-      ];
+      const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
       const result = TimelineManager.findNearestFrame(frames, 100000, []);
       expect(result).toEqual(frames[1]);
     });
 
     it("should return nearest frame when timeline time is between frames", () => {
-      const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 })
-      ];
+      const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
 
       // Closer to frame 1 (timeline 100)
       let result = TimelineManager.findNearestFrame(frames, 80000, []);
@@ -140,10 +115,10 @@ describe("TimelineManager", () => {
 
     it("should skip folded lines", () => {
       const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 }),
-        createTestFrame(300000, { line: 4 })
+        mockFrame(0, { line: 1 }),
+        mockFrame(100000, { line: 2 }),
+        mockFrame(200000, { line: 3 }),
+        mockFrame(300000, { line: 4 })
       ];
 
       // Fold line 2
@@ -154,11 +129,7 @@ describe("TimelineManager", () => {
     });
 
     it("should handle all frames being folded", () => {
-      const frames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 })
-      ];
+      const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
 
       // Fold all lines
       const result = TimelineManager.findNearestFrame(frames, 100000, [1, 2, 3]);
@@ -172,7 +143,7 @@ describe("TimelineManager", () => {
     describe("setTime", () => {
       it("should update time in store and seek animation timeline", () => {
         const mockSeek = jest.fn();
-        const testState = createTestState([createTestFrame(0, { line: 1 })]);
+        const testState = createTestState([mockFrame(0, { line: 1 })]);
         testState.animationTimeline.seek = mockSeek;
 
         const store = createMockStore(testState);
@@ -204,10 +175,10 @@ describe("TimelineManager", () => {
 
       it("should calculate nearest frame to current timeline time", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         // Set timeline time to 150 (between frames 1 and 2)
         const testState = createTestState(frames, 150000, null);
@@ -220,10 +191,10 @@ describe("TimelineManager", () => {
 
       it("should find nearest frame even when stored currentFrame is different", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         // Timeline time at 250, but stored frame is frame 0 (incorrect)
         const testState = createTestState(frames, 250000, frames[0]);
@@ -236,10 +207,10 @@ describe("TimelineManager", () => {
 
       it("should handle folded lines when finding nearest frame", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }), // This will be folded
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }), // This will be folded
+          mockFrame(300000, { line: 4 })
         ];
         const testState = createTestState(frames, 150000, null);
         const store = createMockStore(testState, [3]); // Fold line 3
@@ -260,10 +231,10 @@ describe("TimelineManager", () => {
 
       it("should return next non-folded frame", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         const testState = createTestState(frames);
         const store = createMockStore(testState, [3]); // Fold line 3
@@ -275,7 +246,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return undefined when at last frame", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = createTestState(frames);
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -285,11 +256,11 @@ describe("TimelineManager", () => {
 
       it("should skip multiple consecutive folded frames", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 }),
-          createTestFrame(400000, { line: 5 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 }),
+          mockFrame(400000, { line: 5 })
         ];
         const testState = createTestState(frames);
         const store = createMockStore(testState, [2, 3, 4]); // Fold lines 2, 3, 4
@@ -302,10 +273,10 @@ describe("TimelineManager", () => {
 
       it("should use current position when no index provided", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         // Timeline at 150 (between frame 1 and 2)
         const testState = createTestState(frames, 150000);
@@ -318,11 +289,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle timeline time before all frames", () => {
-        const frames = [
-          createTestFrame(100000, { line: 1 }),
-          createTestFrame(200000, { line: 2 }),
-          createTestFrame(300000, { line: 3 })
-        ];
+        const frames = [mockFrame(100000, { line: 1 }), mockFrame(200000, { line: 2 }), mockFrame(300000, { line: 3 })];
         const testState = createTestState(frames, -50000); // Before all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -332,11 +299,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle timeline time after all frames", () => {
-        const frames = [
-          createTestFrame(100000, { line: 1 }),
-          createTestFrame(200000, { line: 2 }),
-          createTestFrame(300000, { line: 3 })
-        ];
+        const frames = [mockFrame(100000, { line: 1 }), mockFrame(200000, { line: 2 }), mockFrame(300000, { line: 3 })];
         const testState = createTestState(frames, 400000); // After all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -355,11 +318,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle all frames being folded", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 50000);
         const store = createMockStore(testState, [1, 2, 3]); // All folded
         const manager = new TimelineManager(store as any);
@@ -378,10 +337,10 @@ describe("TimelineManager", () => {
 
       it("should return previous non-folded frame", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         const testState = createTestState(frames);
         const store = createMockStore(testState, [3]); // Fold line 3
@@ -393,7 +352,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return undefined when at first frame", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = createTestState(frames);
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -403,11 +362,11 @@ describe("TimelineManager", () => {
 
       it("should skip multiple consecutive folded frames", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 }),
-          createTestFrame(400000, { line: 5 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 }),
+          mockFrame(400000, { line: 5 })
         ];
         const testState = createTestState(frames);
         const store = createMockStore(testState, [2, 3, 4]); // Fold lines 2, 3, 4
@@ -420,10 +379,10 @@ describe("TimelineManager", () => {
 
       it("should use current position when no index provided", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         // Timeline at 250ms (between frame 2 and 3)
         const testState = createTestState(frames, 250000);
@@ -436,11 +395,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle timeline time before all frames", () => {
-        const frames = [
-          createTestFrame(100000, { line: 1 }),
-          createTestFrame(200000, { line: 2 }),
-          createTestFrame(300000, { line: 3 })
-        ];
+        const frames = [mockFrame(100000, { line: 1 }), mockFrame(200000, { line: 2 }), mockFrame(300000, { line: 3 })];
         const testState = createTestState(frames, 50000); // Before all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -450,11 +405,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle timeline time after all frames", () => {
-        const frames = [
-          createTestFrame(100000, { line: 1 }),
-          createTestFrame(200000, { line: 2 }),
-          createTestFrame(300000, { line: 3 })
-        ];
+        const frames = [mockFrame(100000, { line: 1 }), mockFrame(200000, { line: 2 }), mockFrame(300000, { line: 3 })];
         const testState = createTestState(frames, 400000); // After all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -473,11 +424,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle all frames being folded", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 150000);
         const store = createMockStore(testState, [1, 2, 3]); // All folded
         const manager = new TimelineManager(store as any);
@@ -497,7 +444,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return -1 when timeline time is undefined", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = { ...createTestState(frames), time: undefined };
         const store = createMockStore(testState as any);
         const manager = new TimelineManager(store as any);
@@ -507,7 +454,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return -1 when timeline time is negative", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = createTestState(frames, -50000);
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -518,8 +465,8 @@ describe("TimelineManager", () => {
 
       it("should return -1 when timeline time is before first frame", () => {
         const frames = [
-          createTestFrame(100000, { line: 1 }), // First frame at 100
-          createTestFrame(200000, { line: 2 })
+          mockFrame(100000, { line: 1 }), // First frame at 100
+          mockFrame(200000, { line: 2 })
         ];
         const testState = createTestState(frames, 50000); // Before first frame (100ms)
         const store = createMockStore(testState);
@@ -531,10 +478,10 @@ describe("TimelineManager", () => {
 
       it("should return correct index when timeline time is between frames", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         const testState = createTestState(frames, 150000); // Between frame 1 (100ms) and 2 (200ms)
         const store = createMockStore(testState);
@@ -545,11 +492,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return last index when timeline time is after all frames", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 300000); // After all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -559,11 +502,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return exact frame index when timeline time matches", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 100000); // Exactly at frame 1 (100ms)
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -573,7 +512,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle single frame", () => {
-        const frames = [createTestFrame(100000, { line: 1 })];
+        const frames = [mockFrame(100000, { line: 1 })];
 
         // Before frame
         let testState = createTestState(frames, 50000);
@@ -605,7 +544,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return frames.length when timeline time is undefined", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = { ...createTestState(frames), time: undefined };
         const store = createMockStore(testState as any);
         const manager = new TimelineManager(store as any);
@@ -616,8 +555,8 @@ describe("TimelineManager", () => {
 
       it("should return 0 when timeline time is before all frames", () => {
         const frames = [
-          createTestFrame(100000, { line: 1 }), // First frame at 100
-          createTestFrame(200000, { line: 2 })
+          mockFrame(100000, { line: 1 }), // First frame at 100
+          mockFrame(200000, { line: 2 })
         ];
         const testState = createTestState(frames, 50000); // Before all frames
         const store = createMockStore(testState);
@@ -629,10 +568,10 @@ describe("TimelineManager", () => {
 
       it("should return correct index when timeline time is between frames", () => {
         const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 }),
-          createTestFrame(300000, { line: 4 })
+          mockFrame(0, { line: 1 }),
+          mockFrame(100000, { line: 2 }),
+          mockFrame(200000, { line: 3 }),
+          mockFrame(300000, { line: 4 })
         ];
         const testState = createTestState(frames, 150000); // Between frame 1 (100ms) and 2 (200ms)
         const store = createMockStore(testState);
@@ -643,11 +582,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return last index when timeline time is after all frames", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 300000); // After all frames
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -657,11 +592,7 @@ describe("TimelineManager", () => {
       });
 
       it("should return exact frame index when timeline time matches", () => {
-        const frames = [
-          createTestFrame(0, { line: 1 }),
-          createTestFrame(100000, { line: 2 }),
-          createTestFrame(200000, { line: 3 })
-        ];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })];
         const testState = createTestState(frames, 100000); // Exactly at frame 1 (100ms)
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -671,7 +602,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle negative timeline time", () => {
-        const frames = [createTestFrame(0, { line: 1 }), createTestFrame(100000, { line: 2 })];
+        const frames = [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })];
         const testState = createTestState(frames, -50000);
         const store = createMockStore(testState);
         const manager = new TimelineManager(store as any);
@@ -681,7 +612,7 @@ describe("TimelineManager", () => {
       });
 
       it("should handle single frame", () => {
-        const frames = [createTestFrame(100000, { line: 1 })];
+        const frames = [mockFrame(100000, { line: 1 })];
 
         // Before frame
         let testState = createTestState(frames, 50000);

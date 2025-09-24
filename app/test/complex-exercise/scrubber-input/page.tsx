@@ -6,19 +6,19 @@ import OrchestratorProvider from "@/components/complex-exercise/lib/Orchestrator
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import type { Frame } from "interpreters";
 import { TIME_SCALE_FACTOR } from "interpreters";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Create frames for testing with specific timeline positions
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    createTestFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
-    createTestFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
-    createTestFrame(250000, { line: 3, generateDescription: () => "Frame 3" }), // 250ms
-    createTestFrame(400000, { line: 4, generateDescription: () => "Frame 4" }), // 400ms
-    createTestFrame(600000, { line: 5, generateDescription: () => "Frame 5" }), // 600ms
-    createTestFrame(750000, { line: 6, generateDescription: () => "Frame 6" }), // 750ms
-    createTestFrame(900000, { line: 7, generateDescription: () => "Frame 7" }), // 900ms
-    createTestFrame(1000000, { line: 8, generateDescription: () => "Frame 8" }) // 1000ms = 1 second
+    mockFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    mockFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    mockFrame(250000, { line: 3, generateDescription: () => "Frame 3" }), // 250ms
+    mockFrame(400000, { line: 4, generateDescription: () => "Frame 4" }), // 400ms
+    mockFrame(600000, { line: 5, generateDescription: () => "Frame 5" }), // 600ms
+    mockFrame(750000, { line: 6, generateDescription: () => "Frame 6" }), // 750ms
+    mockFrame(900000, { line: 7, generateDescription: () => "Frame 7" }), // 900ms
+    mockFrame(1000000, { line: 8, generateDescription: () => "Frame 8" }) // 1000ms = 1 second
   ];
 }
 
@@ -34,13 +34,19 @@ export default function ScrubberInputTestPage() {
   const scrubberRef = useRef<HTMLInputElement>(null);
 
   // Get state from orchestrator store
-  const { currentTest } = useOrchestratorStore(orchestrator);
+  const { currentTest, prevFrame, nextFrame } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state similar to what would come from the test runner
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      type: "io" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 1000, // 1000 milliseconds = 1 second, max value will be 1000000 microseconds
@@ -60,11 +66,7 @@ export default function ScrubberInputTestPage() {
         }
       } as any,
       time: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: frames[1],
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state
@@ -209,8 +211,8 @@ export default function ScrubberInputTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Debug Info</h2>
           <div className="text-sm space-y-1">
-            <div>Previous Frame: {currentTest.prevFrame?.generateDescription() ?? "None"}</div>
-            <div>Next Frame: {currentTest.nextFrame?.generateDescription() ?? "None"}</div>
+            <div>Previous Frame: {prevFrame?.generateDescription() ?? "None"}</div>
+            <div>Next Frame: {nextFrame?.generateDescription() ?? "None"}</div>
             <div>Total Frames: {frames.length}</div>
             <div>Animation Duration: {animationTimeline?.duration || 0} seconds</div>
           </div>

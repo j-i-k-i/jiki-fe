@@ -65,7 +65,16 @@ describe("CodeEditor", () => {
       testSuiteResult: null,
       bonusTestSuiteResult: null,
       shouldShowBonusTasks: false,
-      shouldAutoplayAnimation: false
+      shouldAutoplayAnimation: false,
+
+      // Frame navigation state
+      prevFrame: undefined,
+      nextFrame: undefined,
+      prevBreakpointFrame: undefined,
+      nextBreakpointFrame: undefined,
+
+      // Test time persistence
+      testCurrentTimes: {}
     });
   });
 

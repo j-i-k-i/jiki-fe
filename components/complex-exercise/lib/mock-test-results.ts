@@ -1,6 +1,5 @@
-import type { AnimationTimeline } from "./stubs";
 import type { TestSuiteResult } from "./test-results-types";
-import { createTestFrame } from "./test-utils/createTestFrame";
+import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
 
 // Create a view element that works on both client and server
 function createViewElement(): HTMLElement {
@@ -9,41 +8,6 @@ function createViewElement(): HTMLElement {
     return {} as HTMLElement;
   }
   return document.createElement("div");
-}
-
-// Mock animation timeline for scrubber
-function createMockAnimationTimeline(): AnimationTimeline {
-  let currentTime = 0;
-  let paused = true;
-  const duration = 75; // Duration in milliseconds (matches max frame at 75ms)
-
-  return {
-    pause: () => {
-      paused = true;
-    },
-    play: () => {
-      paused = false;
-    },
-    paused,
-    duration,
-    progress: currentTime / duration,
-    currentTime,
-    completed: currentTime >= duration,
-    hasPlayedOrScrubbed: false,
-    seek: (time: number) => {
-      currentTime = Math.max(0, Math.min(duration, time));
-    },
-    seekEndOfTimeline: () => {
-      currentTime = duration;
-    },
-    onUpdate: (_callback: (anime: AnimationTimeline) => void) => {
-      // Mock implementation - in real scenario this would be called during animation
-    },
-    timeline: {
-      duration,
-      currentTime
-    }
-  };
 }
 
 export const mockTestResults: TestSuiteResult = {
@@ -64,24 +28,24 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        createTestFrame(0, {
+        mockFrame(0, {
           line: 2,
           generateDescription: () => "Function greet() starts execution"
         }),
-        createTestFrame(25000, {
+        mockFrame(25000, {
           line: 3,
           generateDescription: () => 'Processing input parameter: "World"'
         }),
-        createTestFrame(50000, {
+        mockFrame(50000, {
           line: 4,
           generateDescription: () => 'Concatenating "Hello, " + "World" + "!"'
         }),
-        createTestFrame(75000, {
+        mockFrame(75000, {
           line: 5,
           generateDescription: () => 'Returning "Hello, World!"'
         })
       ],
-      animationTimeline: createMockAnimationTimeline(),
+      animationTimeline: mockAnimationTimeline({ duration: 75 }),
       time: 0,
       view: createViewElement()
     },
@@ -100,26 +64,26 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        createTestFrame(0, {
+        mockFrame(0, {
           line: 2,
           generateDescription: () => "Function greet() starts execution"
         }),
-        createTestFrame(30000, {
+        mockFrame(30000, {
           line: 3,
           generateDescription: () => 'Processing input parameter: ""'
         }),
-        createTestFrame(60000, {
+        mockFrame(60000, {
           line: 4,
           status: "ERROR",
           generateDescription: () => 'Empty string detected - should return "Hello, stranger!"'
         }),
-        createTestFrame(90000, {
+        mockFrame(90000, {
           line: 5,
           status: "ERROR",
           generateDescription: () => 'Incorrectly returning "Hello, !" instead of "Hello, stranger!"'
         })
       ],
-      animationTimeline: createMockAnimationTimeline(),
+      animationTimeline: mockAnimationTimeline({ duration: 75 }),
       time: 60000, // Start at error frame in microseconds
       view: createViewElement()
     },
@@ -139,27 +103,27 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        createTestFrame(0, {
+        mockFrame(0, {
           line: 2,
           generateDescription: () => "Function greet() starts execution"
         }),
-        createTestFrame(25000, {
+        mockFrame(25000, {
           line: 3,
           status: "ERROR",
           generateDescription: () => "Processing input parameter: null"
         }),
-        createTestFrame(50000, {
+        mockFrame(50000, {
           line: 4,
           status: "ERROR",
           generateDescription: () => "Null check missing - should handle null gracefully"
         }),
-        createTestFrame(75000, {
+        mockFrame(75000, {
           line: 5,
           status: "ERROR",
           generateDescription: () => 'Incorrectly returning "Hello, null!" instead of "Hello, stranger!"'
         })
       ],
-      animationTimeline: createMockAnimationTimeline(),
+      animationTimeline: mockAnimationTimeline({ duration: 75 }),
       time: 25000, // Start at first error frame in microseconds
       view: createViewElement()
     }
@@ -184,21 +148,21 @@ export const mockBonusTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        createTestFrame(0, {
+        mockFrame(0, {
           line: 8,
           generateDescription: () => "Function greetMultiple() starts execution"
         }),
-        createTestFrame(30000, {
+        mockFrame(30000, {
           line: 9,
           generateDescription: () => 'Processing array input: ["Alice", "Bob"]'
         }),
-        createTestFrame(60000, {
+        mockFrame(60000, {
           line: 10,
           status: "ERROR",
           generateDescription: () => "Function not implemented yet - should iterate over array"
         })
       ],
-      animationTimeline: createMockAnimationTimeline(),
+      animationTimeline: mockAnimationTimeline({ duration: 75 }),
       time: 0,
       view: createViewElement()
     }

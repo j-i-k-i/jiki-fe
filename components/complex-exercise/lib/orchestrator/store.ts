@@ -49,10 +49,23 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
 
+      // Frame navigation state (moved from currentTest to top level)
+      prevFrame: undefined,
+      nextFrame: undefined,
+      prevBreakpointFrame: undefined,
+      nextBreakpointFrame: undefined,
+
+      // Test time persistence - maps test slugs to their current time positions
+      testCurrentTimes: {},
+
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
         if (!state.currentTest) {
+          set({
+            prevFrame: undefined,
+            nextFrame: undefined
+          });
           return;
         }
 
@@ -68,16 +81,17 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         );
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            prevFrame,
-            nextFrame
-          }
+          prevFrame,
+          nextFrame
         });
       },
       recalculateBreakpointFrames: () => {
         const state = get();
         if (!state.currentTest) {
+          set({
+            prevBreakpointFrame: undefined,
+            nextBreakpointFrame: undefined
+          });
           return;
         }
 
@@ -95,11 +109,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         );
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            prevBreakpointFrame,
-            nextBreakpointFrame
-          }
+          prevBreakpointFrame,
+          nextBreakpointFrame
         });
       },
       setCode: (code) => set({ code, hasCodeBeenEdited: true }),
@@ -108,16 +119,34 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
       setCurrentTest: (test) => {
+        if (!test) {
+          set({
+            currentTest: test,
+            highlightedLine: 0
+          });
+          return;
+        }
+
+        const state = get();
+        // Check if we have a saved time for this test
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const savedTime = state.testCurrentTimes[test.slug];
+        const timeToUse = savedTime !== undefined ? savedTime : test.time;
+
+        // Create test with the appropriate time
+        const testWithTime = {
+          ...test,
+          time: timeToUse
+        };
+
         set({
-          currentTest: test,
+          currentTest: testWithTime,
           // Update highlighted line when setting a new test
-          highlightedLine: test?.currentFrame?.line ?? 0
+          highlightedLine: testWithTime.currentFrame?.line ?? 0
         });
 
-        // If we have a test with a time, trigger frame calculations
-        if (test?.time !== undefined) {
-          get().setCurrentTestTime(test.time);
-        }
+        // Trigger frame calculations with the restored/initial time
+        get().setCurrentTestTime(timeToUse);
       },
       setCurrentFrame: (frame) => {
         const state = get();
@@ -143,11 +172,15 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           return;
         }
 
-        // Update timeline time
+        // Update timeline time and persist it for this test
         set({
           currentTest: {
             ...state.currentTest,
             time: time
+          },
+          testCurrentTimes: {
+            ...state.testCurrentTimes,
+            [state.currentTest.slug]: time
           }
         });
 
@@ -331,7 +364,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           testSuiteResult: null,
           bonusTestSuiteResult: null,
           shouldShowBonusTasks: false,
-          shouldAutoplayAnimation: false
+          shouldAutoplayAnimation: false,
+
+          // Reset frame navigation state
+          prevFrame: undefined,
+          nextFrame: undefined,
+          prevBreakpointFrame: undefined,
+          nextBreakpointFrame: undefined
         })
     }))
   );
@@ -375,7 +414,16 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       testSuiteResult: state.testSuiteResult,
       bonusTestSuiteResult: state.bonusTestSuiteResult,
       shouldShowBonusTasks: state.shouldShowBonusTasks,
-      shouldAutoplayAnimation: state.shouldAutoplayAnimation
+      shouldAutoplayAnimation: state.shouldAutoplayAnimation,
+
+      // Frame navigation state
+      prevFrame: state.prevFrame,
+      nextFrame: state.nextFrame,
+      prevBreakpointFrame: state.prevBreakpointFrame,
+      nextBreakpointFrame: state.nextBreakpointFrame,
+
+      // Test time persistence
+      testCurrentTimes: state.testCurrentTimes
     }))
   );
 }

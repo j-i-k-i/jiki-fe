@@ -9,11 +9,7 @@ interface FrameStepperButtonsProps {
 
 export default function FrameStepperButtons({ enabled }: FrameStepperButtonsProps) {
   const orchestrator = useOrchestrator();
-  const { currentTest } = useOrchestratorStore(orchestrator);
-
-  // Get prev/next frames directly from the store
-  const prevFrame = currentTest?.prevFrame;
-  const nextFrame = currentTest?.nextFrame;
+  const { prevFrame, nextFrame } = useOrchestratorStore(orchestrator);
 
   return (
     <div data-testid="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">

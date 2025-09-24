@@ -1,6 +1,5 @@
 import type { Change } from "diff";
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "./stubs";
 import type { TestResult, TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types
@@ -67,6 +66,15 @@ export interface OrchestratorState {
   bonusTestSuiteResult: TestSuiteResult | null;
   shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
+
+  // Frame navigation state (moved from currentTest to top level)
+  prevFrame?: Frame;
+  nextFrame?: Frame;
+  prevBreakpointFrame?: Frame;
+  nextBreakpointFrame?: Frame;
+
+  // Test time persistence - maps test slugs to their current time positions
+  testCurrentTimes: Record<string, number>;
 }
 
 // Private actions only accessible within the orchestrator

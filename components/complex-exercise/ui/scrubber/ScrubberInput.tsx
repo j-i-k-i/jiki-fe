@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "../../lib/stubs";
+import type { AnimationTimeline } from "../../lib/AnimationTimeline";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
 
 interface ScrubberInputProps {

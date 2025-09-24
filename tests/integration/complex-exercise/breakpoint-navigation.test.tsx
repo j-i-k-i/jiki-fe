@@ -5,11 +5,11 @@ import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import type { Frame } from "interpreters";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Helper to create mock frames
 function createMockFrame(line: number, timeInMicroseconds: number): Frame {
-  return createTestFrame(timeInMicroseconds, { line });
+  return mockFrame(timeInMicroseconds, { line });
 }
 
 // Helper to setup orchestrator with test data
@@ -19,6 +19,12 @@ function setupOrchestrator(frames: Frame[], breakpoints: number[] = [], foldedLi
   // Set up test state with proper animation timeline mock
   orchestrator.getStore().setState({
     currentTest: {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      type: "io" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 5,
@@ -38,11 +44,7 @@ function setupOrchestrator(frames: Frame[], breakpoints: number[] = [], foldedLi
         }
       } as any,
       time: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: frames[1],
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      currentFrame: frames[0]
     },
     breakpoints,
     foldedLines
@@ -147,15 +149,15 @@ describe("Breakpoint Navigation Integration", () => {
 
       // Initially no breakpoints
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame).toBeUndefined();
-      expect(state.currentTest?.nextBreakpointFrame).toBeUndefined();
+      expect(state.prevBreakpointFrame).toBeUndefined();
+      expect(state.nextBreakpointFrame).toBeUndefined();
 
       // Add breakpoints
       orchestrator.getStore().getState().setBreakpoints([2, 4]);
 
       // Check breakpoint frames are updated
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.nextBreakpointFrame?.line).toBe(2);
+      expect(state.nextBreakpointFrame?.line).toBe(2);
     });
 
     it("should update breakpoint frames when folded lines change", () => {
@@ -168,14 +170,14 @@ describe("Breakpoint Navigation Integration", () => {
 
       // Initially line 3 is available as prev breakpoint
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame?.line).toBe(3);
+      expect(state.prevBreakpointFrame?.line).toBe(3);
 
       // Fold line 3
       orchestrator.setFoldedLines([3]);
 
       // Now line 2 should be prev breakpoint
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame?.line).toBe(2);
+      expect(state.prevBreakpointFrame?.line).toBe(2);
     });
 
     it("should update breakpoint frames when timeline time changes", () => {
@@ -191,22 +193,22 @@ describe("Breakpoint Navigation Integration", () => {
 
       // Start at frame 1
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame).toBeUndefined();
-      expect(state.currentTest?.nextBreakpointFrame?.line).toBe(3);
+      expect(state.prevBreakpointFrame).toBeUndefined();
+      expect(state.nextBreakpointFrame?.line).toBe(3);
 
       // Move to frame 3
       orchestrator.setCurrentTestTime(200);
 
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame?.line).toBe(1);
-      expect(state.currentTest?.nextBreakpointFrame?.line).toBe(5);
+      expect(state.prevBreakpointFrame?.line).toBe(1);
+      expect(state.nextBreakpointFrame?.line).toBe(5);
 
       // Move to frame 5
       orchestrator.setCurrentTestTime(400);
 
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame?.line).toBe(3);
-      expect(state.currentTest?.nextBreakpointFrame).toBeUndefined();
+      expect(state.prevBreakpointFrame?.line).toBe(3);
+      expect(state.nextBreakpointFrame).toBeUndefined();
     });
   });
 
@@ -335,8 +337,8 @@ describe("Breakpoint Navigation Integration", () => {
 
       // Check that no breakpoint frames are available
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.prevBreakpointFrame).toBeUndefined();
-      expect(state.currentTest?.nextBreakpointFrame).toBeUndefined();
+      expect(state.prevBreakpointFrame).toBeUndefined();
+      expect(state.nextBreakpointFrame).toBeUndefined();
 
       // Try to navigate - should stay in place
       orchestrator.goToPrevBreakpoint();

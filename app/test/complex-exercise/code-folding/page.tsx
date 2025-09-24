@@ -5,12 +5,12 @@ import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercis
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import type { Frame } from "interpreters";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Create frames for testing
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return Array.from({ length: 15 }, (_, i) =>
-    createTestFrame((i + 1) * 100000, {
+    mockFrame((i + 1) * 100000, {
       line: i + 1,
       generateDescription: () => `Frame ${i + 1}`
     })
@@ -61,10 +61,16 @@ export default function CodeFoldingTestPage() {
   const { foldedLines } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      type: "io" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 15,
@@ -84,11 +90,7 @@ export default function CodeFoldingTestPage() {
         }
       } as any,
       time: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: frames[1],
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state

@@ -1,5 +1,5 @@
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "./stubs";
+import type { AnimationTimeline } from "./AnimationTimeline";
 
 export type TestsType = "io" | "state";
 
@@ -36,10 +36,6 @@ export interface TestResult {
 
   // Navigation properties (calculated by store via setCurrentTestTime)
   currentFrame?: Frame; // Current frame based on timeline position
-  prevFrame?: Frame; // Previous frame from current position
-  nextFrame?: Frame; // Next frame from current position
-  prevBreakpointFrame?: Frame; // Previous frame on a breakpoint line
-  nextBreakpointFrame?: Frame; // Next frame on a breakpoint line
 }
 
 // Legacy alias for backward compatibility during migration
