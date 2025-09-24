@@ -108,6 +108,13 @@ export class AnimationTimeline {
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const lastFrameTime = lastFrame ? lastFrame.timeInMs : 0;
+
+    console.log("AnimationTimeline.populateTimeline:");
+    console.log("  - animationDurationAfterAnimations:", animationDurationAfterAnimations);
+    console.log("  - lastFrame:", lastFrame);
+    console.log("  - lastFrameTime:", lastFrameTime);
+    console.log("  - final duration:", Math.max(animationDurationAfterAnimations, lastFrameTime));
+
     this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrameTime);
     return this;
   }

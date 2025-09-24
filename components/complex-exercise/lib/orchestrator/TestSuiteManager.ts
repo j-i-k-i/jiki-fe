@@ -37,8 +37,8 @@ export class TestSuiteManager {
       // Core TestState properties
       frames: result.frames,
       animationTimeline: result.animationTimeline,
-      timelineTime: result.timelineTime,
-      currentFrame: result.frames.find((f) => f.timelineTime === result.timelineTime) || result.frames[0],
+      time: result.time,
+      currentFrame: result.frames.find((f) => f.time === result.time) || result.frames[0],
       prevFrame: undefined,
       nextFrame: undefined,
       prevBreakpointFrame: undefined,
@@ -102,8 +102,8 @@ export class TestSuiteManager {
           // Core TestState properties
           frames: firstTest.frames,
           animationTimeline: firstTest.animationTimeline,
-          timelineTime: firstTest.timelineTime,
-          currentFrame: firstTest.frames.find((f) => f.time === firstTest.timelineTime) || firstTest.frames[0],
+          time: firstTest.time,
+          currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,

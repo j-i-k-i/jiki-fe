@@ -28,7 +28,7 @@ export interface NewTestResult {
   view: HTMLElement;
   imageSlug?: string;
   animationTimeline: AnimationTimeline | null; // Timeline for scrubber navigation
-  timelineTime: number; // Current scrubber position in microseconds
+  time: number; // Current scrubber position in microseconds
 }
 
 export interface TestSuiteResult {

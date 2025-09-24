@@ -13,16 +13,24 @@ export class BasicExercise extends Exercise {
     }
   ];
 
-  move(executionCtx: { time: number }) {
+  move(executionCtx: any) {
     this.position += 20;
+
+    // Get current time from execution context
+    const currentTime = executionCtx.getCurrentTime ? executionCtx.getCurrentTime() : 0;
 
     this.animations.push({
       targets: ".character",
       translateX: this.position,
       duration: 100,
-      offset: executionCtx.time,
+      offset: currentTime,
       transformations: {}
     } as Animation);
+
+    // Fast forward time for the animation duration
+    if (executionCtx.fastForward) {
+      executionCtx.fastForward(100);
+    }
   }
 
   setStartPosition(position: number) {

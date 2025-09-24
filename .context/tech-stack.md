@@ -12,7 +12,7 @@
 ## Development Tools
 
 - **Linting**: ESLint 9 with Next.js config
-- **Build Tool**: Turbopack (Next.js built-in)
+- **Build Tool**: webpack (Turbopack disabled due to pnpm workspace incompatibility)
 - **Type Checking**: TypeScript strict mode enabled
 
 ## Project Structure

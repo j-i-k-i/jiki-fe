@@ -42,12 +42,18 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
   const expects = scenario.expectations(exercise);
 
   // Build animation timeline
-  // Ensure frames have timelineTime set (interpreterTime is what comes from jikiscript)
-  const frames = result.frames.map((f: any, index: number) => ({
-    ...f,
-    timelineTime: f.timelineTime || f.interpreterTime || index,
-    interpreterTime: f.interpreterTime || index
-  })) as unknown as Frame[];
+  // Frames already have time (microseconds) and timeInMs (milliseconds) from interpreter
+  console.log("Raw frames from interpreter:", result.frames);
+  const frames = result.frames as Frame[];
+
+  console.log("Processed frames:", frames.length, frames);
+  if (frames.length > 0) {
+    console.log("First frame time (microseconds):", frames[0].time);
+    console.log("Last frame time (microseconds):", frames[frames.length - 1].time);
+    console.log("First frame timeInMs (milliseconds):", frames[0].timeInMs);
+    console.log("Last frame timeInMs (milliseconds):", frames[frames.length - 1].timeInMs);
+  }
+  console.log("Animations from exercise:", exercise.animations.length, exercise.animations);
 
   // Create animation timeline if we have animations or frames
   const animationTimeline: AnimationTimeline | null =
@@ -57,6 +63,11 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
           false
         ) as unknown as AnimationTimeline)
       : null;
+
+  console.log("AnimationTimeline created:", animationTimeline);
+  if (animationTimeline) {
+    console.log("AnimationTimeline duration:", animationTimeline.duration);
+  }
 
   // Determine status
   const status = expects.every((e) => e.pass) ? "pass" : "fail";
@@ -71,7 +82,7 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
     codeRun: "move()",
     view: exercise.getView(),
     animationTimeline,
-    timelineTime: 0
+    time: 0
   };
 }
 

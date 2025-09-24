@@ -1,5 +1,11 @@
 # Test Runner Implementation Status
 
+## ⚠️ Important: Webpack Required
+
+**The test runner requires webpack (not Turbopack) due to pnpm workspace incompatibility issues.**
+- Run `pnpm run dev` to start the dev server (now configured without Turbopack)
+- The interpreters package cannot be resolved by Turbopack in the current setup
+
 ## ✅ Completed
 
 ### Core Implementation
@@ -23,10 +29,6 @@
 - Follows best practices from testing guidelines
 
 ## 🔧 Pending
-
-### Immediate
-- Fix interpreters package TypeScript errors to enable imports
-- Once fixed, the test runner should work end-to-end
 
 ### Future Enhancements
 - More complex exercises (MazeExercise, etc.)

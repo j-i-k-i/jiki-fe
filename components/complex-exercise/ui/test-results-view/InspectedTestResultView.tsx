@@ -48,7 +48,7 @@ export function InspectedTestResultView() {
         result={result}
       />
 
-      <div className={assembleClassNames("spotlight")} ref={viewContainerRef} id="view-container" />
+      <div className={assembleClassNames("spotlight", "flex-grow")} ref={viewContainerRef} id="view-container" />
     </div>
   );
 }
