@@ -1,5 +1,5 @@
 import type { StoreApi } from "zustand/vanilla";
-import type { TestExpect, TestResult, TestSuiteResult } from "../test-results-types";
+import type { TestExpect } from "../test-results-types";
 import type { OrchestratorStore } from "../types";
 
 /**
@@ -21,35 +21,14 @@ export class TestSuiteManager {
       const { runTests } = await import("../test-runner/runTests");
       const testResults = runTests(code);
 
-      // Set the results in the store
-      this.setTestSuiteResult(testResults);
-
-      // Set the first test as current by default
-      if (testResults.tests.length > 0) {
-        this.setCurrentTestFromResult(testResults.tests[0]);
-      }
+      // Set the results in the store (will also set the first test as current)
+      state.setTestSuiteResult(testResults);
 
       state.setStatus("success");
     } catch (error) {
       state.setError(error instanceof Error ? error.message : "Unknown error");
       state.setStatus("error");
     }
-  }
-
-  /**
-   * Set the test suite result in the store
-   */
-  setTestSuiteResult(result: TestSuiteResult | null): void {
-    this.store.getState().setTestSuiteResult(result);
-  }
-
-  /**
-   * Set the current test from a test result
-   * The store's setCurrentTest will internally trigger setCurrentTestTime
-   */
-  setCurrentTestFromResult(result: TestResult | null): void {
-    // Just pass it through - the store handles triggering frame calculations
-    this.store.getState().setCurrentTest(result);
   }
 
   /**

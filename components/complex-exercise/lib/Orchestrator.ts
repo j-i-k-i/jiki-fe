@@ -9,8 +9,7 @@ import { EditorManager } from "./orchestrator/EditorManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
-import type { Frame } from "interpreters";
-import type { TestExpect, TestResult, TestSuiteResult } from "./test-results-types";
+import type { TestExpect, TestResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
 
 class Orchestrator {
@@ -186,11 +185,6 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
-  // Test results store public methods - delegate to TestSuiteManager
-  setTestSuiteResult(result: TestSuiteResult | null) {
-    this.testSuiteManager.setTestSuiteResult(result);
-  }
-
   setShouldAutoplayAnimation(autoplay: boolean) {
     this.store.getState().setShouldAutoplayAnimation(autoplay);
   }
@@ -209,15 +203,6 @@ class Orchestrator {
   // Delegate frame methods to TimelineManager
   getNearestCurrentFrame() {
     return this.timelineManager.getNearestCurrentFrame();
-  }
-
-  // Frame navigation methods - delegate to TimelineManager
-  findNextFrame(currentIdx?: number): Frame | undefined {
-    return this.timelineManager.findNextFrame(currentIdx);
-  }
-
-  findPrevFrame(currentIdx?: number): Frame | undefined {
-    return this.timelineManager.findPrevFrame(currentIdx);
   }
 
   // Breakpoint navigation methods - delegate to BreakpointManager

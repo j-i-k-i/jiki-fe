@@ -220,7 +220,14 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setLatestValueSnapshot: (value) => set({ latestValueSnapshot: value }),
 
       // Test results actions
-      setTestSuiteResult: (result) => set({ testSuiteResult: result }),
+      setTestSuiteResult: (result) => {
+        set({ testSuiteResult: result });
+        // Also set the first test as current by default
+        if (result && result.tests.length > 0) {
+          // Call setCurrentTest which will handle all the logic including setting time
+          get().setCurrentTest(result.tests[0]);
+        }
+      },
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
       // Exercise data initialization with priority logic
