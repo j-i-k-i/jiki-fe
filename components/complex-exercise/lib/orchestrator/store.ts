@@ -5,7 +5,6 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";
-import { mockTest } from "./mocks";
 import { TimelineManager } from "./TimelineManager";
 
 const ONE_MINUTE = 60 * 1000;
@@ -20,7 +19,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       output: "",
       status: "idle",
       error: null,
-      currentTest: mockTest, // Temporary: using mock test instead of null
+      currentTest: null,
       hasCodeBeenEdited: false,
       isSpotlightActive: false,
       foldedLines: [],
@@ -336,7 +335,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           output: "",
           status: "idle",
           error: null,
-          currentTest: mockTest, // Temporary: reset to mock test for testing
+          currentTest: null,
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           foldedLines: [],
