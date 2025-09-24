@@ -46,7 +46,6 @@ describe("TestSuiteManager", () => {
         slug: "test-1",
         name: "Test 1",
         status: "pass",
-        type: "state",
         expects: [],
         frames: mockFrames as any,
         time: 100000, // Start at first frame
@@ -75,7 +74,6 @@ describe("TestSuiteManager", () => {
         slug: "test-1",
         name: "Test 1",
         status: "pass",
-        type: "state",
         expects: [],
         frames: [],
         time: 0,

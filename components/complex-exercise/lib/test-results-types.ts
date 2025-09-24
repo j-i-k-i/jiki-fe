@@ -1,8 +1,6 @@
 import type { Frame } from "interpreters";
 import type { AnimationTimeline } from "./AnimationTimeline";
 
-export type TestsType = "io" | "state";
-
 export interface TestExpect {
   pass: boolean;
   actual: any;
@@ -23,7 +21,6 @@ export interface TestResult {
   slug: string;
   name: string;
   status: "pass" | "fail" | "idle";
-  type: TestsType;
   expects: TestExpect[];
   frames: Frame[]; // Execution frames for scrubber timeline
   codeRun?: string;

@@ -116,7 +116,6 @@ class Orchestrator {
 
   setCurrentTestTime(time: number) {
     this.timelineManager.setTime(time);
-    this.testSuiteManager.updateCurrentTestTime(time);
   }
 
   setCurrentTest(test: TestState | null) {

@@ -44,7 +44,6 @@ export default function ScrubberInputTestPage() {
       slug: "test-1",
       name: "Test 1",
       status: "pass" as const,
-      type: "io" as const,
       expects: [],
       view: document.createElement("div"),
       frames,

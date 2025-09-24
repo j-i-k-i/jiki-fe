@@ -20,7 +20,6 @@ function createTestState(slug: string, time: number = 0, frames?: ReturnType<typ
     slug,
     name: `Test ${slug}`,
     status: "pass" as const,
-    type: "io" as const,
     expects: [],
     view: document.createElement("div"),
     frames: defaultFrames,

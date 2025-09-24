@@ -68,7 +68,7 @@ export function InspectedTestResultViewLHS({
         </h3>
 
         {result.status === "pass" && <PassMessage testIdx={0} />}
-        <TestResultInfo result={result} firstExpect={firstExpect} />
+        <TestResultInfo firstExpect={firstExpect} />
       </div>
     </div>
   );

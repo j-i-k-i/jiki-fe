@@ -17,7 +17,6 @@ export interface InformationWidgetData {
 // Test result processing types
 export interface ProcessedExpect {
   diff: Change[];
-  type: "io" | "state";
   actual: any;
   pass: boolean;
   codeRun?: string;

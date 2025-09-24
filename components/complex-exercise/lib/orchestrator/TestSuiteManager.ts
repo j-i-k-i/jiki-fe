@@ -1,4 +1,3 @@
-import { diffChars, diffWords, type Change } from "diff";
 import type { StoreApi } from "zustand/vanilla";
 import type { TestResult, TestSuiteResult } from "../test-results-types";
 import type { OrchestratorStore, ProcessedExpect } from "../types";
@@ -23,15 +22,6 @@ export class TestSuiteManager {
   setCurrentTestFromResult(result: TestResult | null): void {
     // Just pass it through - the store handles triggering frame calculations
     this.store.getState().setCurrentTest(result);
-  }
-
-  /**
-   * Update current test time (in microseconds)
-   */
-  updateCurrentTestTime(time: number): void {
-    const state = this.store.getState();
-    // Simply update the timeline time for the current test
-    state.setCurrentTestTime(time);
   }
 
   /**
@@ -79,21 +69,11 @@ export class TestSuiteManager {
 
     for (const expect of result.expects) {
       if (expect.pass === false) {
-        if (result.type === "state") {
-          return {
-            errorHtml: expect.errorHtml,
-            type: result.type,
-            actual: expect.actual,
-            pass: expect.pass,
-            diff: []
-          };
-        }
-        // io expect
-        const { expected, actual } = expect;
         return {
-          ...expect,
-          type: result.type,
-          diff: this.getDiffOfExpectedAndActual(false, expected, actual)
+          errorHtml: expect.errorHtml,
+          actual: expect.actual,
+          pass: expect.pass,
+          diff: []
         };
       }
     }
@@ -109,94 +89,13 @@ export class TestSuiteManager {
     }
 
     return result.expects.map((expect) => {
-      if (result.type === "state") {
-        // state expect
-        return {
-          errorHtml: expect.errorHtml,
-          type: "state" as const,
-          actual: expect.actual,
-          pass: expect.pass,
-          diff: []
-        };
-      }
-
-      // io expect
-      const { expected, actual } = expect;
+      // Always state expect
       return {
-        ...expect,
-        type: result.type,
-        diff: this.getDiffOfExpectedAndActual(expect.pass, expected, actual)
+        errorHtml: expect.errorHtml,
+        actual: expect.actual,
+        pass: expect.pass,
+        diff: []
       };
     });
-  }
-
-  /**
-   * Format a Jiki object for display
-   */
-  private formatJikiObject(obj: any): string {
-    if (obj === null) {
-      return "null";
-    }
-    if (obj === undefined) {
-      return "undefined";
-    }
-    if (typeof obj === "string") {
-      return obj;
-    }
-    if (typeof obj === "boolean") {
-      return obj.toString();
-    }
-    if (typeof obj === "number") {
-      return obj.toString();
-    }
-    return JSON.stringify(obj);
-  }
-
-  /**
-   * Generate diff between expected and actual values
-   */
-  private getDiffOfExpectedAndActual(passed: boolean, expected: any, actual: any): Change[] {
-    if (passed) {
-      return diffChars(this.formatJikiObject(expected), this.formatJikiObject(actual));
-    }
-
-    if (actual === null || actual === undefined) {
-      return [
-        {
-          added: false,
-          count: 1,
-          removed: true,
-          value: this.formatJikiObject(expected)
-        },
-        {
-          added: true,
-          count: 1,
-          removed: false,
-          value: "[Your function didn't return anything]"
-        }
-      ];
-    }
-
-    if (typeof expected == "string" && typeof actual == "string") {
-      return diffChars(this.formatJikiObject(expected), this.formatJikiObject(actual));
-    }
-    if (typeof expected == "boolean" && typeof actual == "boolean") {
-      return diffWords(this.formatJikiObject(expected), this.formatJikiObject(actual));
-    }
-
-    return [
-      {
-        added: false,
-        count: 1,
-        removed: true,
-        value: this.formatJikiObject(expected)
-      },
-      {
-        added: true,
-        count: 1,
-        removed: false,
-        value: this.formatJikiObject(actual)
-      }
-    ];
   }
 }
