@@ -21,6 +21,7 @@ function createMockFrames(count: number): Frame[] {
 }
 
 // Helper to create mock animation timeline
+// Duration is in microseconds (frames use microseconds)
 function createMockAnimationTimeline(duration: number = 5): AnimationTimeline {
   return {
     duration,
@@ -87,13 +88,13 @@ describe("ScrubberInput Component", () => {
       expect(input.min).toBe("0");
     });
 
-    it("should calculate max value as duration * 1000", () => {
+    it("should use duration directly without scaling", () => {
       const mockOrchestrator = createMockOrchestrator();
       const testCases = [
-        { duration: 1, expected: "1000" },
-        { duration: 5.5, expected: "5500" },
-        { duration: 10, expected: "10000" },
-        { duration: 0.5, expected: "500" }
+        { duration: 1000, expected: "1000" },  // Duration in microseconds
+        { duration: 5500, expected: "5500" },
+        { duration: 10000, expected: "10000" },
+        { duration: 500, expected: "500" }
       ];
 
       testCases.forEach(({ duration, expected }) => {
@@ -114,16 +115,16 @@ describe("ScrubberInput Component", () => {
 
     it("should display the current time value", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(10);
+      const mockTimeline = createMockAnimationTimeline(10000);  // 10ms in microseconds
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={250} enabled={true} />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={2500} enabled={true} />
         </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider") as HTMLInputElement;
-      expect(input.value).toBe("250");
+      expect(input.value).toBe("2500");
     });
 
     it("should handle null animationTimeline", () => {
@@ -137,6 +138,25 @@ describe("ScrubberInput Component", () => {
 
       const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input.max).toBe("0"); // Default duration of 0
+    });
+
+    it("should use animation timeline duration directly in microseconds without scaling", () => {
+      // This tests the fix for the scrubber max value bug where duration was being
+      // incorrectly multiplied by TIME_SCALE_FACTOR when it was already in microseconds
+      const mockOrchestrator = createMockOrchestrator();
+      const frames = createMockFrames(5); // 5 frames, last at 400000 microseconds
+      const lastFrameTime = 400000; // Last frame at 400ms = 400000 microseconds
+      const mockTimeline = createMockAnimationTimeline(lastFrameTime);
+
+      render(
+        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+          <ScrubberInput frames={frames} animationTimeline={mockTimeline} time={0} enabled={true} />
+        </OrchestratorTestProvider>
+      );
+
+      const input = screen.getByRole("slider") as HTMLInputElement;
+      // Should be 400000 (the duration in microseconds), not 400000000 (duration * 1000)
+      expect(input.max).toBe("400000");
     });
   });
 
@@ -173,7 +193,7 @@ describe("ScrubberInput Component", () => {
   describe("onChange handler", () => {
     it("should call setCurrentTestTime when value changes", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(10);
+      const mockTimeline = createMockAnimationTimeline(500000);  // 500ms in microseconds
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
@@ -190,7 +210,7 @@ describe("ScrubberInput Component", () => {
 
     it("should handle multiple value changes", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(10);
+      const mockTimeline = createMockAnimationTimeline(500000);  // 500ms in microseconds
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
