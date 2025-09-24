@@ -112,20 +112,19 @@ Each child component receives the orchestrator and uses `useOrchestratorStore(or
 
 ### Frame Structure
 
-Frames represent execution states at specific points in time. See `components/complex-exercise/lib/stubs.ts` for the Frame interface definition which includes:
+Frames represent execution states at specific points in time. The Frame interface includes:
 
-- `interpreterTime` - Internal interpreter clock value
-- `timelineTime` - Timeline position for animation/scrubbing
+- `time` - Time in microseconds (keeps frames in order with minimal timeline impact)
+- `timeInMs` - Time in milliseconds (for animations and UI display)
 - `line` - Line number in code
 - `status` - SUCCESS or ERROR
-- `description` - Human-readable description
+- `generateDescription()` - Function that returns human-readable description
 
 ### Timeline Management
 
 The orchestrator manages timeline state and provides methods for navigation:
 
-- `setCurrentTestTimelineTime(timelineTime: number)` - Set the current timeline position
-- `setCurrentTestInterpreterTime(interpreterTime: number)` - Set by interpreter time (automatically converts to timeline time)
+- `setCurrentTestTime(time: number)` - Set the current time position in microseconds
 - `getNearestCurrentFrame(): Frame | null` - Get nearest frame to current position
 
 ### Scrubber Components

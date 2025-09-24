@@ -6,7 +6,9 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Scrubber from "@/components/complex-exercise/ui/scrubber/Scrubber";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import type { AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 import type { TestState } from "@/components/complex-exercise/lib/types";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
@@ -20,13 +22,13 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
-  return Array.from({ length: count }, (_, i) => ({
-    interpreterTime: i * 0.01,
-    timelineTime: i,
-    line: i + 1,
-    status: "SUCCESS" as const,
-    description: `Frame ${i}`
-  }));
+  return Array.from({ length: count }, (_, i) =>
+    createTestFrame(i * 100000, {
+      // Each frame is 100ms apart
+      line: i + 1,
+      generateDescription: () => `Frame ${i}`
+    })
+  );
 }
 
 // Helper to create mock animation timeline
@@ -53,17 +55,17 @@ function createMockAnimationTimeline(duration: number = 5): AnimationTimeline {
 // Helper to create a TestState object
 function createTestState(
   frames: Frame[],
-  timelineTime: number,
+  time: number,
   currentFrame: Frame | null,
   animationTimeline?: AnimationTimeline
 ): TestState {
-  const prevFrame = TimelineManager.findPrevFrame(frames, timelineTime, []);
-  const nextFrame = TimelineManager.findNextFrame(frames, timelineTime, []);
+  const prevFrame = TimelineManager.findPrevFrame(frames, time, []);
+  const nextFrame = TimelineManager.findNextFrame(frames, time, []);
 
   return {
     frames,
     animationTimeline: animationTimeline || createMockAnimationTimeline(),
-    timelineTime,
+    time,
     currentFrame,
     prevFrame,
     nextFrame,
@@ -77,7 +79,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setCurrentTestTimelineTime: jest.fn(),
+    setCurrentTestTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -163,7 +165,7 @@ describe("Scrubber Component", () => {
 
       const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input).toBeDisabled();
-      expect(input.value).toBe("0"); // Default timelineTime
+      expect(input.value).toBe("0"); // Default time
     });
   });
 
@@ -316,8 +318,8 @@ describe("Scrubber Component", () => {
     });
 
     it("should pass correct props to FrameStepperButtons", () => {
-      const mockTimeline = createMockAnimationTimeline(5);
-      const frames = createMockFrames(4); // Creates frames at timelineTime: 0, 1, 2, 3
+      const mockTimeline = createMockAnimationTimeline(400); // 400ms duration
+      const frames = createMockFrames(4); // Creates frames at time: 0, 100000, 200000, 300000 microseconds
 
       // Create mock orchestrator with methods that can be updated
       const mockOrchestrator = createMockOrchestrator();
@@ -345,7 +347,7 @@ describe("Scrubber Component", () => {
       // In middle: has both previous and next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 1.5, frames[2], mockTimeline),
+          currentTest: createTestState(frames, 150000, frames[1], mockTimeline), // 150ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false
         })
@@ -364,7 +366,7 @@ describe("Scrubber Component", () => {
       // At last frame: has previous, no next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 3, frames[3], mockTimeline),
+          currentTest: createTestState(frames, 300000, frames[3], mockTimeline), // 300ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false
         })

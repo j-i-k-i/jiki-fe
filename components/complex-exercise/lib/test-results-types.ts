@@ -1,4 +1,5 @@
-import type { Frame, AnimationTimeline } from "./stubs";
+import type { Frame } from "interpreters";
+import type { AnimationTimeline } from "./stubs";
 
 export type TestsType = "io" | "state";
 
@@ -27,7 +28,7 @@ export interface NewTestResult {
   view?: HTMLElement;
   imageSlug?: string;
   animationTimeline: AnimationTimeline | null; // Timeline for scrubber navigation
-  timelineTime: number; // Current scrubber position
+  time: number; // Current scrubber position
 }
 
 export interface TestSuiteResult {

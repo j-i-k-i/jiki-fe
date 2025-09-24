@@ -13,7 +13,7 @@ export default function Scrubber() {
   // Default values when no test is available
   const frames = currentTest?.frames ?? [];
   const animationTimeline = currentTest?.animationTimeline ?? null;
-  const timelineTime = currentTest?.timelineTime ?? 0;
+  const time = currentTest?.time ?? 0;
   const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
   return (
@@ -41,7 +41,7 @@ export default function Scrubber() {
         ref={rangeRef}
         frames={frames}
         animationTimeline={animationTimeline}
-        timelineTime={timelineTime}
+        time={time}
         enabled={isEnabled}
       />
       <FrameStepperButtons enabled={isEnabled} />

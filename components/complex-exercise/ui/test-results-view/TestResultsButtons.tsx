@@ -30,8 +30,8 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
           // Core TestState properties
           frames: test.frames,
           animationTimeline: test.animationTimeline,
-          timelineTime: test.timelineTime,
-          currentFrame: test.frames.find((f) => f.timelineTime === test.timelineTime) || test.frames[0],
+          time: test.time,
+          currentFrame: test.frames.find((f) => f.time === test.time) || test.frames[0],
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,
@@ -55,7 +55,7 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
       if (test.frames.length === 1) {
         const frame = test.frames[0];
         orchestrator.setInformationWidgetData({
-          html: frame.description || "",
+          html: frame.generateDescription() || "",
           line: frame.line,
           status: frame.status
         });

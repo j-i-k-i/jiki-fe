@@ -183,7 +183,7 @@ export default function TestPage() {
     const frames = createTestFrames();
     const testState = {
       frames,
-      timelineTime: 0,
+      time: 0,
       currentFrame: frames[0],
       // ... other test state
     };
@@ -229,7 +229,7 @@ describe("Feature E2E", () => {
     await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       orchestrator.setBreakpoints([1, 3, 5]);
-      orchestrator.setCurrentTestTimelineTime(300);
+      orchestrator.setCurrentTestTime(300);
     });
 
     // Verify UI updates

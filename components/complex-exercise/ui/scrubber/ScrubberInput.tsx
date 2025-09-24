@@ -1,16 +1,18 @@
 import React, { forwardRef } from "react";
-import type { Frame, AnimationTimeline } from "../../lib/stubs";
+import type { Frame } from "interpreters";
+import type { AnimationTimeline } from "../../lib/stubs";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
+import { TIME_SCALE_FACTOR } from "interpreters";
 
 interface ScrubberInputProps {
   frames: Frame[];
   animationTimeline: AnimationTimeline | null;
-  timelineTime: number;
+  time: number;
   enabled: boolean;
 }
 
 const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
-  ({ frames, animationTimeline, timelineTime, enabled }, ref) => {
+  ({ frames, animationTimeline, time, enabled }, ref) => {
     const orchestrator = useOrchestrator();
     return (
       <input
@@ -24,7 +26,7 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
         max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
         ref={ref}
         onInput={updateInputBackground}
-        value={timelineTime}
+        value={time}
         onChange={(event) => {
           handleChange(event, orchestrator);
           updateInputBackground();
@@ -45,7 +47,7 @@ export default ScrubberInput;
 
 function handleChange(event: React.ChangeEvent<HTMLInputElement>, orchestrator: ReturnType<typeof useOrchestrator>) {
   const newValue = Number(event.target.value);
-  orchestrator.setCurrentTestTimelineTime(newValue);
+  orchestrator.setCurrentTestTime(newValue);
   // updateInputBackground() - commented out
 }
 
@@ -72,7 +74,7 @@ function handleOnMouseUp(orchestrator: ReturnType<typeof useOrchestrator>) {
   }
 
   // Snap to the nearest frame's timeline position
-  orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
+  orchestrator.setCurrentTestTime(nearestFrame.time);
 }
 
 function updateInputBackground() {
@@ -88,5 +90,6 @@ function calculateMinInputValue(frames: Frame[]) {
 }
 
 function calculateMaxInputValue(animationTimeline: AnimationTimeline | { duration: number }) {
-  return Math.round(animationTimeline.duration * 100);
+  // Convert animation duration from milliseconds to microseconds
+  return Math.round(animationTimeline.duration * TIME_SCALE_FACTOR);
 }

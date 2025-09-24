@@ -1,7 +1,8 @@
 import { AnimationTimeline } from "@/components/complex-exercise/lib/AnimationTimeline";
 import { createTimeline } from "animejs";
 import type { Timeline, DefaultsParams } from "animejs";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 
 // Mock animejs
 jest.mock("animejs", () => ({
@@ -12,18 +13,14 @@ describe("AnimationTimeline", () => {
   let mockTimeline: Partial<Timeline>;
   let animationTimeline: AnimationTimeline;
   const mockFrames: Frame[] = [
-    { line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" },
-    { line: 2, interpreterTime: 30, timelineTime: 30, status: "SUCCESS" },
-    { line: 3, interpreterTime: 60, timelineTime: 60, status: "SUCCESS" },
-    {
+    createTestFrame(0, { line: 1 }),
+    createTestFrame(30000, { line: 2 }), // 30ms
+    createTestFrame(60000, { line: 3 }), // 60ms
+    createTestFrame(90000, {
       line: 4,
-      interpreterTime: 90,
-      timelineTime: 90,
       status: "ERROR",
-      // TypeScript fix: StaticError interface requires 'type' property
-      // Added 'type: "runtime"' to satisfy the StaticError type definition
       error: { message: "Test error", type: "runtime" }
-    }
+    })
   ];
 
   beforeEach(() => {

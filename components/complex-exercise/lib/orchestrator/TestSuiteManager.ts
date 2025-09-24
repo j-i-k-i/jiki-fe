@@ -25,12 +25,12 @@ export class TestSuiteManager {
   }
 
   /**
-   * Update current test timeline time
+   * Update current test time (in microseconds)
    */
-  updateCurrentTestTimelineTime(time: number): void {
+  updateCurrentTestTime(time: number): void {
     const state = this.store.getState();
     // Simply update the timeline time for the current test
-    state.setCurrentTestTimelineTime(time);
+    state.setCurrentTestTime(time);
   }
 
   /**
@@ -69,8 +69,8 @@ export class TestSuiteManager {
           // Core TestState properties
           frames: firstTest.frames,
           animationTimeline: firstTest.animationTimeline,
-          timelineTime: firstTest.timelineTime,
-          currentFrame: firstTest.frames.find((f) => f.timelineTime === firstTest.timelineTime) || firstTest.frames[0],
+          time: firstTest.time,
+          currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,

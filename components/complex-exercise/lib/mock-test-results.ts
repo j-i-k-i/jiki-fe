@@ -1,11 +1,12 @@
 import type { AnimationTimeline } from "./stubs";
 import type { TestSuiteResult } from "./test-results-types";
+import { createTestFrame } from "./test-utils/createTestFrame";
 
 // Mock animation timeline for scrubber
 function createMockAnimationTimeline(): AnimationTimeline {
   let currentTime = 0;
   let paused = true;
-  const duration = 75; // Match the max interpreterTime, not timelineTime
+  const duration = 75; // Duration in milliseconds (matches max frame at 75ms)
 
   return {
     pause: () => {
@@ -54,37 +55,25 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        {
+        createTestFrame(0, {
           line: 2,
-          interpreterTime: 0,
-          timelineTime: 0,
-          status: "SUCCESS",
-          description: "Function greet() starts execution"
-        },
-        {
+          generateDescription: () => "Function greet() starts execution"
+        }),
+        createTestFrame(25000, {
           line: 3,
-          interpreterTime: 25,
-          timelineTime: 2500,
-          status: "SUCCESS",
-          description: 'Processing input parameter: "World"'
-        },
-        {
+          generateDescription: () => 'Processing input parameter: "World"'
+        }),
+        createTestFrame(50000, {
           line: 4,
-          interpreterTime: 50,
-          timelineTime: 5000,
-          status: "SUCCESS",
-          description: 'Concatenating "Hello, " + "World" + "!"'
-        },
-        {
+          generateDescription: () => 'Concatenating "Hello, " + "World" + "!"'
+        }),
+        createTestFrame(75000, {
           line: 5,
-          interpreterTime: 75,
-          timelineTime: 7500,
-          status: "SUCCESS",
-          description: 'Returning "Hello, World!"'
-        }
+          generateDescription: () => 'Returning "Hello, World!"'
+        })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 0
+      time: 0
     },
     {
       slug: "test-2",
@@ -101,37 +90,27 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        {
+        createTestFrame(0, {
           line: 2,
-          interpreterTime: 0,
-          timelineTime: 0,
-          status: "SUCCESS",
-          description: "Function greet() starts execution"
-        },
-        {
+          generateDescription: () => "Function greet() starts execution"
+        }),
+        createTestFrame(30000, {
           line: 3,
-          interpreterTime: 30,
-          timelineTime: 3000,
-          status: "SUCCESS",
-          description: 'Processing input parameter: ""'
-        },
-        {
+          generateDescription: () => 'Processing input parameter: ""'
+        }),
+        createTestFrame(60000, {
           line: 4,
-          interpreterTime: 60,
-          timelineTime: 6000,
           status: "ERROR",
-          description: 'Empty string detected - should return "Hello, stranger!"'
-        },
-        {
+          generateDescription: () => 'Empty string detected - should return "Hello, stranger!"'
+        }),
+        createTestFrame(90000, {
           line: 5,
-          interpreterTime: 90,
-          timelineTime: 9000,
           status: "ERROR",
-          description: 'Incorrectly returning "Hello, !" instead of "Hello, stranger!"'
-        }
+          generateDescription: () => 'Incorrectly returning "Hello, !" instead of "Hello, stranger!"'
+        })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 6000 // Start at error frame
+      time: 60000 // Start at error frame in microseconds
     },
     {
       slug: "test-3",
@@ -149,37 +128,28 @@ export const mockTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        {
+        createTestFrame(0, {
           line: 2,
-          interpreterTime: 0,
-          timelineTime: 0,
-          status: "SUCCESS",
-          description: "Function greet() starts execution"
-        },
-        {
+          generateDescription: () => "Function greet() starts execution"
+        }),
+        createTestFrame(25000, {
           line: 3,
-          interpreterTime: 25,
-          timelineTime: 2500,
           status: "ERROR",
-          description: "Processing input parameter: null"
-        },
-        {
+          generateDescription: () => "Processing input parameter: null"
+        }),
+        createTestFrame(50000, {
           line: 4,
-          interpreterTime: 50,
-          timelineTime: 5000,
           status: "ERROR",
-          description: "Null check missing - should handle null gracefully"
-        },
-        {
+          generateDescription: () => "Null check missing - should handle null gracefully"
+        }),
+        createTestFrame(75000, {
           line: 5,
-          interpreterTime: 75,
-          timelineTime: 7500,
           status: "ERROR",
-          description: 'Incorrectly returning "Hello, null!" instead of "Hello, stranger!"'
-        }
+          generateDescription: () => 'Incorrectly returning "Hello, null!" instead of "Hello, stranger!"'
+        })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 2500 // Start at first error frame
+      time: 25000 // Start at first error frame in microseconds
     }
   ]
 };
@@ -202,30 +172,22 @@ export const mockBonusTestResults: TestSuiteResult = {
       ],
       // Frame data for timeline navigation
       frames: [
-        {
+        createTestFrame(0, {
           line: 8,
-          interpreterTime: 0,
-          timelineTime: 0,
-          status: "SUCCESS",
-          description: "Function greetMultiple() starts execution"
-        },
-        {
+          generateDescription: () => "Function greetMultiple() starts execution"
+        }),
+        createTestFrame(30000, {
           line: 9,
-          interpreterTime: 30,
-          timelineTime: 3000,
-          status: "SUCCESS",
-          description: 'Processing array input: ["Alice", "Bob"]'
-        },
-        {
+          generateDescription: () => 'Processing array input: ["Alice", "Bob"]'
+        }),
+        createTestFrame(60000, {
           line: 10,
-          interpreterTime: 60,
-          timelineTime: 6000,
           status: "ERROR",
-          description: "Function not implemented yet - should iterate over array"
-        }
+          generateDescription: () => "Function not implemented yet - should iterate over array"
+        })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      timelineTime: 0
+      time: 0
     }
   ]
 };

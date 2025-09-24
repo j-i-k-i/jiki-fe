@@ -1,19 +1,21 @@
-import type { Frame, AnimationTimeline } from "../stubs";
+import type { Frame } from "interpreters";
+import type { AnimationTimeline } from "../stubs";
 import type { TestState } from "../types";
+import { createTestFrame } from "../test-utils/createTestFrame";
 
 // Temporary mock test data for testing the scrubber
 export const mockFrames: Frame[] = [
-  { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Start" } as Frame,
-  { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Line 2" } as Frame,
-  { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Line 3" } as Frame,
-  { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Line 4" } as Frame,
-  { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "End" } as Frame
+  createTestFrame(0, { line: 1, generateDescription: () => "Start" }),
+  createTestFrame(100000, { line: 2, generateDescription: () => "Line 2" }), // 100ms = 100,000 microseconds
+  createTestFrame(200000, { line: 3, generateDescription: () => "Line 3" }), // 200ms
+  createTestFrame(300000, { line: 4, generateDescription: () => "Line 4" }), // 300ms
+  createTestFrame(400000, { line: 5, generateDescription: () => "End" }) // 400ms
 ];
 
 export const mockTest: TestState = {
   frames: mockFrames,
   animationTimeline: {
-    duration: 5,
+    duration: 400, // 400ms to match the last frame at 400000 microseconds
     paused: true,
     seek: (_time: number) => {},
     play: () => {},
@@ -25,11 +27,11 @@ export const mockTest: TestState = {
     seekEndOfTimeline: () => {},
     onUpdate: () => {},
     timeline: {
-      duration: 5,
+      duration: 400, // 400ms
       currentTime: 0
     }
   } as AnimationTimeline,
-  timelineTime: 0,
+  time: 0,
   currentFrame: mockFrames[0], // Initialize with first frame
   prevFrame: undefined, // No previous frame at start
   nextFrame: mockFrames[1], // Next frame is frame 1

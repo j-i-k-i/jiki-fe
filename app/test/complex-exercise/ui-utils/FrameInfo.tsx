@@ -13,10 +13,10 @@ export function FrameInfo({ orchestrator }: FrameInfoProps) {
     <div className="mt-4 p-4 border rounded">
       <h2 className="font-bold mb-2">Current Frame Info:</h2>
       <p data-testid="current-frame">
-        Frame: {currentTest?.currentFrame ? currentTest.currentFrame.description : "None"}
+        Frame: {currentTest?.currentFrame ? currentTest.currentFrame.generateDescription() : "None"}
       </p>
       <p data-testid="frame-line">Line: {currentTest?.currentFrame?.line || 0}</p>
-      <p data-testid="frame-time">Timeline Time: {currentTest?.timelineTime || 0}</p>
+      <p data-testid="frame-time">Timeline Time: {currentTest?.time || 0}</p>
       <p data-testid="folded-lines">Folded Lines: {foldedLines.join(", ") || "None"}</p>
     </div>
   );

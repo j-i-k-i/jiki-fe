@@ -1,5 +1,6 @@
 import type { Change } from "diff";
-import type { AnimationTimeline, Frame } from "./stubs";
+import type { Frame } from "interpreters";
+import type { AnimationTimeline } from "./stubs";
 import type { TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types
@@ -31,7 +32,7 @@ export type ProcessedExpects = ProcessedExpect[];
 export interface TestState {
   frames: Frame[];
   animationTimeline: AnimationTimeline;
-  timelineTime: number;
+  time: number;
   currentFrame: Frame | null; // Current frame based on timeline position
   prevFrame: Frame | undefined; // Previous non-folded frame from current position
   nextFrame: Frame | undefined; // Next non-folded frame from current position
@@ -94,7 +95,7 @@ export interface OrchestratorActions {
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestState | null) => void;
   setCurrentFrame: (frame: Frame) => void;
-  setCurrentTestTimelineTime: (time: number) => void;
+  setCurrentTestTime: (time: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;
   setFoldedLines: (lines: number[]) => void;
