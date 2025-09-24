@@ -1,16 +1,10 @@
-import type { NewTestResult } from "../../lib/test-results-types";
+import type { TestResult } from "../../lib/test-results-types";
 import type { ProcessedExpect } from "../../lib/types";
 import { CodeRun } from "./CodeRun";
 import { IOTestResultView } from "./IOTestResultView";
 import { StateTestResultView } from "./StateTestResultView";
 
-export function TestResultInfo({
-  result,
-  firstExpect
-}: {
-  result: NewTestResult;
-  firstExpect: ProcessedExpect | null;
-}) {
+export function TestResultInfo({ result, firstExpect }: { result: TestResult; firstExpect: ProcessedExpect | null }) {
   if (!firstExpect) {
     return null;
   }

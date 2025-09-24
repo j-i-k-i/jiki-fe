@@ -2,7 +2,7 @@ import { assembleClassNames } from "@/utils/assemble-classnames";
 import { useEffect, useRef } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { NewTestResult } from "../../lib/test-results-types";
+import type { TestResult } from "../../lib/test-results-types";
 import type { ProcessedExpect } from "../../lib/types";
 import { PassMessage } from "./PassMessage";
 import { TestResultInfo } from "./TestResultInfo";
@@ -10,8 +10,8 @@ import { TestResultInfo } from "./TestResultInfo";
 export function InspectedTestResultView() {
   const orchestrator = useOrchestrator();
   const { currentTest } = useOrchestratorStore(orchestrator);
-  // currentTest now has NewTestResult properties merged in
-  const result = currentTest ? (currentTest as unknown as NewTestResult) : null;
+
+  const result = currentTest ? (currentTest as unknown as TestResult) : null;
   const viewContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function InspectedTestResultViewLHS({
   result,
   firstExpect
 }: {
-  result: NewTestResult;
+  result: TestResult;
   firstExpect: ProcessedExpect | null;
 }) {
   return (

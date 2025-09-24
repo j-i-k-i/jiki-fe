@@ -35,13 +35,6 @@ export class TestSuiteManager {
   }
 
   /**
-   * Set whether animation should autoplay
-   */
-  setShouldAutoplayAnimation(autoplay: boolean): void {
-    this.store.getState().setShouldAutoplayAnimation(autoplay);
-  }
-
-  /**
    * Get processed expects for the current test
    */
   getProcessedExpects(): ProcessedExpect[] {

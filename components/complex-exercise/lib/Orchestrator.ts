@@ -206,7 +206,7 @@ class Orchestrator {
   }
 
   setShouldAutoplayAnimation(autoplay: boolean) {
-    this.testSuiteManager.setShouldAutoplayAnimation(autoplay);
+    this.store.getState().setShouldAutoplayAnimation(autoplay);
   }
 
   // Error store public methods

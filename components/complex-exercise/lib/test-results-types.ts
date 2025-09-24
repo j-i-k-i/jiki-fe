@@ -38,9 +38,6 @@ export interface TestResult {
   currentFrame?: Frame; // Current frame based on timeline position
 }
 
-// Legacy alias for backward compatibility during migration
-export type NewTestResult = TestResult;
-
 export interface TestSuiteResult {
   tests: TestResult[];
   status: "pass" | "fail" | "running" | "idle";

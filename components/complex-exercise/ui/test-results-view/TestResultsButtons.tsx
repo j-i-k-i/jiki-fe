@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { assembleClassNames } from "../../../../utils/assemble-classnames";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { NewTestResult } from "../../lib/test-results-types";
+import type { TestResult } from "../../lib/test-results-types";
 
 const TRANSITION_DELAY = 0.1;
 
@@ -13,12 +13,12 @@ export function TestResultsButtons() {
   const { testSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   const handleTestResultSelection = useCallback(
-    (test: NewTestResult) => {
+    (test: TestResult) => {
       if (!testSuiteResult) {
         return;
       }
 
-      // Merge NewTestResult properties into TestState format
+      // Merge TestResult properties into TestState format
       const testState = {
         // Core TestState properties
         frames: test.frames,
