@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GlobalModalProvider } from "@/lib/modal";
 import "../src/utils/whyDidYouRender";
 import "./globals.css";
 
@@ -25,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       {/*<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>*/}
-      <body className={`antialiased`}>{children}</body>
+      <body className={`antialiased`}>
+        {children}
+        <GlobalModalProvider />
+      </body>
     </html>
   );
 }

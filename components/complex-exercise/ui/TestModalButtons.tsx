@@ -1,15 +1,13 @@
 "use client";
 
-import { useOrchestratorContext } from "../lib/OrchestratorProvider";
+import { showModal } from "@/lib/modal";
 
 export function TestModalButtons() {
-  const orchestrator = useOrchestratorContext();
-
   return (
     <div className="flex gap-2">
       <button
         onClick={() =>
-          orchestrator.showModal("example-modal", {
+          showModal("example-modal", {
             title: "Test Modal",
             message: "This is a test of the modal system!"
           })
@@ -20,7 +18,7 @@ export function TestModalButtons() {
       </button>
       <button
         onClick={() =>
-          orchestrator.showModal("confirmation-modal", {
+          showModal("confirmation-modal", {
             title: "Confirm Reset",
             message: "Are you sure you want to reset the code to the default?",
             confirmText: "Reset",
@@ -40,7 +38,7 @@ export function TestModalButtons() {
       </button>
       <button
         onClick={() =>
-          orchestrator.showModal("info-modal", {
+          showModal("info-modal", {
             title: "About This Exercise",
             content: (
               <div className="space-y-2">

@@ -1,11 +1,10 @@
 "use client";
 
-import type Orchestrator from "../../../lib/Orchestrator";
+import { hideModal } from "../store";
 
 interface ConfirmationModalProps {
-  orchestrator: Orchestrator;
   title?: string;
-  message: string;
+  message?: string;
   confirmText?: string;
   cancelText?: string;
   onConfirm?: () => void;
@@ -14,9 +13,8 @@ interface ConfirmationModalProps {
 }
 
 export function ConfirmationModal({
-  orchestrator,
   title = "Confirm Action",
-  message,
+  message = "Are you sure you want to proceed?",
   confirmText = "Confirm",
   cancelText = "Cancel",
   onConfirm,
@@ -25,12 +23,12 @@ export function ConfirmationModal({
 }: ConfirmationModalProps) {
   const handleConfirm = () => {
     onConfirm?.();
-    orchestrator.hideModal();
+    hideModal();
   };
 
   const handleCancel = () => {
     onCancel?.();
-    orchestrator.hideModal();
+    hideModal();
   };
 
   const confirmButtonClasses =
