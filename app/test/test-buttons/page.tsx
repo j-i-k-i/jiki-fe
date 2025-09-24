@@ -28,11 +28,14 @@ export default function TestButtonsTestPage() {
     // Set up the orchestrator for testing
     orchestrator.setExerciseTitle("Test Buttons E2E Test");
 
-    // Run tests to generate mock test results
-    void orchestrator.runCode();
+    // Run tests and wait for completion before exposing to window
+    const initializeTests = async () => {
+      await orchestrator.runCode();
+      // Now expose to window for E2E test access after tests have run
+      (window as any).testOrchestrator = orchestrator;
+    };
 
-    // Expose to window for E2E test access
-    (window as any).testOrchestrator = orchestrator;
+    void initializeTests();
 
     return () => {
       delete (window as any).testOrchestrator;

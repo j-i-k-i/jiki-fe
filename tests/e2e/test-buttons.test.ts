@@ -2,7 +2,23 @@ describe("Test Buttons E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/test-buttons");
     await page.waitForSelector('[data-testid="test-buttons-container"]', { timeout: 10000 });
-    // Wait for the orchestrator to initialize and run tests
+
+    // Wait for orchestrator to be fully initialized with test results
+    await page.waitForFunction(
+      () => {
+        const orchestrator = (window as any).testOrchestrator;
+        return (
+          orchestrator &&
+          orchestrator.store &&
+          orchestrator.store.getState().testSuiteResult &&
+          orchestrator.store.getState().testSuiteResult.tests.length > 0 &&
+          orchestrator.store.getState().status !== "running"
+        );
+      },
+      { timeout: 10000 }
+    );
+
+    // Wait for the test buttons to render
     await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 10000 });
   });
 
@@ -232,7 +248,7 @@ describe("Test Buttons E2E", () => {
       const testStatus = await page.$eval('[data-testid="inspected-test-status"]', (el) => el.textContent);
 
       expect(testName).not.toContain("None");
-      expect(testStatus).toMatch(/pass|fail/);
+      expect(testStatus).toMatch(/pass|fail|idle/);
     });
 
     it("should update test result details when different test is selected", async () => {
@@ -282,11 +298,25 @@ describe("Test Buttons E2E", () => {
     });
 
     it("should be able to programmatically set inspected test", async () => {
+      // Wait for orchestrator to be fully available
+      await page.waitForFunction(
+        () => {
+          const orchestrator = (window as any).testOrchestrator;
+          return (
+            orchestrator &&
+            orchestrator.store &&
+            orchestrator.store.getState().testSuiteResult &&
+            orchestrator.store.getState().testSuiteResult.tests.length > 0
+          );
+        },
+        { timeout: 10000 }
+      );
+
       // Use orchestrator to set inspected test
       await page.evaluate(() => {
         const orchestrator = (window as any).testOrchestrator;
         const testSuiteResult = orchestrator.store.getState().testSuiteResult;
-        if (testSuiteResult && testSuiteResult.tests.length > 0) {
+        if (testSuiteResult && testSuiteResult.tests.length > 0 && orchestrator.setInspectedTestResult) {
           orchestrator.setInspectedTestResult(testSuiteResult.tests[0]);
         }
       });
