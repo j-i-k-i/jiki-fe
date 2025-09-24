@@ -13,7 +13,7 @@ module.exports = {
     ]
   },
   server: {
-    command: "next dev --turbopack --port 3070",
+    command: "next dev --port 3070",
     port: 3070,
     launchTimeout: 10000,
     debug: true

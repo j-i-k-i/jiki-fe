@@ -1,4 +1,5 @@
 "use client";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 
 import React, { useEffect, useState } from "react";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
@@ -7,16 +8,16 @@ import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/Frame
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
 import { FrameInfo } from "../ui-utils/FrameInfo";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
 
 // Create test frames similar to mockFrames
 function createTestFrames(): Frame[] {
   return [
-    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
-    { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
-    { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
-    { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
-    { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame
+    createTestFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    createTestFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    createTestFrame(200000, { line: 3, generateDescription: () => "Frame 3" }), // 200ms
+    createTestFrame(300000, { line: 4, generateDescription: () => "Frame 4" }), // 300ms
+    createTestFrame(400000, { line: 5, generateDescription: () => "Frame 5" }) // 400ms
   ];
 }
 
@@ -41,7 +42,7 @@ export default function FrameStepperButtonsTestPage() {
           duration: 5,
           paused: true,
           seek: (_time: number) => {
-            // Don't call setCurrentTestTimelineTime here to avoid circular dependency
+            // Don't call setCurrentTestTime here to avoid circular dependency
             // The orchestrator will handle the timeline updates
           },
           play: () => {},
@@ -57,7 +58,7 @@ export default function FrameStepperButtonsTestPage() {
             currentTime: 0
           }
         } as any,
-        timelineTime: 0,
+        time: 0,
         currentFrame: frames[0],
         prevFrame: initialPrevFrame,
         nextFrame: initialNextFrame,

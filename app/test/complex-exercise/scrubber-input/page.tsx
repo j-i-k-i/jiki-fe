@@ -4,19 +4,21 @@ import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { TIME_SCALE_FACTOR } from "interpreters";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 
 // Create frames for testing with specific timeline positions
 function createTestFrames(): Frame[] {
   return [
-    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
-    { interpreterTime: 0.01, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
-    { interpreterTime: 0.02, timelineTime: 250, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
-    { interpreterTime: 0.03, timelineTime: 400, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
-    { interpreterTime: 0.04, timelineTime: 600, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame,
-    { interpreterTime: 0.05, timelineTime: 750, line: 6, status: "SUCCESS", description: "Frame 6" } as Frame,
-    { interpreterTime: 0.06, timelineTime: 900, line: 7, status: "SUCCESS", description: "Frame 7" } as Frame,
-    { interpreterTime: 0.07, timelineTime: 1000, line: 8, status: "SUCCESS", description: "Frame 8" } as Frame
+    createTestFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    createTestFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    createTestFrame(250000, { line: 3, generateDescription: () => "Frame 3" }), // 250ms
+    createTestFrame(400000, { line: 4, generateDescription: () => "Frame 4" }), // 400ms
+    createTestFrame(600000, { line: 5, generateDescription: () => "Frame 5" }), // 600ms
+    createTestFrame(750000, { line: 6, generateDescription: () => "Frame 6" }), // 750ms
+    createTestFrame(900000, { line: 7, generateDescription: () => "Frame 7" }), // 900ms
+    createTestFrame(1000000, { line: 8, generateDescription: () => "Frame 8" }) // 1000ms = 1 second
   ];
 }
 
@@ -41,7 +43,7 @@ export default function ScrubberInputTestPage() {
     const testState = {
       frames,
       animationTimeline: {
-        duration: 10, // 10 seconds, max value will be 1000
+        duration: 1000, // 1000 milliseconds = 1 second, max value will be 1000000 microseconds
         paused: true,
         seek: (_time: number) => {},
         play: () => {},
@@ -53,11 +55,11 @@ export default function ScrubberInputTestPage() {
         seekEndOfTimeline: () => {},
         onUpdate: () => {},
         timeline: {
-          duration: 10,
+          duration: 1000,
           currentTime: 0
         }
       } as any,
-      timelineTime: 0,
+      time: 0,
       currentFrame: frames[0],
       prevFrame: undefined,
       nextFrame: frames[1],
@@ -67,7 +69,7 @@ export default function ScrubberInputTestPage() {
 
     // Initialize the orchestrator with test state
     orchestrator.setCurrentTest(testState);
-    orchestrator.setCurrentTestTimelineTime(0);
+    orchestrator.setCurrentTestTime(0);
 
     // Expose orchestrator and scrubber ref to window for E2E testing
     (window as any).testOrchestrator = orchestrator;
@@ -82,7 +84,7 @@ export default function ScrubberInputTestPage() {
   }, [orchestrator]);
 
   const currentFrame = currentTest?.currentFrame;
-  const timelineTime = currentTest?.timelineTime || 0;
+  const time = currentTest?.time || 0;
   const frames = currentTest?.frames || [];
   const animationTimeline = currentTest?.animationTimeline || null;
 
@@ -104,23 +106,24 @@ export default function ScrubberInputTestPage() {
             ref={scrubberRef}
             frames={frames}
             animationTimeline={animationTimeline}
-            timelineTime={timelineTime}
+            time={time}
             enabled={true}
           />
           <div className="mt-2 text-sm text-gray-600">
-            Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration * 100) : 0}
+            Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration * TIME_SCALE_FACTOR) : 0}
           </div>
         </div>
 
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Current State</h2>
-          <div data-testid="timeline-time">Timeline Time: {timelineTime}</div>
+          <div data-testid="timeline-time">Timeline Time: {time}</div>
           <div data-testid="current-frame">
-            Current Frame: {currentFrame.description} (Line {currentFrame.line})
+            Current Frame: {currentFrame.generateDescription()} (Line {currentFrame.line})
           </div>
-          <div data-testid="current-frame-time">Current Frame Time: {currentFrame.timelineTime}</div>
+          <div data-testid="current-frame-time">Current Frame Time: {currentFrame.time}</div>
           <div data-testid="nearest-frame">
-            Nearest Frame: {nearestFrame ? `${nearestFrame.description} (Time: ${nearestFrame.timelineTime})` : "None"}
+            Nearest Frame:{" "}
+            {nearestFrame ? `${nearestFrame.generateDescription()} (Time: ${nearestFrame.time})` : "None"}
           </div>
         </div>
 
@@ -136,7 +139,7 @@ export default function ScrubberInputTestPage() {
                 >
                   Frame {idx + 1}
                 </span>
-                <span className="text-sm">Time: {frame.timelineTime}</span>
+                <span className="text-sm">Time: {frame.time}</span>
                 <span className="text-sm text-gray-500">Line: {frame.line}</span>
               </div>
             ))}
@@ -148,45 +151,45 @@ export default function ScrubberInputTestPage() {
           <div className="space-x-2">
             <button
               data-testid="set-time-50"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(50)}
+              onClick={() => orchestrator.setCurrentTestTime(50000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 50
+              Set to 50ms
             </button>
             <button
               data-testid="set-time-175"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(175)}
+              onClick={() => orchestrator.setCurrentTestTime(175000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 175 (between frames)
+              Set to 175ms (between frames)
             </button>
             <button
               data-testid="set-time-325"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(325)}
+              onClick={() => orchestrator.setCurrentTestTime(325000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 325 (between frames)
+              Set to 325ms (between frames)
             </button>
             <button
               data-testid="set-time-500"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(500)}
+              onClick={() => orchestrator.setCurrentTestTime(500000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 500 (between frames)
+              Set to 500ms (between frames)
             </button>
             <button
               data-testid="set-time-675"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(675)}
+              onClick={() => orchestrator.setCurrentTestTime(675000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 675 (between frames)
+              Set to 675ms (between frames)
             </button>
             <button
               data-testid="set-time-825"
-              onClick={() => orchestrator.setCurrentTestTimelineTime(825)}
+              onClick={() => orchestrator.setCurrentTestTime(825000)}
               className="px-3 py-1 border rounded bg-gray-200"
             >
-              Set to 825 (between frames)
+              Set to 825ms (between frames)
             </button>
           </div>
           <div className="mt-2 space-x-2">
@@ -194,7 +197,7 @@ export default function ScrubberInputTestPage() {
               <button
                 key={idx}
                 data-testid={`goto-frame-${idx + 1}`}
-                onClick={() => orchestrator.setCurrentTestTimelineTime(frame.timelineTime)}
+                onClick={() => orchestrator.setCurrentTestTime(frame.time)}
                 className="px-2 py-1 border rounded bg-gray-200"
               >
                 F{idx + 1}
@@ -206,8 +209,8 @@ export default function ScrubberInputTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Debug Info</h2>
           <div className="text-sm space-y-1">
-            <div>Previous Frame: {currentTest.prevFrame?.description ?? "None"}</div>
-            <div>Next Frame: {currentTest.nextFrame?.description ?? "None"}</div>
+            <div>Previous Frame: {currentTest.prevFrame?.generateDescription() ?? "None"}</div>
+            <div>Next Frame: {currentTest.nextFrame?.generateDescription() ?? "None"}</div>
             <div>Total Frames: {frames.length}</div>
             <div>Animation Duration: {animationTimeline?.duration || 0} seconds</div>
           </div>

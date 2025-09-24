@@ -1,7 +1,7 @@
 import React from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { Frame } from "../../lib/stubs";
+import type { Frame } from "interpreters";
 
 interface BreakpointStepperButtonsProps {
   enabled: boolean;

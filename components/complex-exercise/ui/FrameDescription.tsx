@@ -1,6 +1,7 @@
 import React from "react";
 import { useOrchestratorStore } from "../lib/Orchestrator";
 import { useOrchestrator } from "../lib/OrchestratorContext";
+import { TIME_SCALE_FACTOR } from "interpreters";
 
 export default function FrameDescription() {
   const orchestrator = useOrchestrator();
@@ -9,8 +10,8 @@ export default function FrameDescription() {
   // Get currentFrame directly from the store
   const currentFrame = currentTest?.currentFrame;
 
-  // Subscribe to timelineTime for display
-  const timelineTime = currentTest?.timelineTime || 0;
+  // Subscribe to time for display
+  const time = currentTest?.time || 0;
 
   if (!currentTest || !currentFrame) {
     return (
@@ -22,7 +23,7 @@ export default function FrameDescription() {
 
   return (
     <div
-      key={`frame-${currentFrame.line}-${currentFrame.timelineTime}`}
+      key={`frame-${currentFrame.line}-${currentFrame.time}`}
       className="flex items-center px-4 py-2 bg-white border border-gray-200 rounded min-h-[2.5rem]"
     >
       <div className="flex items-center gap-3 w-full">
@@ -36,10 +37,10 @@ export default function FrameDescription() {
             {currentFrame.status}
           </span>
         </div>
-        <span className="text-sm text-gray-700 flex-1">{currentFrame.description}</span>
+        <span className="text-sm text-gray-700 flex-1">{currentFrame.generateDescription()}</span>
         <div className="flex items-center gap-2 text-xs">
           <span className="text-gray-400">Timeline:</span>
-          <span className="font-mono text-gray-600">{(timelineTime / 100).toFixed(2)}s</span>
+          <span className="font-mono text-gray-600">{(time / TIME_SCALE_FACTOR / 1000).toFixed(3)}s</span>
         </div>
       </div>
     </div>

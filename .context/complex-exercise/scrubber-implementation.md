@@ -35,18 +35,17 @@ The orchestrator (`components/complex-exercise/lib/Orchestrator.ts`) manages:
 
 ## Key Concepts
 
-### Timeline Time vs Interpreter Time
+### Time Scales
 
-- **Interpreter Time**: Internal clock value from the interpreter
-- **Timeline Time**: Position on the animation timeline for UI
-- Orchestrator provides conversion methods between the two
+- **Time (Microseconds)**: Minimal impact per frame, allows fine-grained stepping
+- **TimeInMs (Milliseconds)**: For animations and UI display
+- TIME_SCALE_FACTOR = 1000 for conversions
 
 ### Frame Navigation Methods
 
 The orchestrator provides key navigation methods:
 
-- `setCurrentTestTimelineTime(timelineTime: number)` - Set timeline position directly
-- `setCurrentTestInterpreterTime(interpreterTime: number)` - Set by interpreter time (converts automatically)
+- `setCurrentTestTime(time: number)` - Set time position in microseconds
 - `getNearestCurrentFrame(): Frame | null` - Get nearest frame to current position
 - `getCurrentFrame(): Frame | null` - Get current frame (cached for performance)
 
@@ -61,7 +60,7 @@ The orchestrator provides key navigation methods:
 
 2. **ScrubberInput.tsx**
    - Range input for timeline scrubbing
-   - Calls `orchestrator.setCurrentTestTimelineTime` on change
+   - Calls `orchestrator.setCurrentTestTime` on change
    - Snaps to nearest frame on mouse release
    - Keyboard event handlers (space, arrows - TODO)
 
@@ -95,13 +94,13 @@ The scrubber calculates enabled state based on whether there's a current test, c
 
 ## Frame Structure
 
-See `components/complex-exercise/lib/stubs.ts` for the Frame interface which includes:
+The Frame interface (from interpreters package) includes:
 
-- `interpreterTime` - Internal interpreter clock
-- `timelineTime` - Timeline position for UI
+- `time` - Time in microseconds (minimal impact per frame)
+- `timeInMs` - Time in milliseconds (for animations)
 - `line` - Code line number
 - `status` - SUCCESS or ERROR
-- `description` - Human-readable description
+- `generateDescription()` - Function returning human-readable description
 
 ## Range Input Calculations
 
@@ -118,7 +117,7 @@ On mouse release, the scrubber snaps to the nearest frame:
 function handleOnMouseUp(orchestrator: Orchestrator) {
   const nearestFrame = orchestrator.getNearestCurrentFrame();
   if (nearestFrame) {
-    orchestrator.setCurrentTestTimelineTime(nearestFrame.timelineTime);
+    orchestrator.setCurrentTestTime(nearestFrame.time);
   }
 }
 ```

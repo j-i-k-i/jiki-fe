@@ -10,7 +10,7 @@ import { EditorManager } from "./orchestrator/EditorManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
-import type { Frame } from "./stubs";
+import type { Frame } from "interpreters";
 import type { TestSuiteResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, TestState, UnderlineRange } from "./types";
 
@@ -115,14 +115,9 @@ class Orchestrator {
     this.store.getState().setExerciseTitle(title);
   }
 
-  setCurrentTestTimelineTime(time: number) {
-    this.timelineManager.setTimelineTime(time);
-    this.testSuiteManager.updateCurrentTestTimelineTime(time);
-  }
-
-  // UNUSED: This function is currently not called.
-  setCurrentTestInterpreterTime(interpreterTime: number) {
-    this.timelineManager.setInterpreterTime(interpreterTime);
+  setCurrentTestTime(time: number) {
+    this.timelineManager.setTime(time);
+    this.testSuiteManager.updateCurrentTestTime(time);
   }
 
   setCurrentTest(test: TestState | null) {
@@ -148,7 +143,7 @@ class Orchestrator {
     state.setFoldedLines(lines);
     // Then recalculate the frame with the new folded lines
     if (state.currentTest) {
-      state.setCurrentTestTimelineTime(state.currentTest.timelineTime);
+      state.setCurrentTestTime(state.currentTest.time);
     }
   }
 

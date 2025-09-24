@@ -58,12 +58,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         const prevFrame = TimelineManager.findPrevFrame(
           state.currentTest.frames,
-          state.currentTest.timelineTime,
+          state.currentTest.time,
           state.foldedLines
         );
         const nextFrame = TimelineManager.findNextFrame(
           state.currentTest.frames,
-          state.currentTest.timelineTime,
+          state.currentTest.time,
           state.foldedLines
         );
 
@@ -131,7 +131,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         get().recalculateNavigationFrames();
         get().recalculateBreakpointFrames();
       },
-      setCurrentTestTimelineTime: (time) => {
+      setCurrentTestTime: (time) => {
         const state = get();
         if (!state.currentTest) {
           return;
@@ -141,12 +141,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         set({
           currentTest: {
             ...state.currentTest,
-            timelineTime: time
+            time: time
           }
         });
 
         // Check if we landed on an exact frame and update if so
-        const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
+        const exactFrame = state.currentTest.frames.find((f) => f.time === time);
         if (exactFrame) {
           get().setCurrentFrame(exactFrame);
         }

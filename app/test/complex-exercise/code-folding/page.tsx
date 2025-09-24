@@ -4,20 +4,16 @@ import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 
 // Create frames for testing
 function createTestFrames(): Frame[] {
-  return Array.from(
-    { length: 15 },
-    (_, i) =>
-      ({
-        interpreterTime: i * 0.01,
-        timelineTime: i * 100,
-        line: i + 1,
-        status: "SUCCESS",
-        description: `Frame ${i + 1}`
-      }) as Frame
+  return Array.from({ length: 15 }, (_, i) =>
+    createTestFrame((i + 1) * 100000, {
+      line: i + 1,
+      generateDescription: () => `Frame ${i + 1}`
+    })
   );
 }
 
@@ -87,7 +83,7 @@ export default function CodeFoldingTestPage() {
           currentTime: 0
         }
       } as any,
-      timelineTime: 0,
+      time: 0,
       currentFrame: frames[0],
       prevFrame: undefined,
       nextFrame: frames[1],
@@ -97,7 +93,7 @@ export default function CodeFoldingTestPage() {
 
     // Initialize the orchestrator with test state
     orchestrator.setCurrentTest(testState);
-    orchestrator.setCurrentTestTimelineTime(0);
+    orchestrator.setCurrentTestTime(0);
     orchestrator.setShouldAutoRunCode(false);
 
     // Expose orchestrator to window for E2E testing

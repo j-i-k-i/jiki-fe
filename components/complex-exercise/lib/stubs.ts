@@ -18,15 +18,6 @@ export interface AnimationTimeline {
   };
 }
 
-export interface Frame {
-  line: number;
-  interpreterTime: number;
-  timelineTime: number;
-  status: "SUCCESS" | "ERROR";
-  description?: string;
-  error?: StaticError;
-}
-
 export interface StaticError {
   message: string;
   line?: number;

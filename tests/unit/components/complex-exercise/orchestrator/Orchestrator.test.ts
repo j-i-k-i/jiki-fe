@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 
 // Mock localStorage functions
 jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
@@ -43,16 +44,6 @@ describe("Orchestrator", () => {
       expect(state.foldedLines).toEqual([]);
     });
 
-    it("should initialize with mock test data", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
-      const state = orchestrator.getStore().getState();
-
-      expect(state.currentTest).not.toBeNull();
-      expect(state.currentTest?.frames).toHaveLength(5);
-      expect(state.currentTest?.timelineTime).toBe(0);
-      expect(state.currentTest?.animationTimeline).toBeDefined();
-    });
-
     it("should create separate instances with separate stores", () => {
       const orchestrator1 = new Orchestrator("uuid1", "code1");
       const orchestrator2 = new Orchestrator("uuid2", "code2");
@@ -81,18 +72,40 @@ describe("Orchestrator", () => {
   describe("frame synchronization", () => {
     it("should only update currentFrame when landing exactly on a frame", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
+
+      // Create custom test frames
+      const testFrames = [
+        createTestFrame(0, { line: 1 }),
+        createTestFrame(100000, { line: 2 }),
+        createTestFrame(200000, { line: 3 }),
+        createTestFrame(300000, { line: 4 }),
+        createTestFrame(400000, { line: 5 })
+      ];
+
+      // Set up test state with custom frames
+      orchestrator.setCurrentTest({
+        frames: testFrames,
+        animationTimeline: null as any,
+        time: 0,
+        currentFrame: testFrames[0],
+        prevFrame: undefined,
+        nextFrame: testFrames[1],
+        prevBreakpointFrame: undefined,
+        nextBreakpointFrame: undefined
+      });
+
       const state = orchestrator.getStore().getState();
 
       // Initial frame should be the first one
       expect(state.currentTest?.currentFrame?.line).toBe(1);
 
       // Change timeline time to between frames (should NOT update currentFrame)
-      orchestrator.setCurrentTestTimelineTime(150);
+      orchestrator.setCurrentTestTime(150000);
       let updatedState = orchestrator.getStore().getState();
       expect(updatedState.currentTest?.currentFrame?.line).toBe(1); // Should stay at 1
 
       // Change timeline time to exact frame position (should update currentFrame)
-      orchestrator.setCurrentTestTimelineTime(200);
+      orchestrator.setCurrentTestTime(200000);
       updatedState = orchestrator.getStore().getState();
       expect(updatedState.currentTest?.currentFrame?.line).toBe(3); // Should update to line 3
     });
@@ -100,8 +113,27 @@ describe("Orchestrator", () => {
     it("should recalculate navigation frames when setFoldedLines is called", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
 
-      // Set timeline to line 2
-      orchestrator.setCurrentTestTimelineTime(100);
+      // Create custom test frames
+      const testFrames = [
+        createTestFrame(0, { line: 1 }),
+        createTestFrame(100000, { line: 2 }),
+        createTestFrame(200000, { line: 3 }),
+        createTestFrame(300000, { line: 4 })
+      ];
+
+      // Set up test state with custom frames at line 2
+      orchestrator.setCurrentTest({
+        frames: testFrames,
+        animationTimeline: null as any,
+        time: 100000,
+        currentFrame: testFrames[1],
+        prevFrame: testFrames[0],
+        nextFrame: testFrames[2],
+        prevBreakpointFrame: undefined,
+        nextBreakpointFrame: undefined
+      });
+
+      // Verify initial state
       let state = orchestrator.getStore().getState();
       expect(state.currentTest?.currentFrame?.line).toBe(2);
 

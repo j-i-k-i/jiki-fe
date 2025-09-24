@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { AnimationTimeline, Frame } from "@/components/complex-exercise/lib/stubs";
+import type { AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 import "@testing-library/jest-dom";
@@ -9,13 +11,13 @@ import React from "react";
 
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
-  return Array.from({ length: count }, (_, i) => ({
-    interpreterTime: i * 0.01,
-    timelineTime: i * 100,
-    line: i + 1,
-    status: "SUCCESS" as const,
-    description: `Frame ${i}`
-  }));
+  return Array.from({ length: count }, (_, i) =>
+    createTestFrame(i * 100000, {
+      // Each frame is 100ms apart
+      line: i + 1,
+      generateDescription: () => `Frame ${i}`
+    })
+  );
 }
 
 // Helper to create mock animation timeline
@@ -44,7 +46,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setCurrentTestTimelineTime: jest.fn(),
+    setCurrentTestTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -67,12 +69,7 @@ describe("ScrubberInput Component", () => {
       // Test with less than 2 frames
       const { rerender } = render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(1)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(1)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -82,12 +79,7 @@ describe("ScrubberInput Component", () => {
       // Test with 2 or more frames
       rerender(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(3)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -95,13 +87,13 @@ describe("ScrubberInput Component", () => {
       expect(input.min).toBe("0");
     });
 
-    it("should calculate max value as duration * 100", () => {
+    it("should calculate max value as duration * 1000", () => {
       const mockOrchestrator = createMockOrchestrator();
       const testCases = [
-        { duration: 1, expected: "100" },
-        { duration: 5.5, expected: "550" },
-        { duration: 10, expected: "1000" },
-        { duration: 0.5, expected: "50" }
+        { duration: 1, expected: "1000" },
+        { duration: 5.5, expected: "5500" },
+        { duration: 10, expected: "10000" },
+        { duration: 0.5, expected: "500" }
       ];
 
       testCases.forEach(({ duration, expected }) => {
@@ -109,12 +101,7 @@ describe("ScrubberInput Component", () => {
 
         const { rerender } = render(
           <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-            <ScrubberInput
-              frames={createMockFrames(3)}
-              animationTimeline={mockTimeline}
-              timelineTime={0}
-              enabled={true}
-            />
+            <ScrubberInput frames={createMockFrames(3)} animationTimeline={mockTimeline} time={0} enabled={true} />
           </OrchestratorTestProvider>
         );
 
@@ -125,18 +112,13 @@ describe("ScrubberInput Component", () => {
       });
     });
 
-    it("should display the current timelineTime value", () => {
+    it("should display the current time value", () => {
       const mockOrchestrator = createMockOrchestrator();
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={250}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={250} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -149,7 +131,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput frames={createMockFrames(3)} animationTimeline={null} timelineTime={0} enabled={true} />
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={null} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -165,12 +147,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(3)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={false}
-          />
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={mockTimeline} time={0} enabled={false} />
         </OrchestratorTestProvider>
       );
 
@@ -184,12 +161,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(3)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -199,26 +171,21 @@ describe("ScrubberInput Component", () => {
   });
 
   describe("onChange handler", () => {
-    it("should call setCurrentTestTimelineTime when value changes", () => {
+    it("should call setCurrentTestTime when value changes", () => {
       const mockOrchestrator = createMockOrchestrator();
       const mockTimeline = createMockAnimationTimeline(10);
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
       const input = screen.getByRole("slider");
       fireEvent.change(input, { target: { value: "300" } });
 
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(300);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledTimes(1);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(300);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledTimes(1);
     });
 
     it("should handle multiple value changes", () => {
@@ -227,12 +194,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -242,10 +204,10 @@ describe("ScrubberInput Component", () => {
       fireEvent.change(input, { target: { value: "200" } });
       fireEvent.change(input, { target: { value: "350" } });
 
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledTimes(3);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenNthCalledWith(1, 100);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenNthCalledWith(2, 200);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenNthCalledWith(3, 350);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledTimes(3);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenNthCalledWith(1, 100);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenNthCalledWith(2, 200);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenNthCalledWith(3, 350);
     });
   });
 
@@ -262,7 +224,7 @@ describe("ScrubberInput Component", () => {
           <ScrubberInput
             frames={createMockFrames(5)}
             animationTimeline={mockTimeline}
-            timelineTime={150} // Between frames
+            time={150} // Between frames
             enabled={true}
           />
         </OrchestratorTestProvider>
@@ -272,7 +234,7 @@ describe("ScrubberInput Component", () => {
       fireEvent.mouseUp(input);
 
       expect(mockOrchestrator.getNearestCurrentFrame).toHaveBeenCalled();
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(nearestFrame.timelineTime);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(nearestFrame.time);
     });
 
     it("should not snap if no nearest frame is found", () => {
@@ -283,12 +245,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={150}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={150} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -296,8 +253,8 @@ describe("ScrubberInput Component", () => {
       fireEvent.mouseUp(input);
 
       expect(mockOrchestrator.getNearestCurrentFrame).toHaveBeenCalled();
-      // Should not call setCurrentTestTimelineTime when no frame is found
-      expect(mockOrchestrator.setCurrentTestTimelineTime).not.toHaveBeenCalled();
+      // Should not call setCurrentTestTime when no frame is found
+      expect(mockOrchestrator.setCurrentTestTime).not.toHaveBeenCalled();
     });
   });
 
@@ -308,12 +265,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -333,12 +285,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(5)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(5)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
@@ -365,7 +312,7 @@ describe("ScrubberInput Component", () => {
             ref={ref}
             frames={createMockFrames(3)}
             animationTimeline={mockTimeline}
-            timelineTime={0}
+            time={0}
             enabled={true}
           />
         </OrchestratorTestProvider>
@@ -383,12 +330,7 @@ describe("ScrubberInput Component", () => {
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
-          <ScrubberInput
-            frames={createMockFrames(3)}
-            animationTimeline={mockTimeline}
-            timelineTime={0}
-            enabled={true}
-          />
+          <ScrubberInput frames={createMockFrames(3)} animationTimeline={mockTimeline} time={0} enabled={true} />
         </OrchestratorTestProvider>
       );
 
