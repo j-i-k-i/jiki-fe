@@ -10,8 +10,8 @@ import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { Frame } from "interpreters";
-import type { TestResult, TestSuiteResult } from "./test-results-types";
-import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, UnderlineRange } from "./types";
+import type { TestExpect, TestResult, TestSuiteResult } from "./test-results-types";
+import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;
@@ -305,15 +305,11 @@ class Orchestrator {
   }
 
   // Test result processing methods - delegate to TestSuiteManager
-  getProcessedExpects(): ProcessedExpect[] {
-    return this.testSuiteManager.getProcessedExpects();
-  }
-
-  getFirstFailingExpect(): ProcessedExpect | null {
+  getFirstFailingExpect(): TestExpect | null {
     return this.testSuiteManager.getFirstFailingExpect();
   }
 
-  getFirstExpect(): ProcessedExpect | null {
+  getFirstExpect(): TestExpect | null {
     return this.testSuiteManager.getFirstExpect();
   }
 }

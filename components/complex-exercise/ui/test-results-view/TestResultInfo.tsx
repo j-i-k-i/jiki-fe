@@ -1,7 +1,7 @@
-import type { ProcessedExpect } from "../../lib/types";
+import type { TestExpect } from "../../lib/test-results-types";
 import { StateTestResultView } from "./StateTestResultView";
 
-export function TestResultInfo({ firstExpect }: { firstExpect: ProcessedExpect | null }) {
+export function TestResultInfo({ firstExpect }: { firstExpect: TestExpect | null }) {
   if (!firstExpect) {
     return null;
   }

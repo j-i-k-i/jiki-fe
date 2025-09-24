@@ -1,4 +1,3 @@
-import type { Change } from "diff";
 import type { Frame } from "interpreters";
 import type { TestResult, TestSuiteResult } from "./test-results-types";
 
@@ -13,18 +12,6 @@ export interface InformationWidgetData {
   line: number;
   status: "SUCCESS" | "ERROR";
 }
-
-// Test result processing types
-export interface ProcessedExpect {
-  diff: Change[];
-  actual: any;
-  pass: boolean;
-  codeRun?: string;
-  errorHtml?: string;
-  expected?: any;
-}
-
-export type ProcessedExpects = ProcessedExpect[];
 
 // Public read-only state that components can access
 export interface OrchestratorState {

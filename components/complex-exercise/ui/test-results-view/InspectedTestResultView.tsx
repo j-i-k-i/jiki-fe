@@ -2,8 +2,7 @@ import { assembleClassNames } from "@/utils/assemble-classnames";
 import { useEffect, useRef } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { TestResult } from "../../lib/test-results-types";
-import type { ProcessedExpect } from "../../lib/types";
+import type { TestExpect, TestResult } from "../../lib/test-results-types";
 import { PassMessage } from "./PassMessage";
 import { TestResultInfo } from "./TestResultInfo";
 
@@ -57,7 +56,7 @@ export function InspectedTestResultViewLHS({
   firstExpect
 }: {
   result: TestResult;
-  firstExpect: ProcessedExpect | null;
+  firstExpect: TestExpect | null;
 }) {
   return (
     <div data-ci="inspected-test-result-view" className="scenario-lhs">
