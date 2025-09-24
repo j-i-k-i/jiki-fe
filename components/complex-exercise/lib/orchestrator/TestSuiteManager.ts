@@ -25,22 +25,14 @@ export class TestSuiteManager {
   }
 
   /**
-   * Get the first failing expect for the current test
+   * Get the first expect (failing or first overall) for the current test
    */
-  getFirstFailingExpect(): TestExpect | null {
+  getFirstExpect(): TestExpect | null {
     const currentTest = this.store.getState().currentTest;
     if (!currentTest) {
       return null;
     }
-    return currentTest.expects.find((expect) => expect.pass === false) || null;
-  }
-
-  /**
-   * Get the first expect (failing or first overall) for the current test
-   */
-  getFirstExpect(): TestExpect | null {
-    const firstFailing = this.getFirstFailingExpect();
-    const currentTest = this.store.getState().currentTest;
-    return firstFailing || currentTest?.expects[0] || null;
+    const firstFailing = currentTest.expects.find((expect) => expect.pass === false);
+    return firstFailing || currentTest.expects[0] || null;
   }
 }

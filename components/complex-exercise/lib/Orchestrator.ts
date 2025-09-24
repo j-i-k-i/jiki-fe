@@ -292,10 +292,6 @@ class Orchestrator {
   }
 
   // Test result processing methods - delegate to TestSuiteManager
-  getFirstFailingExpect(): TestExpect | null {
-    return this.testSuiteManager.getFirstFailingExpect();
-  }
-
   getFirstExpect(): TestExpect | null {
     return this.testSuiteManager.getFirstExpect();
   }
