@@ -5,7 +5,6 @@ import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercis
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import type { Frame } from "interpreters";
-import { TIME_SCALE_FACTOR } from "interpreters";
 import { mockFrame } from "@/tests/mocks";
 
 // Create frames for testing with specific timeline positions
@@ -48,7 +47,7 @@ export default function ScrubberInputTestPage() {
       view: document.createElement("div"),
       frames,
       animationTimeline: {
-        duration: 1000, // 1000 milliseconds = 1 second, max value will be 1000000 microseconds
+        duration: 1000000, // 1000000 microseconds = 1 second
         paused: true,
         seek: (_time: number) => {},
         play: () => {},
@@ -111,7 +110,7 @@ export default function ScrubberInputTestPage() {
             enabled={true}
           />
           <div className="mt-2 text-sm text-gray-600">
-            Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration * TIME_SCALE_FACTOR) : 0}
+            Range: 0 - {animationTimeline ? Math.round(animationTimeline.duration) : 0}
           </div>
         </div>
 
@@ -213,7 +212,7 @@ export default function ScrubberInputTestPage() {
             <div>Previous Frame: {prevFrame?.generateDescription() ?? "None"}</div>
             <div>Next Frame: {nextFrame?.generateDescription() ?? "None"}</div>
             <div>Total Frames: {frames.length}</div>
-            <div>Animation Duration: {animationTimeline?.duration || 0} seconds</div>
+            <div>Animation Duration: {animationTimeline ? animationTimeline.duration / 1000000 : 0} seconds</div>
           </div>
         </div>
       </div>

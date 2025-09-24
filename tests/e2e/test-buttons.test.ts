@@ -287,7 +287,7 @@ describe("Test Buttons E2E", () => {
         const orchestrator = (window as any).testOrchestrator;
         const testSuiteResult = orchestrator.store.getState().testSuiteResult;
         if (testSuiteResult && testSuiteResult.tests.length > 0) {
-          orchestrator.setInspectedTestResult(testSuiteResult.tests[0]);
+          orchestrator.setCurrentTest(testSuiteResult.tests[0]);
         }
       });
 

@@ -67,8 +67,8 @@ export default function TestButtonsTestPage() {
         >
           <h3>Debug Info</h3>
           <p data-testid="tests-count">Tests: {testSuiteResult?.tests.length || 0}</p>
-          <p data-testid="inspected-test-name">Inspected test: {currentTest ? "Active" : "None"}</p>
-          <p data-testid="inspected-test-status">Inspected test status: {currentTest ? "Running" : "None"}</p>
+          <p data-testid="inspected-test-name">Inspected test: {currentTest ? currentTest.name : "None"}</p>
+          <p data-testid="inspected-test-status">Inspected test status: {currentTest ? currentTest.status : "None"}</p>
         </div>
       </div>
     </OrchestratorProvider>
