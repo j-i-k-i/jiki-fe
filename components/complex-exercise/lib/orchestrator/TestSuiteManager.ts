@@ -39,14 +39,17 @@ export class TestSuiteManager {
       return;
     }
 
+    const currentFrame = result.frames.find((f) => f.time === result.time) || result.frames[0];
+    const currentFrameIndex = result.frames.indexOf(currentFrame);
+
     const testState = {
       // Core TestState properties
       frames: result.frames,
       animationTimeline: result.animationTimeline,
       time: result.time,
-      currentFrame: result.frames.find((f) => f.time === result.time) || result.frames[0],
-      prevFrame: undefined,
-      nextFrame: undefined,
+      currentFrame,
+      prevFrame: currentFrameIndex > 0 ? result.frames[currentFrameIndex - 1] : undefined,
+      nextFrame: currentFrameIndex < result.frames.length - 1 ? result.frames[currentFrameIndex + 1] : undefined,
       prevBreakpointFrame: undefined,
       nextBreakpointFrame: undefined,
       // NewTestResult properties for display
@@ -64,7 +67,10 @@ export class TestSuiteManager {
       frames: testState.frames.length,
       hasAnimationTimeline: !!testState.animationTimeline,
       hasView: !!testState.view,
-      currentFrame: testState.currentFrame
+      currentFrame: testState.currentFrame,
+      currentFrameIndex,
+      hasPrevFrame: !!testState.prevFrame,
+      hasNextFrame: !!testState.nextFrame
     });
 
     this.store.getState().setCurrentTest(testState);

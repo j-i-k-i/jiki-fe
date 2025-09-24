@@ -55,6 +55,7 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
   console.log("[runScenario] Frames generated:", frames.length, "frames");
   console.log("[runScenario] First frame:", frames[0]);
   console.log("[runScenario] Last frame:", frames[frames.length - 1]);
+  console.log("[runScenario] Last frame timeInMs:", frames[frames.length - 1]?.timeInMs);
 
   // Create animation timeline if we have animations or frames
   const animationTimeline: AnimationTimeline | null =
@@ -83,7 +84,7 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
     codeRun: "move()",
     view: exercise.getView(),
     animationTimeline,
-    time: 0
+    time: frames[0]?.time || 0
   };
 }
 

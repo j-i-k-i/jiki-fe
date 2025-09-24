@@ -90,6 +90,9 @@ function calculateMinInputValue(frames: Frame[]) {
 }
 
 function calculateMaxInputValue(animationTimeline: AnimationTimeline | { duration: number }) {
-  // Convert animation duration from milliseconds to microseconds
-  return Math.round(animationTimeline.duration * TIME_SCALE_FACTOR);
+  // The duration is in milliseconds, but we're dealing with microsecond values for the scrubber
+  const maxValue = Math.round(animationTimeline.duration);
+  console.log("[ScrubberInput] Timeline duration:", animationTimeline.duration, "ms");
+  console.log("[ScrubberInput] Max value (microseconds):", maxValue);
+  return maxValue;
 }
