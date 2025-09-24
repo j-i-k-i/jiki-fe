@@ -11,7 +11,7 @@ export function InspectedTestResultView() {
   const orchestrator = useOrchestrator();
   const { currentTest } = useOrchestratorStore(orchestrator);
   // currentTest now has NewTestResult properties merged in
-  const result = currentTest && currentTest.expects ? (currentTest as unknown as NewTestResult) : null;
+  const result = currentTest ? (currentTest as unknown as NewTestResult) : null;
   const viewContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -31,7 +31,6 @@ export function InspectedTestResultView() {
     viewContainerRef.current.innerHTML = "";
     viewContainerRef.current.appendChild(result.view);
     result.view.style.display = "block";
-
   }, [result]);
 
   const firstExpect = orchestrator.getFirstExpect();

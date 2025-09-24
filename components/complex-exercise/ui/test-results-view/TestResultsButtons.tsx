@@ -25,31 +25,26 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
       }
 
       // Merge NewTestResult properties into TestState format
-      if (test.animationTimeline) {
-        const testState = {
-          // Core TestState properties
-          frames: test.frames,
-          animationTimeline: test.animationTimeline,
-          time: test.time,
-          currentFrame: test.frames.find((f) => f.time === test.time) || test.frames[0],
-          prevFrame: undefined,
-          nextFrame: undefined,
-          prevBreakpointFrame: undefined,
-          nextBreakpointFrame: undefined,
-          // NewTestResult properties
-          name: test.name,
-          status: test.status,
-          type: test.type,
-          expects: test.expects,
-          view: test.view,
-          imageSlug: test.imageSlug,
-          slug: test.slug
-        };
-        orchestrator.setCurrentTest(testState);
-      } else {
-        // For tests without animation timeline, just set to null
-        orchestrator.setCurrentTest(null);
-      }
+      const testState = {
+        // Core TestState properties
+        frames: test.frames,
+        animationTimeline: test.animationTimeline,
+        time: test.time,
+        currentFrame: test.frames.find((f) => f.time === test.time) || test.frames[0],
+        prevFrame: undefined,
+        nextFrame: undefined,
+        prevBreakpointFrame: undefined,
+        nextBreakpointFrame: undefined,
+        // NewTestResult properties
+        name: test.name,
+        status: test.status,
+        type: test.type,
+        expects: test.expects,
+        view: test.view,
+        imageSlug: test.imageSlug,
+        slug: test.slug
+      };
+      orchestrator.setCurrentTest(testState);
 
       // Set information widget data for single frame tests
       if (test.frames.length === 1) {

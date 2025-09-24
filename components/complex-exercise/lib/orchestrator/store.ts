@@ -129,7 +129,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         const state = get();
         // Check if we have a saved time for this test
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const savedTime = state.testCurrentTimes[test.slug];
         const timeToUse = savedTime !== undefined ? savedTime : test.time;
 

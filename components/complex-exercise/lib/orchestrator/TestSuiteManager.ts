@@ -73,29 +73,27 @@ export class TestSuiteManager {
     // Merge TestResult properties into TestState format
     if (mockTestResults.tests.length > 0) {
       const firstTest = mockTestResults.tests[0];
-      if (firstTest.animationTimeline) {
-        const testState = {
-          // Core TestState properties
-          frames: firstTest.frames,
-          animationTimeline: firstTest.animationTimeline,
-          time: firstTest.time,
-          currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
-          prevFrame: undefined,
-          nextFrame: undefined,
-          prevBreakpointFrame: undefined,
-          nextBreakpointFrame: undefined,
-          // TestResult properties
-          name: firstTest.name,
-          status: firstTest.status,
-          type: firstTest.type,
-          expects: firstTest.expects,
-          view: firstTest.view,
-          imageSlug: firstTest.imageSlug,
-          slug: firstTest.slug
-        };
-        this.store.getState().setCurrentTest(testState);
-        this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
-      }
+      const testState = {
+        // Core TestState properties
+        frames: firstTest.frames,
+        animationTimeline: firstTest.animationTimeline,
+        time: firstTest.time,
+        currentFrame: firstTest.frames.find((f) => f.time === firstTest.time) || firstTest.frames[0],
+        prevFrame: undefined,
+        nextFrame: undefined,
+        prevBreakpointFrame: undefined,
+        nextBreakpointFrame: undefined,
+        // TestResult properties
+        name: firstTest.name,
+        status: firstTest.status,
+        type: firstTest.type,
+        expects: firstTest.expects,
+        view: firstTest.view,
+        imageSlug: firstTest.imageSlug,
+        slug: firstTest.slug
+      };
+      this.store.getState().setCurrentTest(testState);
+      this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);
     }
   }
 
@@ -104,7 +102,7 @@ export class TestSuiteManager {
    */
   getProcessedExpects(): ProcessedExpect[] {
     const currentTest = this.store.getState().currentTest;
-    if (!currentTest || !currentTest.expects) {
+    if (!currentTest) {
       return [];
     }
     // currentTest now has TestResult properties merged in
@@ -117,7 +115,7 @@ export class TestSuiteManager {
    */
   getFirstFailingExpect(): ProcessedExpect | null {
     const currentTest = this.store.getState().currentTest;
-    if (!currentTest || !currentTest.expects) {
+    if (!currentTest) {
       return null;
     }
     // currentTest now has TestResult properties merged in

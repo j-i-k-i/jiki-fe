@@ -74,7 +74,7 @@ export interface OrchestratorState {
   nextBreakpointFrame?: Frame;
 
   // Test time persistence - maps test slugs to their current time positions
-  testCurrentTimes: Record<string, number>;
+  testCurrentTimes: Record<string, number | undefined>;
 }
 
 // Private actions only accessible within the orchestrator
