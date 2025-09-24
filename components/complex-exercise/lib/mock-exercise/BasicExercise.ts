@@ -96,7 +96,9 @@ export class BasicExercise extends Exercise {
   }
 
   private updateView(): void {
-    if (!this.view) return;
+    if (!this.view) {
+      return;
+    }
 
     const character = this.view.querySelector(".character") as HTMLElement;
     const positionLabel = this.view.querySelector(".position-label") as HTMLElement;

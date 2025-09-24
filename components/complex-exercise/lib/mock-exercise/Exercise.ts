@@ -5,7 +5,7 @@ export abstract class Exercise {
 
   abstract availableFunctions: Array<{
     name: string;
-    func: Function;
+    func: (...args: any[]) => any;
     description?: string;
   }>;
 

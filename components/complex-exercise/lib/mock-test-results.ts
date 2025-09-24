@@ -73,7 +73,8 @@ export const mockTestResults: TestSuiteResult = {
         })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      time: 0
+      time: 0,
+      view: document.createElement("div")
     },
     {
       slug: "test-2",
@@ -110,7 +111,8 @@ export const mockTestResults: TestSuiteResult = {
         })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      time: 60000 // Start at error frame in microseconds
+      time: 60000, // Start at error frame in microseconds
+      view: document.createElement("div")
     },
     {
       slug: "test-3",
@@ -149,7 +151,8 @@ export const mockTestResults: TestSuiteResult = {
         })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      time: 25000 // Start at first error frame in microseconds
+      time: 25000, // Start at first error frame in microseconds
+      view: document.createElement("div")
     }
   ]
 };
@@ -187,7 +190,8 @@ export const mockBonusTestResults: TestSuiteResult = {
         })
       ],
       animationTimeline: createMockAnimationTimeline(),
-      time: 0
+      time: 0,
+      view: document.createElement("div")
     }
   ]
 };

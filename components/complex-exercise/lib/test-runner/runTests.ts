@@ -1,6 +1,9 @@
 import { jikiscript } from "interpreters";
+// Frame type imported for use in type assertions
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { Frame } from "interpreters";
 import type { TestSuiteResult, NewTestResult } from "../test-results-types";
-import type { AnimationTimeline, Frame } from "../stubs";
+import type { AnimationTimeline } from "../stubs";
 import { BasicExercise } from "../mock-exercise/BasicExercise";
 import basicTests from "../mock-exercise/BasicExercise.test";
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
@@ -13,13 +16,14 @@ interface Scenario {
   expectations: (exercise: any) => any[];
 }
 
-interface Task {
-  name: string;
-  scenarios: Scenario[];
-  bonus?: boolean;
-}
+// Task interface for future use when we implement task grouping
+// interface Task {
+//   name: string;
+//   scenarios: Scenario[];
+//   bonus?: boolean;
+// }
 
-async function runScenario(scenario: Scenario, studentCode: string): Promise<NewTestResult> {
+function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
   // Create fresh exercise instance
   const exercise = new BasicExercise();
 
@@ -27,7 +31,7 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
   scenario.setup(exercise);
 
   // Execute student code with Jikiscript
-  const result = await jikiscript.interpret(studentCode, {
+  const result = jikiscript.interpret(studentCode, {
     externalFunctions: exercise.availableFunctions.map((func) => ({
       name: func.name,
       func: func.func
@@ -43,17 +47,7 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
 
   // Build animation timeline
   // Frames already have time (microseconds) and timeInMs (milliseconds) from interpreter
-  console.log("Raw frames from interpreter:", result.frames);
-  const frames = result.frames as Frame[];
-
-  console.log("Processed frames:", frames.length, frames);
-  if (frames.length > 0) {
-    console.log("First frame time (microseconds):", frames[0].time);
-    console.log("Last frame time (microseconds):", frames[frames.length - 1].time);
-    console.log("First frame timeInMs (milliseconds):", frames[0].timeInMs);
-    console.log("Last frame timeInMs (milliseconds):", frames[frames.length - 1].timeInMs);
-  }
-  console.log("Animations from exercise:", exercise.animations.length, exercise.animations);
+  const frames = result.frames;
 
   // Create animation timeline if we have animations or frames
   const animationTimeline: AnimationTimeline | null =
@@ -64,10 +58,7 @@ async function runScenario(scenario: Scenario, studentCode: string): Promise<New
         ) as unknown as AnimationTimeline)
       : null;
 
-  console.log("AnimationTimeline created:", animationTimeline);
-  if (animationTimeline) {
-    console.log("AnimationTimeline duration:", animationTimeline.duration);
-  }
+  // Animation timeline is ready for scrubber
 
   // Determine status
   const status = expects.every((e) => e.pass) ? "pass" : "fail";
@@ -92,7 +83,7 @@ export async function runTests(studentCode: string): Promise<TestSuiteResult> {
   // Run all scenarios from all tasks
   for (const task of basicTests.tasks) {
     for (const scenario of task.scenarios) {
-      const result = await runScenario(scenario, studentCode);
+      const result = runScenario(scenario, studentCode);
       tests.push(result);
     }
   }
