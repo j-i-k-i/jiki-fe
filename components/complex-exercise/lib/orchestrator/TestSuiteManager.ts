@@ -9,6 +9,34 @@ export class TestSuiteManager {
   constructor(private readonly store: StoreApi<OrchestratorStore>) {}
 
   /**
+   * Run tests on the provided code
+   */
+  async runCode(code: string): Promise<void> {
+    const state = this.store.getState();
+    state.setStatus("running");
+    state.setError(null);
+
+    try {
+      // Import and run our new test runner
+      const { runTests } = await import("../test-runner/runTests");
+      const testResults = runTests(code);
+
+      // Set the results in the store
+      this.setTestSuiteResult(testResults);
+
+      // Set the first test as current by default
+      if (testResults.tests.length > 0) {
+        this.setCurrentTestFromResult(testResults.tests[0]);
+      }
+
+      state.setStatus("success");
+    } catch (error) {
+      state.setError(error instanceof Error ? error.message : "Unknown error");
+      state.setStatus("error");
+    }
+  }
+
+  /**
    * Set the test suite result in the store
    */
   setTestSuiteResult(result: TestSuiteResult | null): void {

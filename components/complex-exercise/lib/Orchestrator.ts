@@ -230,32 +230,11 @@ class Orchestrator {
   }
 
   async runCode() {
-    const state = this.store.getState();
-    state.setStatus("running");
-    state.setError(null);
+    // Get the current code from the editor
+    const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
-    try {
-      // Get the current code from the editor
-      const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
-
-      // Import and run our new test runner
-      const { runTests } = await import("./test-runner/runTests");
-      const testResults = runTests(currentCode);
-
-      // Set the results in the store
-      this.testSuiteManager.setTestSuiteResult(testResults);
-
-      // Set the first test as current by default
-      // This merges the test result into currentTest for display
-      if (testResults.tests.length > 0) {
-        this.testSuiteManager.setCurrentTestFromResult(testResults.tests[0]);
-      }
-
-      state.setStatus("success");
-    } catch (error) {
-      state.setError(error instanceof Error ? error.message : "Unknown error");
-      state.setStatus("error");
-    }
+    // Delegate to TestSuiteManager
+    await this.testSuiteManager.runCode(currentCode);
   }
 
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
