@@ -47,9 +47,6 @@ describe("Test Runner E2E", () => {
     // Check that the character is at the correct position
     const characterPosition = await page.evaluate(() => {
       const character = document.querySelector(".character") as HTMLElement;
-      if (!character) {
-        return 0;
-      }
       const transform = character.style.transform;
       const match = transform.match(/translateX\((\d+)px\)/);
       return match ? parseInt(match[1]) : 0;

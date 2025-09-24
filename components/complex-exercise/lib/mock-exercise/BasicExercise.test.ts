@@ -1,6 +1,6 @@
 import type { BasicExercise } from "./BasicExercise";
 
-export default {
+const basicExerciseTests = {
   title: "Basic Movement",
   exerciseType: "basic",
 
@@ -52,3 +52,5 @@ export default {
     }
   ]
 };
+
+export default basicExerciseTests;

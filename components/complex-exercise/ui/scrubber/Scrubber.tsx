@@ -16,6 +16,13 @@ export default function Scrubber() {
   const time = currentTest?.time ?? 0;
   const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
+  console.log("[Scrubber] Current test:", currentTest?.slug || "none");
+  console.log("[Scrubber] Frames count:", frames.length);
+  console.log("[Scrubber] Has animationTimeline:", !!animationTimeline);
+  console.log("[Scrubber] Is enabled:", isEnabled);
+  console.log("[Scrubber] hasCodeBeenEdited:", hasCodeBeenEdited);
+  console.log("[Scrubber] isSpotlightActive:", isSpotlightActive);
+
   return (
     <div
       data-testid="scrubber"

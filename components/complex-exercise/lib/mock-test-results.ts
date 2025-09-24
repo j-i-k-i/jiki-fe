@@ -2,6 +2,15 @@ import type { AnimationTimeline } from "./stubs";
 import type { TestSuiteResult } from "./test-results-types";
 import { createTestFrame } from "./test-utils/createTestFrame";
 
+// Create a view element that works on both client and server
+function createViewElement(): HTMLElement {
+  if (typeof document === "undefined") {
+    // Return a mock element for SSR
+    return {} as HTMLElement;
+  }
+  return document.createElement("div");
+}
+
 // Mock animation timeline for scrubber
 function createMockAnimationTimeline(): AnimationTimeline {
   let currentTime = 0;
@@ -74,7 +83,7 @@ export const mockTestResults: TestSuiteResult = {
       ],
       animationTimeline: createMockAnimationTimeline(),
       time: 0,
-      view: document.createElement("div")
+      view: createViewElement()
     },
     {
       slug: "test-2",
@@ -112,7 +121,7 @@ export const mockTestResults: TestSuiteResult = {
       ],
       animationTimeline: createMockAnimationTimeline(),
       time: 60000, // Start at error frame in microseconds
-      view: document.createElement("div")
+      view: createViewElement()
     },
     {
       slug: "test-3",
@@ -152,7 +161,7 @@ export const mockTestResults: TestSuiteResult = {
       ],
       animationTimeline: createMockAnimationTimeline(),
       time: 25000, // Start at first error frame in microseconds
-      view: document.createElement("div")
+      view: createViewElement()
     }
   ]
 };
@@ -191,7 +200,7 @@ export const mockBonusTestResults: TestSuiteResult = {
       ],
       animationTimeline: createMockAnimationTimeline(),
       time: 0,
-      view: document.createElement("div")
+      view: createViewElement()
     }
   ]
 };

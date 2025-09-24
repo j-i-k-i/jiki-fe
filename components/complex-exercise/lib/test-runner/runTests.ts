@@ -24,6 +24,8 @@ interface Scenario {
 // }
 
 function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
+  console.log("[runScenario] Starting scenario:", scenario.slug);
+
   // Create fresh exercise instance
   const exercise = new BasicExercise();
 
@@ -31,6 +33,7 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
   scenario.setup(exercise);
 
   // Execute student code with Jikiscript
+  console.log("[runScenario] Executing code with Jikiscript");
   const result = jikiscript.interpret(studentCode, {
     externalFunctions: exercise.availableFunctions.map((func) => ({
       name: func.name,
@@ -44,10 +47,14 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
 
   // Run expectations
   const expects = scenario.expectations(exercise);
+  console.log("[runScenario] Expectations result:", expects);
 
   // Build animation timeline
   // Frames already have time (microseconds) and timeInMs (milliseconds) from interpreter
   const frames = result.frames;
+  console.log("[runScenario] Frames generated:", frames.length, "frames");
+  console.log("[runScenario] First frame:", frames[0]);
+  console.log("[runScenario] Last frame:", frames[frames.length - 1]);
 
   // Create animation timeline if we have animations or frames
   const animationTimeline: AnimationTimeline | null =
@@ -59,9 +66,12 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
       : null;
 
   // Animation timeline is ready for scrubber
+  console.log("[runScenario] Animations collected:", exercise.animations.length);
+  console.log("[runScenario] AnimationTimeline created:", animationTimeline ? "yes" : "no");
 
   // Determine status
   const status = expects.every((e) => e.pass) ? "pass" : "fail";
+  console.log("[runScenario] Test status:", status);
 
   return {
     slug: scenario.slug,
@@ -77,7 +87,9 @@ function runScenario(scenario: Scenario, studentCode: string): NewTestResult {
   };
 }
 
-export async function runTests(studentCode: string): Promise<TestSuiteResult> {
+export function runTests(studentCode: string): TestSuiteResult {
+  console.log("[runTests] Starting test execution");
+  console.log("[runTests] Student code:", studentCode);
   const tests: NewTestResult[] = [];
 
   // Run all scenarios from all tasks
@@ -91,8 +103,17 @@ export async function runTests(studentCode: string): Promise<TestSuiteResult> {
   // Determine overall status
   const status = tests.every((t) => t.status === "pass") ? "pass" : "fail";
 
-  return {
+  const result: TestSuiteResult = {
     tests,
     status
   };
+
+  console.log("[runTests] Final result:", result);
+  console.log("[runTests] Number of tests:", tests.length);
+  console.log(
+    "[runTests] Total frames across all tests:",
+    tests.reduce((sum, t) => sum + (t.frames?.length || 0), 0)
+  );
+
+  return result;
 }

@@ -103,12 +103,7 @@ export class BasicExercise extends Exercise {
     const character = this.view.querySelector(".character") as HTMLElement;
     const positionLabel = this.view.querySelector(".position-label") as HTMLElement;
 
-    if (character) {
-      character.style.transform = `translateY(-50%) translateX(${this.position}px)`;
-    }
-
-    if (positionLabel) {
-      positionLabel.textContent = `Position: ${this.position}px`;
-    }
+    character.style.transform = `translateY(-50%) translateX(${this.position}px)`;
+    positionLabel.textContent = `Position: ${this.position}px`;
   }
 }

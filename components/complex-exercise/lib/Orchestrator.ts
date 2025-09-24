@@ -253,6 +253,7 @@ class Orchestrator {
   }
 
   async runCode() {
+    console.log("[runCode] Starting execution");
     const state = this.store.getState();
     state.setStatus("running");
     state.setError(null);
@@ -261,23 +262,33 @@ class Orchestrator {
       // Get the current code from the editor
       const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
-      console.log("Running code:", currentCode);
+      console.log("[runCode] Current code:", currentCode);
+      console.log("[runCode] Code length:", currentCode.length, "characters");
 
       // Import and run our new test runner
       const { runTests } = await import("./test-runner/runTests");
-      const testResults = await runTests(currentCode);
+      console.log("[runCode] Test runner imported, executing tests...");
+
+      const testResults = runTests(currentCode);
+      console.log("[runCode] Test results received:", testResults);
 
       // Set the results in the store
+      console.log("[runCode] Setting test suite result in store");
       this.testSuiteManager.setTestSuiteResult(testResults);
 
       // Set the first test as current by default
       // This merges the test result into currentTest for display
       if (testResults.tests.length > 0) {
+        console.log("[runCode] Setting first test as current:", testResults.tests[0].slug);
         this.testSuiteManager.setCurrentTestFromResult(testResults.tests[0]);
+      } else {
+        console.log("[runCode] WARNING: No tests in results!");
       }
 
+      console.log("[runCode] Success! Setting status to success");
       state.setStatus("success");
     } catch (error) {
+      console.error("[runCode] Error occurred:", error);
       state.setError(error instanceof Error ? error.message : "Unknown error");
       state.setStatus("error");
     }

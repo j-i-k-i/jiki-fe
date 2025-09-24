@@ -14,6 +14,7 @@ export class TestSuiteManager {
    * Set the test suite result in the store
    */
   setTestSuiteResult(result: TestSuiteResult | null): void {
+    console.log("[TestSuiteManager] Setting test suite result:", result);
     this.store.getState().setTestSuiteResult(result);
   }
 
@@ -28,7 +29,12 @@ export class TestSuiteManager {
    * Set the current test from a test result, merging NewTestResult properties into TestState
    */
   setCurrentTestFromResult(result: NewTestResult | null): void {
+    console.log("[TestSuiteManager] Setting current test from result:", result?.slug);
+    console.log("[TestSuiteManager] Has animationTimeline:", !!result?.animationTimeline);
+    console.log("[TestSuiteManager] Frames count:", result?.frames?.length || 0);
+
     if (!result || !result.animationTimeline) {
+      console.log("[TestSuiteManager] No result or animationTimeline, setting currentTest to null");
       this.store.getState().setCurrentTest(null);
       return;
     }
@@ -52,6 +58,14 @@ export class TestSuiteManager {
       imageSlug: result.imageSlug,
       slug: result.slug
     };
+
+    console.log("[TestSuiteManager] Created test state:", {
+      slug: testState.slug,
+      frames: testState.frames.length,
+      hasAnimationTimeline: !!testState.animationTimeline,
+      hasView: !!testState.view,
+      currentFrame: testState.currentFrame
+    });
 
     this.store.getState().setCurrentTest(testState);
     this.store.getState().setHighlightedLine(testState.currentFrame.line || 0);

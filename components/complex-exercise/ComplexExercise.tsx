@@ -12,10 +12,7 @@ import TestResultsView from "./ui/test-results-view/TestResultsView";
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance
   const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator(
-      "example-exercise-001",
-      `// Custom initial code\nfunction greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("World"));`
-    )
+    new Orchestrator("example-exercise-001", `move()\nmove()\nmove()\nmove()\nmove()`)
   );
   const orchestrator = orchestratorRef.current;
 
