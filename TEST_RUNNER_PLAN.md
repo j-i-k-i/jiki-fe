@@ -251,13 +251,14 @@ expect(value).toBeGreaterThan(expected).withError("Value too small");
 ### With Jikiscript Interpreter
 
 ```typescript
-import * as jikiscript from "interpreters";
+import { jikiscript } from "interpreters";
+import type { Frame } from "interpreters";
 
-const result = await jikiscript.interpret(code, {
+const result = jikiscript.interpret(code, {
   externalFunctions: exercise.availableFunctions,
   options: interpreterOptions
 });
-// result.frames - execution frames
+// result.frames - execution frames (with time in microseconds, timeInMs in milliseconds)
 // result.value - return value
 // result.status - success/error
 ```

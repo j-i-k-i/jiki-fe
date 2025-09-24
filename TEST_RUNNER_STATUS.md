@@ -1,10 +1,8 @@
 # Test Runner Implementation Status
 
-## ⚠️ Important: Webpack Required
+## ✅ Working with Interpreters Package
 
-**The test runner requires webpack (not Turbopack) due to pnpm workspace incompatibility issues.**
-- Run `pnpm run dev` to start the dev server (now configured without Turbopack)
-- The interpreters package cannot be resolved by Turbopack in the current setup
+The test runner is now fully integrated with the interpreters package from the monorepo.
 
 ## ✅ Completed
 
@@ -14,6 +12,8 @@
 - **Test Runner**: Executes scenarios through Jikiscript interpreter
 - **Store Integration**: Proper data flow through TestSuiteManager to UI components
 - **Visual Display**: Exercise view showing character position and movement
+- **Time Scales**: Properly using microseconds (Frame.time) and milliseconds (Frame.timeInMs) from interpreters package
+- **Frame Types**: Using Frame type directly from interpreters package
 
 ### UI Integration
 - Test results display in TestResultsView
@@ -38,7 +38,7 @@
 - Setup functions for exercise initialization
 - Custom interpreter options per scenario
 
-## How to Test (once interpreters are fixed)
+## How to Test
 
 1. Start dev server: `pnpm run dev`
 2. Navigate to: http://localhost:3060/dev/complex-exercise
@@ -78,4 +78,6 @@ runCode() → runTests() → Jikiscript.interpret() → TestResults
         UI components render results + visualization
 ```
 
-The system is fully integrated and ready to work once the interpreters package builds successfully.
+The system is fully integrated and working with the interpreters package. All time scales follow the PR 24 conventions:
+- Frame.time: microseconds (for scrubber precision)
+- Frame.timeInMs: milliseconds (for animation compatibility)
