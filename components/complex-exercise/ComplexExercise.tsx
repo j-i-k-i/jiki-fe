@@ -7,6 +7,7 @@ import CodeEditor from "./ui/CodeEditor";
 import FrameDescription from "./ui/FrameDescription";
 import RunButton from "./ui/RunButton";
 import Scrubber from "./ui/scrubber/Scrubber";
+import { TestModalButtons } from "./ui/TestModalButtons";
 import TestResultsView from "./ui/test-results-view/TestResultsView";
 
 export default function ComplexExercise() {
@@ -84,7 +85,10 @@ export default function ComplexExercise() {
             </div>
             {error && <div className="text-sm text-red-600">{error}</div>}
           </div>
-          <RunButton />
+          <div className="flex gap-2">
+            <RunButton />
+            <TestModalButtons />
+          </div>
         </div>
       </div>
     </OrchestratorProvider>

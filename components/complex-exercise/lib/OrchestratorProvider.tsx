@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode } from "react";
-import OrchestratorContext from "./OrchestratorContext";
+import OrchestratorContext, { useOrchestrator } from "./OrchestratorContext";
 import type Orchestrator from "./Orchestrator";
 
 interface OrchestratorProviderProps {
@@ -12,3 +12,6 @@ interface OrchestratorProviderProps {
 export default function OrchestratorProvider({ orchestrator, children }: OrchestratorProviderProps) {
   return <OrchestratorContext.Provider value={orchestrator}>{children}</OrchestratorContext.Provider>;
 }
+
+// Re-export the hook with a more descriptive name for external usage
+export const useOrchestratorContext = useOrchestrator;

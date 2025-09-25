@@ -1,7 +1,6 @@
 "use client";
 
-import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
-import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 // TestResultsButtons component is not used - we're rendering buttons inline for this test
 // import { TestResultsButtons } from "@/components/complex-exercise/ui/test-results-view/TestResultsButtons";
@@ -29,14 +28,14 @@ export default function TestButtonsTestPage() {
     // Set up the orchestrator for testing
     orchestrator.setExerciseTitle("Test Buttons E2E Test");
 
+    // Expose orchestrator to window for E2E testing
+    (window as any).testOrchestrator = orchestrator;
+
     // Run tests to generate mock test results
     void orchestrator.runCode().then(() => {
       // Mark as ready for testing
       (window as any).testsReady = true;
     });
-
-    // Expose to window for E2E test access
-    (window as any).testOrchestrator = orchestrator;
 
     return () => {
       delete (window as any).testOrchestrator;

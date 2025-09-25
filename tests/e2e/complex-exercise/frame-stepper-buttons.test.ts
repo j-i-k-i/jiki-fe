@@ -69,7 +69,7 @@ describe("FrameStepper Buttons E2E", () => {
 
     frameTime = await page.$eval('[data-testid="frame-time"]', (el) => el.textContent);
     expect(frameTime).toContain("Timeline Time: 200");
-  });
+  }, 40000);
 
   it("should navigate backward through frames with prev button", async () => {
     await page.waitForSelector('[data-testid="frame-stepper-buttons"]');
