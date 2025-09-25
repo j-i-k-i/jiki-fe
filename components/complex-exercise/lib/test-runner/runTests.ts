@@ -62,7 +62,7 @@ function runScenario(scenario: Scenario, studentCode: string): TestResult {
     status,
     expects,
     frames,
-    codeRun: "move()",
+    codeRun: studentCode,
     view: exercise.getView(),
     animationTimeline,
     time: frames[0]?.time || 0

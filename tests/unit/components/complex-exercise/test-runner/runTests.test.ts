@@ -138,5 +138,25 @@ describe("runTests", () => {
       expect(result.tests[1].status).toBe("pass");
       expect(result.status).toBe("pass");
     });
+
+    it("should set codeRun to the student code for each test", () => {
+      const mockFrames = [{ time: 100000, timeInMs: 100, status: "SUCCESS", line: 1 }];
+
+      (jikiscript.interpret as jest.Mock).mockReturnValue({
+        frames: mockFrames,
+        value: undefined,
+        status: "SUCCESS"
+      });
+
+      const code = "for (let i = 0; i < 5; i++) {\n  move();\n}";
+      const result = runTests(code);
+
+      // Each test result should have codeRun set to the student code
+      expect(result.tests[0].codeRun).toBe(code);
+      expect(result.tests[1].codeRun).toBe(code);
+
+      // Should not be hardcoded to "move()"
+      expect(result.tests[0].codeRun).not.toBe("move()");
+    });
   });
 });
