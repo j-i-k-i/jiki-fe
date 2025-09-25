@@ -11,7 +11,7 @@ export interface CodeBlank {
 interface CodeWithBlanksProps {
   codeLines: string[];
   blanks: Record<string, CodeBlank>;
-  values: Record<string, string>;
+  values: Record<string, string | undefined>;
   onChange: (id: string, value: string) => void;
   showLineNumbers?: boolean;
   disabled?: boolean;
@@ -73,7 +73,7 @@ export function CodeWithBlanks({
                      disabled:opacity-50 disabled:cursor-not-allowed
                      transition-all duration-200`}
           style={{
-            width: `${Math.max(((values[blankId] || "").length || (blank.placeholder || "").length || 3) + 2, 8)}ch`
+            width: `${Math.max((values[blankId]?.length || blank.placeholder?.length || 3) + 2, 8)}ch`
           }}
           onKeyDown={(e) => {
             if (e.key === "Tab" && !e.shiftKey) {
