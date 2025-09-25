@@ -25,7 +25,7 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
         max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
         ref={ref}
         onInput={updateInputBackground}
-        value={time ?? 0}
+        value={time}
         onChange={(event) => {
           handleChange(event, orchestrator);
           updateInputBackground();

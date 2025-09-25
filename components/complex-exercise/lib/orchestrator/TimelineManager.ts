@@ -1,14 +1,14 @@
 import type { Frame } from "interpreters";
 import { TIME_SCALE_FACTOR } from "interpreters";
 import type { StoreApi } from "zustand/vanilla";
-import type { OrchestratorState } from "../types";
+import type { OrchestratorActions, OrchestratorState } from "../types";
 
 /**
  * TimelineManager handles all timeline and frame-related operations.
  * This includes frame navigation, timeline time management, and caching.
  */
 export class TimelineManager {
-  constructor(private readonly store: StoreApi<OrchestratorState & any>) {}
+  constructor(private readonly store: StoreApi<OrchestratorState & OrchestratorActions>) {}
 
   /**
    * Static helper to find previous non-folded frame index.
@@ -190,11 +190,8 @@ export class TimelineManager {
   getNearestCurrentFrame(): Frame | null {
     const state = this.store.getState();
     const time = state.currentTestTime;
-    if (time === undefined) {
-      return null;
-    }
 
-    return TimelineManager.findNearestFrame(state.currentTest?.frames, time, state.foldedLines);
+    return TimelineManager.findNearestFrame(state.currentTest?.frames || null, time, state.foldedLines);
   }
 
   /**
@@ -247,7 +244,7 @@ export class TimelineManager {
       }
 
       // Special case: if timeline is after all frames, return the last non-folded frame
-      if (time !== undefined && frames.length > 0 && time > frames[frames.length - 1].time) {
+      if (frames.length > 0 && time > frames[frames.length - 1].time) {
         // Start from the last frame and find the last non-folded one
         for (let i = frames.length - 1; i >= 0; i--) {
           if (!state.foldedLines.includes(frames[i].line)) {
@@ -314,7 +311,7 @@ export class TimelineManager {
       return undefined;
     }
 
-    if (time === undefined || time < 0) {
+    if (time < 0) {
       // No timeline time or negative, start from beginning (before first frame)
       return -1;
     }
@@ -341,10 +338,10 @@ export class TimelineManager {
       return undefined;
     }
 
-    if (time === undefined) {
-      // No timeline time, start from end
-      return frames.length;
-    }
+    // if (time === undefined) {
+    //   // No timeline time, start from end
+    //   return frames.length;
+    // }
 
     // For negative times or times before first frame, return 0
     if (time < 0) {
