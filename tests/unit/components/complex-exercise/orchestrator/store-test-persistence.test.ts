@@ -24,11 +24,10 @@ describe("Store Test Time Persistence", () => {
   describe("setCurrentTestTime", () => {
     it("should save the current time to testCurrentTimes when updating time", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const test = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
 
       orchestrator.setCurrentTest(test);
       orchestrator.setCurrentTestTime(150000);
@@ -39,11 +38,10 @@ describe("Store Test Time Persistence", () => {
 
     it("should update the saved time when scrubbing multiple times", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const test = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
 
       orchestrator.setCurrentTest(test);
 
@@ -65,16 +63,14 @@ describe("Store Test Time Persistence", () => {
 
     it("should maintain separate times for different tests", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test1 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
-      const test2 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-2");
+      const test1 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
+      const test2 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-2"
+      );
 
       // Set time for test 1
       orchestrator.setCurrentTest(test1);
@@ -93,11 +89,10 @@ describe("Store Test Time Persistence", () => {
   describe("setCurrentTest", () => {
     it("should use the test's initial time when no saved time exists", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test = mockTestResult([
-        mockFrame(50000, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const test = mockTestResult(
+        [mockFrame(50000, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
 
       orchestrator.setCurrentTest(test);
 
@@ -108,16 +103,14 @@ describe("Store Test Time Persistence", () => {
 
     it("should restore the saved time when switching back to a test", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test1 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
-      const test2 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-2");
+      const test1 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
+      const test2 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-2"
+      );
 
       // Set test 1 and scrub to a position
       orchestrator.setCurrentTest(test1);
@@ -137,21 +130,18 @@ describe("Store Test Time Persistence", () => {
 
     it("should handle switching between multiple tests and preserve all positions", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test1 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
-      const test2 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-2");
-      const test3 = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-3");
+      const test1 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
+      const test2 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-2"
+      );
+      const test3 = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-3"
+      );
 
       // Set positions for all three tests
       orchestrator.setCurrentTest(test1);
@@ -187,11 +177,10 @@ describe("Store Test Time Persistence", () => {
 
     it("should handle setting a null test", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const test = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
 
       orchestrator.setCurrentTest(test);
       orchestrator.setCurrentTestTime(150000);
@@ -207,21 +196,19 @@ describe("Store Test Time Persistence", () => {
 
     it("should update the saved time even when switching to the same test", () => {
       const orchestrator = new Orchestrator("test-uuid", "");
-      const test = mockTestResult([
-        mockFrame(0, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const test = mockTestResult(
+        [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
 
       orchestrator.setCurrentTest(test);
       orchestrator.setCurrentTestTime(100000);
 
       // Create a new test object with same slug but different initial time
-      const sameTestNewTime = mockTestResult([
-        mockFrame(50000, { line: 1 }),
-        mockFrame(100000, { line: 2 }),
-        mockFrame(200000, { line: 3 })
-      ], "test-1");
+      const sameTestNewTime = mockTestResult(
+        [mockFrame(50000, { line: 1 }), mockFrame(100000, { line: 2 }), mockFrame(200000, { line: 3 })],
+        "test-1"
+      );
       orchestrator.setCurrentTest(sameTestNewTime);
 
       const state = orchestrator.getStore().getState();

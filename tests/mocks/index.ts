@@ -3,5 +3,8 @@
  * These provide consistent, typed mocks with sensible defaults.
  */
 
-export { mockFrame } from "./mockFrame";
 export { mockAnimationTimeline, mockAnimationTimelineWithDuration } from "./mockAnimationTimeline";
+export { mockFrame } from "./mockFrame";
+export { mockOrchestrator } from "./orchestrator";
+export { mockStore as createMockStore } from "./orchestrator-store";
+export { mockTestResult } from "./test-result";

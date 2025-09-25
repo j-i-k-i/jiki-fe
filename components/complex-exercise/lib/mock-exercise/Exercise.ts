@@ -11,15 +11,15 @@ export abstract class Exercise {
   }>;
 
   abstract getState(): Record<string, any>;
-  protected populateView() {};
+  protected populateView() {}
 
   constructor() {
-    this.view = document.createElement("div")
-    this.view.id = `exercise-${Math.random().toString(36).substr(2, 9)}`
-    this.view.style.display = 'none'
-    document.body.appendChild(this.view)
+    this.view = document.createElement("div");
+    this.view.id = `exercise-${Math.random().toString(36).substr(2, 9)}`;
+    this.view.style.display = "none";
+    document.body.appendChild(this.view);
 
-    this.populateView()
+    this.populateView();
   }
 
   getView(): HTMLElement {

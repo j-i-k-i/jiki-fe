@@ -64,7 +64,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
-        if (!state.currentTest) {
+        if (!state.currentTest || !state.currentFrame) {
           set({
             prevFrame: undefined,
             nextFrame: undefined
@@ -74,12 +74,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         const prevFrame = TimelineManager.findPrevFrame(
           state.currentTest.frames,
-          state.currentTestTime,
+          state.currentFrame,
           state.foldedLines
         );
         const nextFrame = TimelineManager.findNextFrame(
           state.currentTest.frames,
-          state.currentTestTime,
+          state.currentFrame,
           state.foldedLines
         );
 
@@ -147,7 +147,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Trigger frame calculations with the restored/initial time
         get().setCurrentTestTime(timeToUse, "nearest");
       },
-      setCurrentTestTime: (time, nearestOrExactFrame) => {
+      setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact") => {
         const state = get();
         if (!state.currentTest) {
           return;

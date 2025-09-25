@@ -75,7 +75,7 @@ describe("CodeEditor", () => {
       testCurrentTimes: {},
 
       // Current test time and frame
-      currentTestTime: undefined,
+      currentTestTime: 0,
       currentFrame: undefined
     });
   });

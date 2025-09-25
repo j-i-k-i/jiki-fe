@@ -1,7 +1,7 @@
-import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
 import { mockFrame } from "@/tests/mocks";
+import { renderHook } from "@testing-library/react";
 
 // Mock localStorage functions
 jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
@@ -133,18 +133,22 @@ describe("Orchestrator", () => {
 
       // Verify initial state
       let state = orchestrator.getStore().getState();
+      state.setCurrentTestTime(100000, "exact");
+
+      // Refresh it
+      state = orchestrator.getStore().getState();
       expect(state.currentFrame?.line).toBe(2);
 
       // Fold line 2
       orchestrator.setFoldedLines([2]);
 
-      // currentFrame should remain the same (we haven't moved the timeline)
+      // When folding the current frame's line, it moves to the next non-folded frame
       state = orchestrator.getStore().getState();
-      expect(state.currentFrame?.line).toBe(2);
+      expect(state.currentFrame?.line).toBe(3);
 
-      // But navigation frames should skip the folded line
+      // Navigation frames should skip the folded line
       expect(state.prevFrame?.line).toBe(1);
-      expect(state.nextFrame?.line).toBe(3);
+      expect(state.nextFrame?.line).toBe(4);
     });
   });
 
