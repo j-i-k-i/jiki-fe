@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import { ToasterProvider } from "@/components/toaster-config";
 import { GlobalModalProvider } from "@/lib/modal";
+import type { Metadata } from "next";
 import "../src/utils/whyDidYouRender";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`antialiased`}>
         {children}
         <GlobalModalProvider />
+        <ToasterProvider />
       </body>
     </html>
   );
