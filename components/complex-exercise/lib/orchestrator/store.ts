@@ -56,7 +56,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       testCurrentTimes: {},
 
       // Current test time - extracted from currentTest to prevent rerenders
-      currentTestTime: undefined,
+      currentTestTime: 0,
 
       // Current frame - extracted from currentTest to prevent rerenders
       currentFrame: undefined,
@@ -125,7 +125,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         if (!test) {
           set({
             currentTest: test,
-            currentTestTime: undefined,
+            currentTestTime: 0,
             currentFrame: undefined,
             highlightedLine: 0
           });
@@ -145,7 +145,32 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         });
 
         // Trigger frame calculations with the restored/initial time
-        get().setCurrentTestTime(timeToUse);
+        get().setCurrentTestTime(timeToUse, "nearest");
+      },
+      setCurrentTestTime: (time, nearestOrExactFrame) => {
+        const state = get();
+        if (!state.currentTest) {
+          return;
+        }
+
+        // Update timeline time and persist it for this test
+        set({
+          currentTestTime: time,
+          testCurrentTimes: {
+            ...state.testCurrentTimes,
+            [state.currentTest.slug]: time
+          }
+        });
+
+        // Normally we only want to update this if we land on an exact
+        // frame, but on loading a new test, we want to just get any frame so we have one.
+        const frame =
+          nearestOrExactFrame === "nearest"
+            ? TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines)
+            : state.currentTest.frames.find((f) => f.time === time);
+        if (frame) {
+          get().setCurrentFrame(frame);
+        }
       },
       setCurrentFrame: (frame) => {
         const state = get();
@@ -161,27 +186,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Recalculate both navigation and breakpoint frames after updating current frame
         get().recalculateNavigationFrames();
         get().recalculateBreakpointFrames();
-      },
-      setCurrentTestTime: (time) => {
-        const state = get();
-        if (!state.currentTest) {
-          return;
-        }
-
-        // Update timeline time and persist it for this test
-        set({
-          currentTestTime: time,
-          testCurrentTimes: {
-            ...state.testCurrentTimes,
-            [state.currentTest.slug]: time
-          }
-        });
-
-        // Check if we landed on an exact frame and update if so
-        const exactFrame = state.currentTest.frames.find((f) => f.time === time);
-        if (exactFrame) {
-          get().setCurrentFrame(exactFrame);
-        }
       },
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
@@ -369,7 +373,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           nextBreakpointFrame: undefined,
 
           // Reset current test time and frame
-          currentTestTime: undefined,
+          currentTestTime: 0,
           currentFrame: undefined
         })
     }))

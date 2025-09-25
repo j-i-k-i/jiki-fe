@@ -1,4 +1,4 @@
-import { TIME_SCALE_FACTOR } from "interpreters";
+import { type ExecutionContext } from "interpreters";
 import type { Animation } from "../AnimationTimeline";
 import { Exercise } from "./Exercise";
 
@@ -13,25 +13,22 @@ export class BasicExercise extends Exercise {
     }
   ];
 
-  move(executionCtx: any) {
+  move(executionCtx: ExecutionContext) {
     this.position += 20;
 
     // Get current time from execution context
-    const currentTime = executionCtx.getCurrentTime ? executionCtx.getCurrentTime() : 0;
 
-    console.warn(this.position)
+    console.warn(this.position);
     this.animations.push({
       targets: `#${this.view.id} .character`,
       left: this.position,
       duration: 100,
-      offset: Math.round(currentTime / TIME_SCALE_FACTOR),
+      offset: executionCtx.getCurrentTimeInMs(),
       transformations: {}
     } as Animation);
 
     // Fast forward time for the animation duration
-    if (executionCtx.fastForward) {
-      executionCtx.fastForward(100);
-    }
+    executionCtx.fastForward(100);
   }
 
   setStartPosition(position: number) {
@@ -46,7 +43,7 @@ export class BasicExercise extends Exercise {
 
   protected populateView() {
     const container = document.createElement("div");
-    this.view.appendChild(container)
+    this.view.appendChild(container);
     container.className = "exercise-container";
     container.style.cssText = `
       width: 100%;
