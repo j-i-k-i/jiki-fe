@@ -15,20 +15,26 @@ The test runner system executes student code against predefined tests, generatin
 
 ## Architecture
 
-### Test Execution Flow
+### Components
 
-1. **Test Suite Generation** (`generateAndRunTestSuite.ts`)
+1. **TestSuiteManager** (`orchestrator/TestSuiteManager.ts`)
+   - Manages test execution lifecycle
+   - Handles test suite result storage
+   - Integrates with orchestrator state
+   - Provides methods for running and clearing tests
+
+2. **Test Suite Generation** (`generateAndRunTestSuite.ts`)
    - Entry point for test execution
    - Iterates through tasks and their tests
    - Returns `TestSuiteResult` with all test results
 
-2. **Individual Test Execution** (`execTest.ts`)
+3. **Individual Test Execution** (`execTest.ts`)
    - Core test execution logic
    - Handles both JavaScript and Jikiscript languages
    - Creates exercise instances when needed
    - Returns comprehensive test results
 
-3. **Test Result Structure**
+4. **Test Result Structure**
    ```typescript
    {
      expects: Expect[]           // Assertions
@@ -148,10 +154,25 @@ The test runner provides:
   - `time`: Microseconds for scrubber precision
   - `timeInMs`: Milliseconds for animation compatibility
 - `animationTimeline`: Timeline synchronized with frames
-- Uses TIME_SCALE_FACTOR (1000) for microsecond/millisecond conversion
+- Uses TIME_SCALE_FACTOR (1000) imported from interpreters package
 
 This enables the scrubber to:
 
 - Navigate through code execution with microsecond precision
 - Sync visual animations using millisecond timings
 - Show frame information at each step
+
+## TestSuiteManager Integration
+
+The TestSuiteManager orchestrates test execution:
+
+1. **Running Tests**: Calls test runner functions and stores results
+2. **State Management**: Updates orchestrator state with test results
+3. **Result Caching**: Maintains test suite results for reuse
+4. **Clearing Tests**: Resets test state when code changes
+
+## See Also
+
+- [Interpreters Integration](./interpreters.md) - How interpreters generate frames
+- [Scrubber Frames](./scrubber-frames.md) - Frame consumption by UI
+- [Orchestrator Pattern](./orchestrator-pattern.md) - State management

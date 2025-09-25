@@ -21,7 +21,8 @@ The complex exercise system uses two different time scales for different purpose
 ### TIME_SCALE_FACTOR
 
 - **Value**: 1000
-- **Location**: Exported from `interpreters/src/shared/frames.ts`
+- **Location**: Exported from `interpreters` package (source: `../interpreters/src/shared/frames.ts`)
+- **Import**: `import { TIME_SCALE_FACTOR } from 'interpreters'`
 - **Usage**: Convert between microseconds and milliseconds
 - **Formula**: `timeInMs = time / TIME_SCALE_FACTOR`
 
@@ -29,15 +30,21 @@ The complex exercise system uses two different time scales for different purpose
 
 ### Frame Type Structure
 
+The Frame interface is exported from the interpreters package:
+
 ```typescript
+import { Frame } from "interpreters";
+
 interface Frame {
   time: number; // Microseconds (interpreter time)
   timeInMs: number; // Milliseconds (animation time)
   line: number;
-  status: FrameStatus;
+  status: FrameExecutionStatus; // "SUCCESS" | "ERROR"
   code: string;
-  generateDescription: () => string;
-  // ... other fields
+  generateDescription: () => string; // Lazy description generation
+  error?: any; // Error details if status is ERROR
+  result?: any; // Evaluation result
+  data?: Record<string, any>; // Additional interpreter data
 }
 ```
 
@@ -85,10 +92,11 @@ The factory automatically:
 
 ## Important Notes
 
-1. **Always use TIME_SCALE_FACTOR**: Never hardcode 1000 for conversions
+1. **Always import TIME_SCALE_FACTOR**: Use `import { TIME_SCALE_FACTOR } from 'interpreters'` - never hardcode 1000
 2. **Clear field naming**: `time` = microseconds, `timeInMs` = milliseconds
 3. **Scrubber precision**: The scrubber operates in microseconds to allow fine-grained control
 4. **Animation compatibility**: AnimeJS requires milliseconds, so conversion happens at the boundary
+5. **Workspace dependency**: The interpreters package is a workspace dependency in the monorepo
 
 ## Migration Guide
 
@@ -99,3 +107,9 @@ When working with time values:
 3. Use `Frame.timeInMs` for milliseconds (animations)
 4. Import and use TIME_SCALE_FACTOR for any conversions
 5. Use createTestFrame for test data to ensure consistency
+
+## See Also
+
+- [Interpreters Integration](./interpreters.md) - How interpreters package integrates
+- [Test Runner](./test-runner.md) - Frame generation during test execution
+- [Scrubber Frames](./scrubber-frames.md) - How frames are consumed by UI

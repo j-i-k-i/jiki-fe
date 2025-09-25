@@ -55,8 +55,10 @@ Following Next.js best practices, we use the "Store project files outside of app
 /app              # Only routing files (page.tsx, layout.tsx, etc.)
   /dev            # Development-only tools and utilities (blocked in production)
 /components       # Reusable React components used by pages
-/lib              # Utility functions and shared logic
+/utils            # Utility functions and shared logic
 /public           # Static assets
+/tests            # Test files organized by type (unit, integration, e2e)
+/scripts          # Build and development scripts
 /middleware.ts    # Edge middleware for route protection and filtering
 ```
 
@@ -64,6 +66,8 @@ Following Next.js best practices, we use the "Store project files outside of app
 
 - **App directory**: Contains only routing-related files - pages, layouts, loading, and error boundaries
 - **Components directory**: All UI components that pages use live here, organized by feature or type
+- **Utils directory**: Shared utility functions and helpers
+- **Tests directory**: Centralized test organization separate from source code
 - **Separation of concerns**: Business logic, components, and utilities are kept outside the app directory
 - **Clean routing**: The app directory structure directly mirrors the URL structure without clutter
 

@@ -116,14 +116,13 @@ components/complex-exercise/
 │       ├── EditorManager.ts     # CodeMirror management
 │       ├── TimelineManager.ts   # Timeline & frame logic
 │       ├── BreakpointManager.ts # Breakpoint navigation
-│       ├── store.ts             # Zustand store factory
-│       └── mocks.ts             # Test data
+│       ├── TestSuiteManager.ts  # Test execution management
+│       └── store.ts             # Zustand store factory
 └── ui/
     ├── CodeEditor.tsx           # Editor wrapper
     ├── codemirror/              # CodeMirror implementation
     │   ├── CodeMirror.tsx       # Main editor component
     │   ├── extensions/          # Custom extensions
-    │   ├── hooks/               # React hooks
     │   ├── setup/               # Configuration
     │   └── utils/               # Utilities
     └── scrubber/                # Scrubber components

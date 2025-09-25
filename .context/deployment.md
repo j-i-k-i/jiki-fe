@@ -17,18 +17,18 @@ Cloudflare Workers with Next.js Edge Runtime
 - Markdown content processed at build time
 - Static assets optimized and bundled
 - TypeScript compilation with strict mode
+- Interpreters package bundled as workspace dependency
 
 ## Environment Configuration
 
-- Production URL: TBD
-- Development: http://localhost:3060
-- Edge Runtime compatibility required
-- PPP location detection via API
+- **Production URL**: TBD (pending launch)
+- **Development**: http://localhost:3060
+- **Edge Runtime**: Cloudflare Workers compatibility
+- **Features**:
+  - Purchasing power parity (PPP) pricing based on location
+  - Full internationalization support
+  - Mobile-first responsive design
 
-## Deployment Checklist
+## Current Status
 
-- [ ] SVG support implementation
-- [ ] Font optimization setup
-- [ ] Cloudflare Workers configuration
-- [ ] GitHub Actions workflow
-- [ ] Environment variables setup
+The application is in active development with deployment infrastructure being finalized for the January 2025 launch.
