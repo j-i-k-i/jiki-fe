@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { playSound } from "@/lib/sound";
 import { QuizContent } from "./QuizContent";
 import { CodeInput } from "./CodeInput";
 import { InfoBox } from "./InfoBox";
@@ -33,6 +34,9 @@ export function CodingQuizCard({ question, onNext }: CodingQuizCardProps) {
     const correct = normalizeCode(userCode) === normalizeCode(question.correctAnswer);
     setIsCorrect(correct);
     setSubmitted(true);
+
+    // Play appropriate sound
+    playSound(correct ? "success" : "error");
   };
 
   const handleNext = () => {

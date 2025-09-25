@@ -92,3 +92,21 @@ function formatValue(value: number): string {
 - Write self-documenting code that doesn't need extensive comments
 - Add comments only for complex business logic or non-obvious decisions
 - Use JSDoc for public APIs and component props when needed
+
+## Global Utilities
+
+### Sound System
+
+The sound system provides a globally accessible `playSound` function for audio feedback:
+
+```typescript
+import { playSound } from "@/lib/sound";
+
+// Use directly in event handlers
+playSound("success");
+playSound("error");
+```
+
+- No need to initialize - singleton pattern handles setup
+- Sounds are preloaded on first import
+- See [sound.md](./sound.md) for full documentation

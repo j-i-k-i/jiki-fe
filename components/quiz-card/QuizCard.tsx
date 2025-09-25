@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { playSound } from "@/lib/sound";
 import { QuizContent } from "./QuizContent";
 import { QuizOption, type QuizOptionState } from "./QuizOption";
 import { QuizFeedback } from "./QuizFeedback";
@@ -38,6 +39,13 @@ export function QuizCard({ question, onNext }: QuizCardProps) {
     setSubmitted(true);
     const isCorrect = selectedIndex === question.correctIndex;
     setFeedbackType(isCorrect ? "correct" : "incorrect");
+
+    // Play appropriate sound
+    if (isCorrect) {
+      playSound("success");
+    } else {
+      playSound("error");
+    }
   };
 
   const handleNext = () => {

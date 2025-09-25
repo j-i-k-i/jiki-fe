@@ -1,5 +1,6 @@
 "use client";
 
+import { playSound } from "@/lib/sound";
 import { useState } from "react";
 import { CodeWithBlanks, type CodeBlank } from "./CodeWithBlanks";
 import { InfoBox } from "./InfoBox";
@@ -35,7 +36,7 @@ export function FillInQuizCard({ question, onNext }: FillInQuizCardProps) {
     const newResults: Record<string, boolean> = {};
     let correct = true;
 
-    Object.entries(question.blanks).forEach(([id, blank]) => {
+    for (const [id, blank] of Object.entries(question.blanks)) {
       const userAnswer = (values[id] || "").trim().toLowerCase();
       const correctAnswer = blank.correctAnswer.trim().toLowerCase();
       const isCorrect = userAnswer === correctAnswer;
@@ -43,11 +44,14 @@ export function FillInQuizCard({ question, onNext }: FillInQuizCardProps) {
       if (!isCorrect) {
         correct = false;
       }
-    });
+    }
 
     setResults(newResults);
     setAllCorrect(correct);
     setSubmitted(true);
+
+    // Play appropriate sound based on whether all answers are correct
+    playSound(correct ? "success" : "error");
   };
 
   const handleNext = () => {
