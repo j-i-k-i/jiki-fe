@@ -18,10 +18,11 @@
 
 ### E2E Tests
 
-- `pnpm test:e2e` - Run E2E tests in headless mode
+- `pnpm test:e2e` - Run E2E tests with shared server (fast)
 - `pnpm test:e2e:watch` - Run E2E tests in watch mode
 - `pnpm test:e2e:headful` - Run E2E tests with visible browser
 - `pnpm test:all` - Run both unit and E2E tests
+- `pnpm test:e2e -- tests/e2e/home.test.ts` - Run specific test file
 
 ### Setup
 
