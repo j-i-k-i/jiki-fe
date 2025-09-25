@@ -95,9 +95,7 @@ export function QuizCard({ question, onNext }: QuizCardProps) {
       <button
         onClick={submitted ? handleNext : handleSubmit}
         disabled={!submitted && selectedIndex === null}
-        className="w-full mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg 
-                   hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed
-                   transition-colors duration-200"
+        className="w-full mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200"
       >
         {submitted ? "Next Question" : "Submit"}
       </button>
