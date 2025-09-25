@@ -2,7 +2,7 @@ describe("BreakpointStepper Buttons E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/breakpoint-stepper-buttons");
     // Wait for the page to be ready
-    await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 2000 });
   });
 
   describe("Initial State", () => {

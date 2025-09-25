@@ -49,6 +49,32 @@ const basicExerciseTests = {
           }
         }
       ]
+    },
+    {
+      name: "Bonus challenges",
+      bonus: true,
+      scenarios: [
+        {
+          slug: "bonus-double-movement",
+          name: "Double movement",
+          description: "Move the character 10 times",
+
+          setup(exercise: BasicExercise) {
+            exercise.setStartPosition(0);
+          },
+
+          expectations(exercise: BasicExercise) {
+            return [
+              {
+                pass: exercise.position === 200,
+                actual: exercise.position,
+                expected: 200,
+                errorHtml: `Expected position to be 200 but got ${exercise.position}. Did you call move() 10 times?`
+              }
+            ];
+          }
+        }
+      ]
     }
   ]
 };

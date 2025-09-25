@@ -21,7 +21,7 @@
 describe("Code Folding E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/code-folding");
-    await page.waitForSelector('[data-testid="code-folding-container"]', { timeout: 5000 });
+    await page.waitForSelector('[data-testid="code-folding-container"]', { timeout: 2000 });
     // Wait for CodeMirror to fully initialize
     await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
   });

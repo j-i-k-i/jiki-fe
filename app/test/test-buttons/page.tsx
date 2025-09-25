@@ -3,7 +3,8 @@
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
-import { TestResultsButtons } from "@/components/complex-exercise/ui/test-results-view/TestResultsButtons";
+// TestResultsButtons component is not used - we're rendering buttons inline for this test
+// import { TestResultsButtons } from "@/components/complex-exercise/ui/test-results-view/TestResultsButtons";
 import { InspectedTestResultView } from "@/components/complex-exercise/ui/test-results-view/InspectedTestResultView";
 import { useEffect, useRef } from "react";
 
@@ -29,13 +30,17 @@ export default function TestButtonsTestPage() {
     orchestrator.setExerciseTitle("Test Buttons E2E Test");
 
     // Run tests to generate mock test results
-    void orchestrator.runCode();
+    void orchestrator.runCode().then(() => {
+      // Mark as ready for testing
+      (window as any).testsReady = true;
+    });
 
     // Expose to window for E2E test access
     (window as any).testOrchestrator = orchestrator;
 
     return () => {
       delete (window as any).testOrchestrator;
+      delete (window as any).testsReady;
     };
   }, [orchestrator]);
 
@@ -47,7 +52,65 @@ export default function TestButtonsTestPage() {
         <div style={{ marginBottom: "20px" }}>
           <h2>Test Results</h2>
           <div data-testid="test-buttons">
-            <TestResultsButtons />
+            {/* Regular tests */}
+            <div style={{ marginBottom: "10px" }}>
+              <p data-testid="regular-tests-count">
+                Regular tests: {testSuiteResult?.tests.filter((t) => !t.slug || !t.slug.includes("bonus")).length || 0}
+              </p>
+              <div data-testid="regular-test-buttons" style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {testSuiteResult?.tests
+                  .filter((t) => !t.slug || !t.slug.includes("bonus"))
+                  .map((test, idx) => (
+                    <button
+                      key={test.slug || test.name}
+                      onClick={() => orchestrator.setCurrentTest(test)}
+                      className={`test-button ${test.status} ${currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""}`}
+                      style={{
+                        padding: "8px 12px",
+                        border: `1px solid ${test.status === "pass" ? "#10b981" : "#ef4444"}`,
+                        borderRadius: "6px",
+                        backgroundColor: currentTest === test ? "#3b82f6" : "#fff",
+                        color: currentTest === test ? "#fff" : test.status === "pass" ? "#10b981" : "#ef4444",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "500"
+                      }}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            {/* Bonus tests */}
+            <div>
+              <p data-testid="bonus-tests-count">
+                Bonus tests: {testSuiteResult?.tests.filter((t) => t.slug && t.slug.includes("bonus")).length || 0}
+              </p>
+              <div data-testid="bonus-test-buttons" style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {testSuiteResult?.tests
+                  .filter((t) => t.slug && t.slug.includes("bonus"))
+                  .map((test) => (
+                    <button
+                      key={test.slug || test.name}
+                      onClick={() => orchestrator.setCurrentTest(test)}
+                      className={`test-button ${test.status} ${currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""}`}
+                      style={{
+                        padding: "8px 12px",
+                        border: `1px solid ${test.status === "pass" ? "#10b981" : "#ef4444"}`,
+                        borderRadius: "6px",
+                        backgroundColor: currentTest === test ? "#3b82f6" : "#fff",
+                        color: currentTest === test ? "#fff" : test.status === "pass" ? "#10b981" : "#ef4444",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        fontWeight: "500"
+                      }}
+                    >
+                      ★
+                    </button>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
 
