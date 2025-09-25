@@ -7,13 +7,13 @@ import BreakpointStepperButtons from "./BreakpointStepperButtons";
 
 export default function Scrubber() {
   const orchestrator = useOrchestrator();
-  const { currentTest, hasCodeBeenEdited, isSpotlightActive } = useOrchestratorStore(orchestrator);
+  const { currentTest, currentTestTime, hasCodeBeenEdited, isSpotlightActive } = useOrchestratorStore(orchestrator);
   const rangeRef = useRef<HTMLInputElement>(null);
 
   // Default values when no test is available
   const frames = currentTest?.frames ?? [];
   const animationTimeline = currentTest?.animationTimeline ?? null;
-  const time = currentTest?.time ?? 0;
+  const time = currentTestTime;
   const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
   return (

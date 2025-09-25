@@ -1,12 +1,12 @@
-import { createTimeline } from "animejs";
 import {
-  type Timeline,
+  createTimeline,
   type AnimationParams,
   type DefaultsParams,
   type TargetsParam,
+  type Timeline,
   type TimelinePosition
 } from "animejs";
-import type { Frame } from "interpreters";
+import { TIME_SCALE_FACTOR, type Frame } from "interpreters";
 
 export type Animation =
   | (AnimationParams & { targets?: TargetsParam })
@@ -108,7 +108,7 @@ export class AnimationTimeline {
 
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const lastFrameTime = lastFrame ? lastFrame.time : 0;
+    const lastFrameTime = lastFrame ? lastFrame.timeInMs : 0;
     this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrameTime);
     return this;
   }
@@ -118,7 +118,8 @@ export class AnimationTimeline {
   }
 
   public get duration() {
-    return this.animationTimeline.duration;
+    // Translate this back to microseconds
+    return this.animationTimeline.duration * TIME_SCALE_FACTOR;
   }
 
   public get currentTime() {

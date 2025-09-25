@@ -28,6 +28,7 @@ const basicExerciseTests = {
             ];
           }
         },
+
         {
           slug: "start-at-50",
           name: "Starting from position 50",

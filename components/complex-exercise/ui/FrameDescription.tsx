@@ -5,13 +5,10 @@ import { TIME_SCALE_FACTOR } from "interpreters";
 
 export default function FrameDescription() {
   const orchestrator = useOrchestrator();
-  const { currentTest } = useOrchestratorStore(orchestrator);
-
-  // Get currentFrame directly from the store
-  const currentFrame = currentTest?.currentFrame;
+  const { currentTest, currentTestTime, currentFrame } = useOrchestratorStore(orchestrator);
 
   // Subscribe to time for display
-  const time = currentTest?.time || 0;
+  const time = currentTestTime || 0;
 
   if (!currentTest || !currentFrame) {
     return (

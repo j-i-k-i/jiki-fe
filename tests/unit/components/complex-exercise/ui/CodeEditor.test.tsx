@@ -72,7 +72,11 @@ describe("CodeEditor", () => {
       nextBreakpointFrame: undefined,
 
       // Test time persistence
-      testCurrentTimes: {}
+      testCurrentTimes: {},
+
+      // Current test time and frame
+      currentTestTime: 0,
+      currentFrame: undefined
     });
   });
 

@@ -41,9 +41,7 @@ function setupOrchestrator(frames: Frame[], breakpoints: number[] = [], foldedLi
           duration: 5,
           currentTime: 0
         }
-      } as any,
-      time: 0,
-      currentFrame: frames[0]
+      } as any
     },
     breakpoints,
     foldedLines
@@ -75,8 +73,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToPrevBreakpoint();
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200);
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTestTime).toBe(200);
+      expect(state.currentFrame?.line).toBe(3);
     });
 
     it("should navigate to next breakpoint", () => {
@@ -97,8 +95,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToNextBreakpoint();
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200);
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTestTime).toBe(200);
+      expect(state.currentFrame?.line).toBe(3);
     });
 
     it("should not navigate when no breakpoint exists", () => {
@@ -113,8 +111,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToNextBreakpoint();
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200); // Should stay at same position
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTestTime).toBe(200); // Should stay at same position
+      expect(state.currentFrame?.line).toBe(3);
     });
 
     it("should skip folded lines when navigating", () => {
@@ -136,8 +134,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToNextBreakpoint();
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(300);
-      expect(state.currentTest?.currentFrame?.line).toBe(4);
+      expect(state.currentTestTime).toBe(300);
+      expect(state.currentFrame?.line).toBe(4);
     });
   });
 
@@ -243,15 +241,15 @@ describe("Breakpoint Navigation Integration", () => {
       fireEvent.click(nextButton);
 
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(400);
-      expect(state.currentTest?.currentFrame?.line).toBe(5);
+      expect(state.currentTestTime).toBe(400);
+      expect(state.currentFrame?.line).toBe(5);
 
       // Click prev to go back to line 3
       fireEvent.click(prevButton);
 
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200);
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTestTime).toBe(200);
+      expect(state.currentFrame?.line).toBe(3);
     });
 
     it("should update button states when orchestrator state changes", async () => {
@@ -311,8 +309,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToNextBreakpoint();
 
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(100);
-      expect(state.currentTest?.currentFrame?.line).toBe(2);
+      expect(state.currentTestTime).toBe(100);
+      expect(state.currentFrame?.line).toBe(2);
 
       // Move to second frame on line 2
       orchestrator.setCurrentTestTime(150);
@@ -321,8 +319,8 @@ describe("Breakpoint Navigation Integration", () => {
       orchestrator.goToNextBreakpoint();
 
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200);
-      expect(state.currentTest?.currentFrame?.line).toBe(3);
+      expect(state.currentTestTime).toBe(200);
+      expect(state.currentFrame?.line).toBe(3);
     });
 
     it("should handle all breakpoints being folded", () => {
@@ -341,10 +339,10 @@ describe("Breakpoint Navigation Integration", () => {
 
       // Try to navigate - should stay in place
       orchestrator.goToPrevBreakpoint();
-      expect(orchestrator.getStore().getState().currentTest?.time).toBe(300);
+      expect(orchestrator.getStore().getState().currentTestTime).toBe(300);
 
       orchestrator.goToNextBreakpoint();
-      expect(orchestrator.getStore().getState().currentTest?.time).toBe(300);
+      expect(orchestrator.getStore().getState().currentTestTime).toBe(300);
     });
   });
 });

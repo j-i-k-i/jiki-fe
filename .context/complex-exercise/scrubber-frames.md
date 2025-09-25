@@ -20,11 +20,12 @@ The scrubber is a timeline control that allows students to navigate through the 
 Frames are generated during code execution by the custom interpreter:
 
 - **Generation**: One frame per expression parsed
-- **Timing**: Each frame increments time by 1 (represents 1ms of execution)
+- **Timing**: Each frame increments by 1 microsecond (unless fastForward() is used to skip time)
 - **Content**: Each frame contains:
   - Status (success or error)
   - Execution details
-  - Time value for synchronization
+  - Time value for synchronization (in microseconds)
+  - Line number for code highlighting
 
 #### Frame Granularity
 
@@ -45,9 +46,10 @@ if(1+1 == 2)  // Generates 3 frames:
 
 ### Time Synchronization
 
-- **Frame Time**: Increments by 1 per expression (conceptually 1ms)
+- **Frame Time**: Uses microseconds internally (increments by 1 per frame normally)
 - **Timeline Time**: anime.js timeline uses milliseconds
-- **Conversion**: 1 frame time = 1ms timeline time (1:1 ratio)
+- **Conversion**: TIME_SCALE_FACTOR = 1000 (microseconds to milliseconds)
+- **Fast Forward**: Exercises can use fastForward() to jump ahead in time for animations
 - **Context**: When interpreted functions are called, they receive the current frame time to schedule animations
 
 ## Scrubber Functionality

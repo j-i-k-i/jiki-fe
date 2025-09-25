@@ -5,10 +5,8 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Scrubber from "@/components/complex-exercise/ui/scrubber/Scrubber";
-import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import type { Frame } from "interpreters";
-import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
-import type { TestResult } from "@/components/complex-exercise/lib/test-results-types";
+import { mockFrame, mockTestResult, mockOrchestrator, createMockStore } from "@/tests/mocks";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
@@ -29,60 +27,10 @@ function createMockFrames(count: number): Frame[] {
   );
 }
 
-// Helper to create a TestResult object
-function createTestResult(
-  frames: Frame[],
-  time: number,
-  currentFrame: Frame | undefined,
-  animationTimeline?: ReturnType<typeof mockAnimationTimeline>
-): TestResult {
-  return {
-    slug: "test-1",
-    name: "Test 1",
-    status: "pass" as const,
-    expects: [],
-    view: document.createElement("div"),
-    frames,
-    animationTimeline: animationTimeline || mockAnimationTimeline({ duration: 5 }),
-    time,
-    currentFrame
-  };
-}
-
-// Helper to create mock orchestrator
-function createMockOrchestrator(): Orchestrator {
-  return {
-    exerciseUuid: "test-uuid",
-    setCode: jest.fn(),
-    setCurrentTestTime: jest.fn(),
-    setCurrentTest: jest.fn(),
-    setHasCodeBeenEdited: jest.fn(),
-    setIsSpotlightActive: jest.fn(),
-    getNearestCurrentFrame: jest.fn().mockReturnValue(null),
-    runCode: jest.fn(),
-    getStore: jest.fn()
-  } as unknown as Orchestrator;
-}
-
-// Helper to create mock store state
-function createMockStoreState(overrides?: Partial<ReturnType<typeof useOrchestratorStore>>) {
-  return {
-    currentTest: null,
-    hasCodeBeenEdited: false,
-    isSpotlightActive: false,
-    exerciseUuid: "test-uuid",
-    code: "",
-    output: "",
-    status: "idle" as const,
-    error: null,
-    foldedLines: [],
-    breakpoints: [],
-    prevFrame: undefined,
-    nextFrame: undefined,
-    prevBreakpointFrame: undefined,
-    nextBreakpointFrame: undefined,
-    ...overrides
-  };
+// Helper to create mock store state (using our centralized mock but extracting just the state)
+function createMockStoreState(overrides?: any) {
+  const store = createMockStore(overrides);
+  return store.getState();
 }
 
 describe("Scrubber Component", () => {
@@ -92,11 +40,11 @@ describe("Scrubber Component", () => {
 
   describe("container rendering", () => {
     it("should render the scrubber container with data-testid", () => {
-      const mockOrchestrator = createMockOrchestrator();
+      const orchestrator = mockOrchestrator();
       (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -107,17 +55,18 @@ describe("Scrubber Component", () => {
     });
 
     it("should render all child components", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(createMockFrames(3), 100, createMockFrames(3)[1], mockTimeline)
+          currentTest: mockTestResult(createMockFrames(3)),
+          currentTestTime: 100,
+          currentFrame: createMockFrames(3)[1]
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -133,11 +82,11 @@ describe("Scrubber Component", () => {
 
   describe("when currentTest is null", () => {
     it("should pass default values to child components", () => {
-      const mockOrchestrator = createMockOrchestrator();
+      const orchestrator = mockOrchestrator();
       (useOrchestratorStore as jest.Mock).mockReturnValue(createMockStoreState());
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -150,19 +99,20 @@ describe("Scrubber Component", () => {
 
   describe("enabled/disabled state logic", () => {
     it("should be disabled when hasCodeBeenEdited is true", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: true
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -177,19 +127,20 @@ describe("Scrubber Component", () => {
     });
 
     it("should be disabled when isSpotlightActive is true", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           isSpotlightActive: true
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -199,18 +150,19 @@ describe("Scrubber Component", () => {
     });
 
     it("should be disabled when less than 2 frames", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       const frames = createMockFrames(1);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline)
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0]
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -220,20 +172,21 @@ describe("Scrubber Component", () => {
     });
 
     it("should be enabled when all conditions are met", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       const frames = createMockFrames(2);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: false,
           isSpotlightActive: false
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -245,18 +198,19 @@ describe("Scrubber Component", () => {
 
   describe("focus on container click", () => {
     it("should focus the range input when container is clicked", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 5 });
+      const orchestrator = mockOrchestrator();
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline)
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0]
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -275,18 +229,19 @@ describe("Scrubber Component", () => {
 
   describe("prop passing to child components", () => {
     it("should pass correct props to ScrubberInput", () => {
-      const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = mockAnimationTimeline({ duration: 300 }); // 300ms duration to accommodate time: 150
+      const orchestrator = mockOrchestrator();
       const frames = createMockFrames(3);
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 150, frames[2], mockTimeline)
+          currentTest: mockTestResult(frames),
+          currentTestTime: 150,
+          currentFrame: frames[2]
         })
       );
 
       render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -297,17 +252,18 @@ describe("Scrubber Component", () => {
     });
 
     it("should pass correct props to FrameStepperButtons", () => {
-      const mockTimeline = mockAnimationTimeline({ duration: 400 }); // 400ms duration
       const frames = createMockFrames(4); // Creates frames at time: 0, 100000, 200000, 300000 microseconds
 
       // Create mock orchestrator with methods that can be updated
-      const mockOrchestrator = createMockOrchestrator();
+      const orchestrator = mockOrchestrator();
 
       // Test navigation at first frame (position 0)
       // At first frame: no previous, has next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: mockTestResult(frames),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: undefined,
@@ -316,7 +272,7 @@ describe("Scrubber Component", () => {
       );
 
       const { rerender } = render(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -328,7 +284,9 @@ describe("Scrubber Component", () => {
       // In middle: has both previous and next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 150000, frames[1], mockTimeline), // 150ms in microseconds
+          currentTest: mockTestResult(frames),
+          currentTestTime: 150000,
+          currentFrame: frames[1], // 150ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: frames[0],
@@ -337,7 +295,7 @@ describe("Scrubber Component", () => {
       );
 
       rerender(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );
@@ -349,7 +307,9 @@ describe("Scrubber Component", () => {
       // At last frame: has previous, no next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 300000, frames[3], mockTimeline), // 300ms in microseconds
+          currentTest: mockTestResult(frames),
+          currentTestTime: 300000,
+          currentFrame: frames[3], // 300ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: frames[2],
@@ -358,7 +318,7 @@ describe("Scrubber Component", () => {
       );
 
       rerender(
-        <OrchestratorTestProvider orchestrator={mockOrchestrator}>
+        <OrchestratorTestProvider orchestrator={orchestrator}>
           <Scrubber />
         </OrchestratorTestProvider>
       );

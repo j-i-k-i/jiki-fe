@@ -331,6 +331,30 @@ const element = array[0]!; // Assert element exists
 const result = object.method!(); // Assert method exists
 ```
 
+### Centralized Mock Utilities
+
+The project provides centralized mock utilities in `tests/mocks/`:
+
+- **`mockFrame()`** - Creates mock Frame objects with consistent defaults
+- **`mockTestResult()`** - Creates mock TestResult with frames and animation timeline
+- **`mockOrchestrator()`** - Creates mock Orchestrator instances for testing
+- **`mockStore()`** - Creates mock Zustand stores with overrides pattern
+- **`mockAnimationTimeline()`** - Creates mock anime.js timeline objects
+
+Use these utilities to maintain consistency across tests:
+
+```typescript
+import { mockFrame, mockTestResult, mockStore } from "@/tests/mocks";
+
+const frames = [mockFrame(0), mockFrame(100000), mockFrame(200000)];
+const testResult = mockTestResult(frames);
+const store = mockStore({
+  currentTestTime: 150000,
+  currentTest: testResult,
+  foldedLines: [2, 3]
+});
+```
+
 ### Best Practices
 
 1. **Test user behavior, not implementation details**

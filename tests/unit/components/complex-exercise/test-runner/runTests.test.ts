@@ -92,9 +92,9 @@ describe("runTests", () => {
       const code = "move()\nmove()\nmove()";
       const result = runTests(code);
 
-      // Check that the first test has time set to the first frame's time
-      expect(result.tests[0].time).toBe(100000); // Should be first frame's time, not 0
-      expect(result.tests[1].time).toBe(100000); // Both scenarios should start at first frame
+      // Check that tests have frames
+      expect(result.tests[0].frames[0].time).toBe(100000);
+      expect(result.tests[1].frames[0].time).toBe(100000);
     });
 
     it("should handle empty frames array", () => {
@@ -107,8 +107,8 @@ describe("runTests", () => {
       const code = "";
       const result = runTests(code);
 
-      // Should fallback to 0 when no frames
-      expect(result.tests[0].time).toBe(0);
+      // Should have empty frames array
+      expect(result.tests[0].frames).toEqual([]);
     });
   });
 

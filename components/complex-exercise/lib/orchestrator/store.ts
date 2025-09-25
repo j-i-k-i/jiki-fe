@@ -55,10 +55,16 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Test time persistence - maps test slugs to their current time positions
       testCurrentTimes: {},
 
+      // Current test time - extracted from currentTest to prevent rerenders
+      currentTestTime: 0,
+
+      // Current frame - extracted from currentTest to prevent rerenders
+      currentFrame: undefined,
+
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
-        if (!state.currentTest) {
+        if (!state.currentTest || !state.currentFrame) {
           set({
             prevFrame: undefined,
             nextFrame: undefined
@@ -68,12 +74,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         const prevFrame = TimelineManager.findPrevFrame(
           state.currentTest.frames,
-          state.currentTest.time,
+          state.currentFrame,
           state.foldedLines
         );
         const nextFrame = TimelineManager.findNextFrame(
           state.currentTest.frames,
-          state.currentTest.time,
+          state.currentFrame,
           state.foldedLines
         );
 
@@ -93,13 +99,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }
 
         const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-          state.currentTest.currentFrame,
+          state.currentFrame,
           state.currentTest.frames,
           state.breakpoints,
           state.foldedLines
         );
         const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-          state.currentTest.currentFrame,
+          state.currentFrame,
           state.currentTest.frames,
           state.breakpoints,
           state.foldedLines
@@ -119,6 +125,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         if (!test) {
           set({
             currentTest: test,
+            currentTestTime: 0,
+            currentFrame: undefined,
             highlightedLine: 0
           });
           return;
@@ -127,22 +135,42 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         const state = get();
         // Check if we have a saved time for this test
         const savedTime = state.testCurrentTimes[test.slug];
-        const timeToUse = savedTime !== undefined ? savedTime : test.time;
-
-        // Create test with the appropriate time
-        const testWithTime = {
-          ...test,
-          time: timeToUse
-        };
+        const timeToUse = savedTime !== undefined ? savedTime : (test.frames.at(0)?.time ?? 0);
 
         set({
-          currentTest: testWithTime,
-          // Update highlighted line when setting a new test
-          highlightedLine: testWithTime.currentFrame?.line ?? 0
+          currentTest: test,
+          currentTestTime: timeToUse,
+          currentFrame: undefined,
+          highlightedLine: 0
         });
 
         // Trigger frame calculations with the restored/initial time
-        get().setCurrentTestTime(timeToUse);
+        get().setCurrentTestTime(timeToUse, "nearest");
+      },
+      setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact") => {
+        const state = get();
+        if (!state.currentTest) {
+          return;
+        }
+
+        // Update timeline time and persist it for this test
+        set({
+          currentTestTime: time,
+          testCurrentTimes: {
+            ...state.testCurrentTimes,
+            [state.currentTest.slug]: time
+          }
+        });
+
+        // Normally we only want to update this if we land on an exact
+        // frame, but on loading a new test, we want to just get any frame so we have one.
+        const frame =
+          nearestOrExactFrame === "nearest"
+            ? TimelineManager.findNearestFrame(state.currentTest.frames, time, state.foldedLines)
+            : state.currentTest.frames.find((f) => f.time === time);
+        if (frame) {
+          get().setCurrentFrame(frame);
+        }
       },
       setCurrentFrame: (frame) => {
         const state = get();
@@ -151,40 +179,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            currentFrame: frame
-          },
+          currentFrame: frame,
           highlightedLine: frame.line
         });
 
         // Recalculate both navigation and breakpoint frames after updating current frame
         get().recalculateNavigationFrames();
         get().recalculateBreakpointFrames();
-      },
-      setCurrentTestTime: (time) => {
-        const state = get();
-        if (!state.currentTest) {
-          return;
-        }
-
-        // Update timeline time and persist it for this test
-        set({
-          currentTest: {
-            ...state.currentTest,
-            time: time
-          },
-          testCurrentTimes: {
-            ...state.testCurrentTimes,
-            [state.currentTest.slug]: time
-          }
-        });
-
-        // Check if we landed on an exact frame and update if so
-        const exactFrame = state.currentTest.frames.find((f) => f.time === time);
-        if (exactFrame) {
-          get().setCurrentFrame(exactFrame);
-        }
       },
       setHasCodeBeenEdited: (value) => set({ hasCodeBeenEdited: value }),
       setIsSpotlightActive: (value) => set({ isSpotlightActive: value }),
@@ -369,7 +370,11 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,
-          nextBreakpointFrame: undefined
+          nextBreakpointFrame: undefined,
+
+          // Reset current test time and frame
+          currentTestTime: 0,
+          currentFrame: undefined
         })
     }))
   );
@@ -420,7 +425,13 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       nextBreakpointFrame: state.nextBreakpointFrame,
 
       // Test time persistence
-      testCurrentTimes: state.testCurrentTimes
+      testCurrentTimes: state.testCurrentTimes,
+
+      // Current test time
+      currentTestTime: state.currentTestTime,
+
+      // Current frame
+      currentFrame: state.currentFrame
     }))
   );
 }
