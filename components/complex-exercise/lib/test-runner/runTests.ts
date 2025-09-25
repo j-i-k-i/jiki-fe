@@ -1,6 +1,4 @@
 import { jikiscript } from "interpreters";
-// Frame type imported for use in type assertions
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
 import { BasicExercise } from "../mock-exercise/BasicExercise";
 import basicTests from "../mock-exercise/BasicExercise.test";

@@ -30,12 +30,7 @@ function createMockFrames(count: number): Frame[] {
 }
 
 // Helper to create a TestResult object
-function createTestResult(
-  frames: Frame[],
-  time: number,
-  currentFrame: Frame | undefined,
-  animationTimeline?: ReturnType<typeof mockAnimationTimeline>
-): TestResult {
+function createTestResult(frames: Frame[], animationTimeline?: ReturnType<typeof mockAnimationTimeline>): TestResult {
   return {
     slug: "test-1",
     name: "Test 1",
@@ -43,9 +38,7 @@ function createTestResult(
     expects: [],
     view: document.createElement("div"),
     frames,
-    animationTimeline: animationTimeline || mockAnimationTimeline({ duration: 5 }),
-    time,
-    currentFrame
+    animationTimeline: animationTimeline || mockAnimationTimeline({ duration: 5 })
   };
 }
 
@@ -81,6 +74,8 @@ function createMockStoreState(overrides?: Partial<ReturnType<typeof useOrchestra
     nextFrame: undefined,
     prevBreakpointFrame: undefined,
     nextBreakpointFrame: undefined,
+    currentTestTime: undefined,
+    currentFrame: undefined,
     ...overrides
   };
 }
@@ -112,7 +107,9 @@ describe("Scrubber Component", () => {
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(createMockFrames(3), 100, createMockFrames(3)[1], mockTimeline)
+          currentTest: createTestResult(createMockFrames(3), mockTimeline),
+          currentTestTime: 100,
+          currentFrame: createMockFrames(3)[1]
         })
       );
 
@@ -156,7 +153,9 @@ describe("Scrubber Component", () => {
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: true
         })
       );
@@ -183,7 +182,9 @@ describe("Scrubber Component", () => {
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           isSpotlightActive: true
         })
       );
@@ -226,7 +227,9 @@ describe("Scrubber Component", () => {
       const frames = createMockFrames(2);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: false,
           isSpotlightActive: false
         })
@@ -281,7 +284,9 @@ describe("Scrubber Component", () => {
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 150, frames[2], mockTimeline)
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 150,
+          currentFrame: frames[2]
         })
       );
 
@@ -307,7 +312,9 @@ describe("Scrubber Component", () => {
       // At first frame: no previous, has next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 0,
+          currentFrame: frames[0],
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: undefined,
@@ -328,7 +335,9 @@ describe("Scrubber Component", () => {
       // In middle: has both previous and next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 150000, frames[1], mockTimeline), // 150ms in microseconds
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 150000,
+          currentFrame: frames[1], // 150ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: frames[0],
@@ -349,7 +358,9 @@ describe("Scrubber Component", () => {
       // At last frame: has previous, no next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestResult(frames, 300000, frames[3], mockTimeline), // 300ms in microseconds
+          currentTest: createTestResult(frames, mockTimeline),
+          currentTestTime: 300000,
+          currentFrame: frames[3], // 300ms in microseconds
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           prevFrame: frames[2],

@@ -90,25 +90,23 @@ describe("Orchestrator", () => {
         expects: [],
         view: document.createElement("div"),
         frames: testFrames,
-        animationTimeline: null as any,
-        time: 0,
-        currentFrame: testFrames[0]
+        animationTimeline: null as any
       });
 
       const state = orchestrator.getStore().getState();
 
       // Initial frame should be the first one
-      expect(state.currentTest?.currentFrame?.line).toBe(1);
+      expect(state.currentFrame?.line).toBe(1);
 
       // Change timeline time to between frames (should NOT update currentFrame)
       orchestrator.setCurrentTestTime(150000);
       let updatedState = orchestrator.getStore().getState();
-      expect(updatedState.currentTest?.currentFrame?.line).toBe(1); // Should stay at 1
+      expect(updatedState.currentFrame?.line).toBe(1); // Should stay at 1
 
       // Change timeline time to exact frame position (should update currentFrame)
       orchestrator.setCurrentTestTime(200000);
       updatedState = orchestrator.getStore().getState();
-      expect(updatedState.currentTest?.currentFrame?.line).toBe(3); // Should update to line 3
+      expect(updatedState.currentFrame?.line).toBe(3); // Should update to line 3
     });
 
     it("should recalculate navigation frames when setFoldedLines is called", () => {
@@ -130,21 +128,19 @@ describe("Orchestrator", () => {
         expects: [],
         view: document.createElement("div"),
         frames: testFrames,
-        animationTimeline: null as any,
-        time: 100000,
-        currentFrame: testFrames[1]
+        animationTimeline: null as any
       });
 
       // Verify initial state
       let state = orchestrator.getStore().getState();
-      expect(state.currentTest?.currentFrame?.line).toBe(2);
+      expect(state.currentFrame?.line).toBe(2);
 
       // Fold line 2
       orchestrator.setFoldedLines([2]);
 
       // currentFrame should remain the same (we haven't moved the timeline)
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.currentFrame?.line).toBe(2);
+      expect(state.currentFrame?.line).toBe(2);
 
       // But navigation frames should skip the folded line
       expect(state.prevFrame?.line).toBe(1);

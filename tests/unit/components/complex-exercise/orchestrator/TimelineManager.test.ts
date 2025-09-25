@@ -7,7 +7,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
 
 // Helper to create a test state
-function createTestResult(frames: Frame[], time: number = 0, currentFrame: Frame | null = null): TestResult {
+function createTestResult(frames: Frame[]): TestResult {
   return {
     slug: "test-1",
     name: "Test 1",
@@ -15,9 +15,7 @@ function createTestResult(frames: Frame[], time: number = 0, currentFrame: Frame
     expects: [],
     view: document.createElement("div"),
     frames,
-    animationTimeline: mockAnimationTimeline({ duration: 5 }),
-    time,
-    currentFrame: currentFrame || frames[0] || null
+    animationTimeline: mockAnimationTimeline({ duration: 5 })
   };
 }
 
@@ -151,7 +149,7 @@ describe("TimelineManager", () => {
         manager.setTime(200000);
 
         const state = store.getState() as any;
-        expect(state.currentTest?.time).toBe(200000);
+        expect(state.currentTestTime).toBe(200000);
         expect(mockSeek).toHaveBeenCalledWith(200); // 200000 / 1000 for microseconds to milliseconds
       });
 

@@ -9,7 +9,7 @@ jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
 }));
 
 // Helper to create a test state
-function createTestResult(slug: string, time: number = 0, frames?: ReturnType<typeof mockFrame>[]): TestResult {
+function createTestResult(slug: string, frames?: ReturnType<typeof mockFrame>[]): TestResult {
   const defaultFrames = frames || [
     mockFrame(0, { line: 1 }),
     mockFrame(100000, { line: 2 }),
@@ -23,9 +23,7 @@ function createTestResult(slug: string, time: number = 0, frames?: ReturnType<ty
     expects: [],
     view: document.createElement("div"),
     frames: defaultFrames,
-    animationTimeline: null as any,
-    time,
-    currentFrame: defaultFrames[0]
+    animationTimeline: null as any
   };
 }
 
@@ -104,7 +102,7 @@ describe("Store Test Time Persistence", () => {
       orchestrator.setCurrentTest(test);
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(50000);
+      expect(state.currentTestTime).toBe(50000);
       expect(state.testCurrentTimes["test-1"]).toBe(50000);
     });
 
@@ -125,7 +123,7 @@ describe("Store Test Time Persistence", () => {
       orchestrator.setCurrentTest(test1);
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(150000); // Restored position
+      expect(state.currentTestTime).toBe(150000); // Restored position
       expect(state.currentTest?.slug).toBe("test-1");
     });
 
@@ -154,17 +152,17 @@ describe("Store Test Time Persistence", () => {
       // Switch back to test 2 and verify restoration
       orchestrator.setCurrentTest(test2);
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(200000);
+      expect(state.currentTestTime).toBe(200000);
 
       // Switch to test 1 and verify restoration
       orchestrator.setCurrentTest(test1);
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(100000);
+      expect(state.currentTestTime).toBe(100000);
 
       // Switch to test 3 and verify restoration
       orchestrator.setCurrentTest(test3);
       state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(300000);
+      expect(state.currentTestTime).toBe(300000);
     });
 
     it("should handle setting a null test", () => {
@@ -196,7 +194,7 @@ describe("Store Test Time Persistence", () => {
 
       const state = orchestrator.getStore().getState();
       // Should use the saved time, not the new test's initial time
-      expect(state.currentTest?.time).toBe(100000);
+      expect(state.currentTestTime).toBe(100000);
     });
   });
 
@@ -218,8 +216,8 @@ describe("Store Test Time Persistence", () => {
       orchestrator.setCurrentTest(test1);
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(100000);
-      expect(state.currentTest?.currentFrame?.line).toBe(2);
+      expect(state.currentTestTime).toBe(100000);
+      expect(state.currentFrame?.line).toBe(2);
     });
 
     it("should handle restoring a time between frames", () => {
@@ -235,9 +233,9 @@ describe("Store Test Time Persistence", () => {
       orchestrator.setCurrentTest(test);
 
       const state = orchestrator.getStore().getState();
-      expect(state.currentTest?.time).toBe(150000);
+      expect(state.currentTestTime).toBe(150000);
       // currentFrame should still be the last frame we passed
-      expect(state.currentTest?.currentFrame?.line).toBe(1);
+      expect(state.currentFrame?.line).toBe(1);
     });
   });
 });

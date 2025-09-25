@@ -1,8 +1,10 @@
 import {
-  animate,
-  createTimeline, type AnimationParams,
+  createTimeline,
+  type AnimationParams,
   type DefaultsParams,
-  type TargetsParam, type Timeline, type TimelinePosition
+  type TargetsParam,
+  type Timeline,
+  type TimelinePosition
 } from "animejs";
 import { TIME_SCALE_FACTOR, type Frame } from "interpreters";
 
@@ -84,8 +86,6 @@ export class AnimationTimeline {
       // about spreading Partial<AnimationParams> which could theoretically contain non-object types.
       // At runtime, spread would work fine, but TypeScript's type checker is overly cautious here.
       const params = Object.assign({}, rest, transformations || {}) as AnimationParams;
-console.log(targets, params, offset)
-console.log(this._uniqueId)
       this.animationTimeline.add(targets as TargetsParam, params, offset as TimelinePosition);
     });
 
@@ -109,13 +109,7 @@ console.log(this._uniqueId)
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const lastFrameTime = lastFrame ? lastFrame.timeInMs : 0;
-    console.warn(this.frames.map(f => [f.time, f.timeInMs]))
-    console.warn("Animations: ", animationDurationAfterAnimations, lastFrameTime)
     this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrameTime);
-
-    globalThis.animationTimeline = this.animationTimeline
-    globalThis.animate = animate
-    console.warn(this.animationTimeline)
     return this;
   }
 
