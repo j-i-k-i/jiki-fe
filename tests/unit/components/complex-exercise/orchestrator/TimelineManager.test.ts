@@ -4,8 +4,8 @@ import { createMockStore, mockFrame, mockTestResult } from "@/tests/mocks";
 
 describe("TimelineManager", () => {
   describe("static findNearestFrame", () => {
-    it("should return null when frames is undefined", () => {
-      const result = TimelineManager.findNearestFrame(undefined, 0, []);
+    it("should return null when frames is null", () => {
+      const result = TimelineManager.findNearestFrame(null, 0, []);
       expect(result).toBeNull();
     });
 

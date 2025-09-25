@@ -145,10 +145,10 @@ describe("AnimationTimeline", () => {
 
     it("should adjust duration to include last frame", () => {
       mockTimeline.duration = 50;
-      animationTimeline.populateTimeline([], false);
+      animationTimeline.populateTimeline(mockFrames, false);
 
       // Should set duration to the last frame's time (90000 microseconds = 90ms)
-      expect(mockTimeline.duration).toBe(90000);
+      expect(mockTimeline.duration).toBe(90);
     });
 
     it("should handle empty frames array", () => {
@@ -389,7 +389,7 @@ describe("AnimationTimeline", () => {
 
     it("should return duration", () => {
       mockTimeline.duration = 250;
-      expect(animationTimeline.duration).toBe(250);
+      expect(animationTimeline.duration).toBe(250000); // it scales into microseconds
     });
 
     it("should return paused state", () => {
