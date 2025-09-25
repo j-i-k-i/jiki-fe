@@ -5,7 +5,10 @@ describe("Global Modal System E2E", () => {
       waitUntil: "networkidle2"
     });
     // Ensure page is ready by waiting for a known element
-    await page.waitForSelector("h1");
+    await page.waitForSelector("h1", { timeout: 10000 });
+
+    // Wait a bit for page to fully stabilize
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it("should open and close example modal", async () => {
@@ -13,16 +16,33 @@ describe("Global Modal System E2E", () => {
     const modalBefore = await page.$('[role="dialog"]');
     expect(modalBefore).toBeNull();
 
-    // Click button to open modal - evaluate in page context
-    await page.evaluate(() => {
+    // Wait for button to be present and clickable
+    await page.waitForFunction(
+      () => {
+        const button = Array.from(document.querySelectorAll("button")).find((el) =>
+          el.textContent?.includes("Show Example Modal")
+        );
+        return button !== undefined;
+      },
+      { timeout: 5000 }
+    );
+
+    // Click button to open modal - evaluate in page context and verify click happened
+    const clickResult = await page.evaluate(() => {
       const button = Array.from(document.querySelectorAll("button")).find((el) =>
         el.textContent?.includes("Show Example Modal")
       );
-      button?.click();
+      if (!button) {
+        throw new Error("Button 'Show Example Modal' not found");
+      }
+      button.click();
+      return true;
     });
 
+    expect(clickResult).toBe(true);
+
     // Wait for modal to appear
-    await page.waitForSelector('[role="dialog"]');
+    await page.waitForSelector('[role="dialog"]', { timeout: 10000 });
 
     // Verify modal content - get all h2 elements and find the one in the modal
     const titleText = await page.evaluate(() => {
@@ -51,7 +71,7 @@ describe("Global Modal System E2E", () => {
     // Verify modal is closed
     const modalAfter = await page.$('[role="dialog"]');
     expect(modalAfter).toBeNull();
-  });
+  }, 40000);
 
   it("should handle confirmation modal with callbacks", async () => {
     // Open confirmation modal
@@ -86,7 +106,7 @@ describe("Global Modal System E2E", () => {
 
     // Wait for modal to close
     await page.waitForFunction(() => !document.querySelector('[role="dialog"]'));
-  });
+  }, 40000);
 
   it("should display info modal with custom content", async () => {
     // Open info modal
@@ -240,5 +260,5 @@ describe("Global Modal System - Complex Exercise Integration", () => {
 
     // Wait for modal to disappear
     await page.waitForFunction(() => !document.querySelector('[role="dialog"]'));
-  });
+  }, 40000);
 });

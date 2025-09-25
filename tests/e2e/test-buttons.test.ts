@@ -9,7 +9,6 @@ describe("Test Buttons E2E", () => {
 
     // Wait for the buttons to appear
     await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 5000 });
-
   });
 
   describe("Regular Test Buttons", () => {
