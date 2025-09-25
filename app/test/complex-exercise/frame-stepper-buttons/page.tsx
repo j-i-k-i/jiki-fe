@@ -1,4 +1,5 @@
 "use client";
+import { mockFrame } from "@/tests/mocks";
 
 import React, { useEffect, useState } from "react";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
@@ -7,16 +8,16 @@ import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/Frame
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
 import { FrameInfo } from "../ui-utils/FrameInfo";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
 
 // Create test frames similar to mockFrames
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
-    { interpreterTime: 1, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
-    { interpreterTime: 2, timelineTime: 200, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
-    { interpreterTime: 3, timelineTime: 300, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
-    { interpreterTime: 4, timelineTime: 400, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame
+    mockFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    mockFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    mockFrame(200000, { line: 3, generateDescription: () => "Frame 3" }), // 200ms
+    mockFrame(300000, { line: 4, generateDescription: () => "Frame 4" }), // 300ms
+    mockFrame(400000, { line: 5, generateDescription: () => "Frame 5" }) // 400ms
   ];
 }
 
@@ -27,7 +28,7 @@ export default function FrameStepperButtonsTestPage() {
     const orch = new Orchestrator("test-exercise", "// Test code for frame stepping");
 
     // Create test frames and set up the test state
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Initialize the orchestrator's test state with frames
     // Calculate initial prev/next frames
@@ -36,12 +37,17 @@ export default function FrameStepperButtonsTestPage() {
 
     orch.getStore().setState({
       currentTest: {
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
         frames,
         animationTimeline: {
           duration: 5,
           paused: true,
           seek: (_time: number) => {
-            // Don't call setCurrentTestTimelineTime here to avoid circular dependency
+            // Don't call setCurrentTestTime here to avoid circular dependency
             // The orchestrator will handle the timeline updates
           },
           play: () => {},
@@ -57,13 +63,12 @@ export default function FrameStepperButtonsTestPage() {
             currentTime: 0
           }
         } as any,
-        timelineTime: 0,
-        currentFrame: frames[0],
-        prevFrame: initialPrevFrame,
-        nextFrame: initialNextFrame,
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined
-      }
+        time: 0,
+        currentFrame: frames[0]
+      },
+      // Frame navigation state at top level
+      prevFrame: initialPrevFrame,
+      nextFrame: initialNextFrame
     });
 
     setOrchestrator(orch);

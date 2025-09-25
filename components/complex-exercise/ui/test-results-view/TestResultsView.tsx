@@ -7,7 +7,7 @@ import { TestResultsButtons as OrchestratorTestResultsButtons } from "./TestResu
 
 export default function TestResultsView() {
   const orchestrator = useOrchestrator();
-  const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
+  const { testSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   if (!testSuiteResult) {
     return (
@@ -18,7 +18,6 @@ export default function TestResultsView() {
   }
 
   const hasTests = testSuiteResult.tests.length > 0;
-  const hasBonusTests = bonusTestSuiteResult && bonusTestSuiteResult.tests.length > 0;
   const allTestsPassed = testSuiteResult.tests.every((test) => test.status === "pass");
 
   return (
@@ -43,14 +42,13 @@ export default function TestResultsView() {
               </span>
             </div>
             <div className="flex items-center gap-2 mb-3">
-              <OrchestratorTestResultsButtons isBonus={false} />
-              {hasBonusTests && <OrchestratorTestResultsButtons isBonus={true} />}
+              <OrchestratorTestResultsButtons />
             </div>
           </div>
         )}
 
         {/* Test result details */}
-        {inspectedTestResult && (
+        {currentTest && (
           <div className="border-t border-gray-200 pt-4">
             <InspectedTestResultView />
           </div>

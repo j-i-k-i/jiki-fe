@@ -6,10 +6,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Scrubber from "@/components/complex-exercise/ui/scrubber/Scrubber";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame, AnimationTimeline } from "@/components/complex-exercise/lib/stubs";
-import type { TestState } from "@/components/complex-exercise/lib/types";
+import type { Frame } from "interpreters";
+import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
+import type { TestResult } from "@/components/complex-exercise/lib/test-results-types";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
-import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 
 // Mock the orchestrator store hook
@@ -20,55 +20,32 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
-  return Array.from({ length: count }, (_, i) => ({
-    interpreterTime: i * 0.01,
-    timelineTime: i,
-    line: i + 1,
-    status: "SUCCESS" as const,
-    description: `Frame ${i}`
-  }));
+  return Array.from({ length: count }, (_, i) =>
+    mockFrame(i * 100000, {
+      // Each frame is 100ms apart
+      line: i + 1,
+      generateDescription: () => `Frame ${i}`
+    })
+  );
 }
 
-// Helper to create mock animation timeline
-function createMockAnimationTimeline(duration: number = 5): AnimationTimeline {
-  return {
-    duration,
-    paused: true,
-    seek: jest.fn(),
-    play: jest.fn(),
-    pause: jest.fn(),
-    progress: 0,
-    currentTime: 0,
-    completed: false,
-    hasPlayedOrScrubbed: false,
-    seekEndOfTimeline: jest.fn(),
-    onUpdate: jest.fn(),
-    timeline: {
-      duration,
-      currentTime: 0
-    }
-  };
-}
-
-// Helper to create a TestState object
-function createTestState(
+// Helper to create a TestResult object
+function createTestResult(
   frames: Frame[],
-  timelineTime: number,
-  currentFrame: Frame | null,
-  animationTimeline?: AnimationTimeline
-): TestState {
-  const prevFrame = TimelineManager.findPrevFrame(frames, timelineTime, []);
-  const nextFrame = TimelineManager.findNextFrame(frames, timelineTime, []);
-
+  time: number,
+  currentFrame: Frame | undefined,
+  animationTimeline?: ReturnType<typeof mockAnimationTimeline>
+): TestResult {
   return {
+    slug: "test-1",
+    name: "Test 1",
+    status: "pass" as const,
+    expects: [],
+    view: document.createElement("div"),
     frames,
-    animationTimeline: animationTimeline || createMockAnimationTimeline(),
-    timelineTime,
-    currentFrame,
-    prevFrame,
-    nextFrame,
-    prevBreakpointFrame: undefined,
-    nextBreakpointFrame: undefined
+    animationTimeline: animationTimeline || mockAnimationTimeline({ duration: 5 }),
+    time,
+    currentFrame
   };
 }
 
@@ -77,7 +54,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setCurrentTestTimelineTime: jest.fn(),
+    setCurrentTestTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -100,6 +77,10 @@ function createMockStoreState(overrides?: Partial<ReturnType<typeof useOrchestra
     error: null,
     foldedLines: [],
     breakpoints: [],
+    prevFrame: undefined,
+    nextFrame: undefined,
+    prevBreakpointFrame: undefined,
+    nextBreakpointFrame: undefined,
     ...overrides
   };
 }
@@ -127,11 +108,11 @@ describe("Scrubber Component", () => {
 
     it("should render all child components", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(createMockFrames(3), 100, createMockFrames(3)[1], mockTimeline)
+          currentTest: createTestResult(createMockFrames(3), 100, createMockFrames(3)[1], mockTimeline)
         })
       );
 
@@ -163,19 +144,19 @@ describe("Scrubber Component", () => {
 
       const input = screen.getByRole("slider") as HTMLInputElement;
       expect(input).toBeDisabled();
-      expect(input.value).toBe("0"); // Default timelineTime
+      expect(input.value).toBe("0"); // Default time
     });
   });
 
   describe("enabled/disabled state logic", () => {
     it("should be disabled when hasCodeBeenEdited is true", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
           hasCodeBeenEdited: true
         })
       );
@@ -197,12 +178,12 @@ describe("Scrubber Component", () => {
 
     it("should be disabled when isSpotlightActive is true", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
           isSpotlightActive: true
         })
       );
@@ -219,12 +200,12 @@ describe("Scrubber Component", () => {
 
     it("should be disabled when less than 2 frames", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       const frames = createMockFrames(1);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline)
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline)
         })
       );
 
@@ -240,12 +221,12 @@ describe("Scrubber Component", () => {
 
     it("should be enabled when all conditions are met", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       const frames = createMockFrames(2);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
           hasCodeBeenEdited: false,
           isSpotlightActive: false
         })
@@ -265,12 +246,12 @@ describe("Scrubber Component", () => {
   describe("focus on container click", () => {
     it("should focus the range input when container is clicked", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 5 });
 
       const frames = createMockFrames(3);
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline)
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline)
         })
       );
 
@@ -295,12 +276,12 @@ describe("Scrubber Component", () => {
   describe("prop passing to child components", () => {
     it("should pass correct props to ScrubberInput", () => {
       const mockOrchestrator = createMockOrchestrator();
-      const mockTimeline = createMockAnimationTimeline(5);
+      const mockTimeline = mockAnimationTimeline({ duration: 300 }); // 300ms duration to accommodate time: 150
       const frames = createMockFrames(3);
 
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 150, frames[2], mockTimeline)
+          currentTest: createTestResult(frames, 150, frames[2], mockTimeline)
         })
       );
 
@@ -316,8 +297,8 @@ describe("Scrubber Component", () => {
     });
 
     it("should pass correct props to FrameStepperButtons", () => {
-      const mockTimeline = createMockAnimationTimeline(5);
-      const frames = createMockFrames(4); // Creates frames at timelineTime: 0, 1, 2, 3
+      const mockTimeline = mockAnimationTimeline({ duration: 400 }); // 400ms duration
+      const frames = createMockFrames(4); // Creates frames at time: 0, 100000, 200000, 300000 microseconds
 
       // Create mock orchestrator with methods that can be updated
       const mockOrchestrator = createMockOrchestrator();
@@ -326,9 +307,11 @@ describe("Scrubber Component", () => {
       // At first frame: no previous, has next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 0, frames[0], mockTimeline),
+          currentTest: createTestResult(frames, 0, frames[0], mockTimeline),
           hasCodeBeenEdited: false,
-          isSpotlightActive: false
+          isSpotlightActive: false,
+          prevFrame: undefined,
+          nextFrame: frames[1]
         })
       );
 
@@ -345,9 +328,11 @@ describe("Scrubber Component", () => {
       // In middle: has both previous and next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 1.5, frames[2], mockTimeline),
+          currentTest: createTestResult(frames, 150000, frames[1], mockTimeline), // 150ms in microseconds
           hasCodeBeenEdited: false,
-          isSpotlightActive: false
+          isSpotlightActive: false,
+          prevFrame: frames[0],
+          nextFrame: frames[2]
         })
       );
 
@@ -364,9 +349,11 @@ describe("Scrubber Component", () => {
       // At last frame: has previous, no next
       (useOrchestratorStore as jest.Mock).mockReturnValue(
         createMockStoreState({
-          currentTest: createTestState(frames, 3, frames[3], mockTimeline),
+          currentTest: createTestResult(frames, 300000, frames[3], mockTimeline), // 300ms in microseconds
           hasCodeBeenEdited: false,
-          isSpotlightActive: false
+          isSpotlightActive: false,
+          prevFrame: frames[2],
+          nextFrame: undefined
         })
       );
 

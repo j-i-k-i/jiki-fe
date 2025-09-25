@@ -3,9 +3,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/FrameStepperButtons";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -14,13 +15,13 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
-  return Array.from({ length: count }, (_, i) => ({
-    interpreterTime: i * 0.01,
-    timelineTime: i * 100,
-    line: i + 1,
-    status: "SUCCESS" as const,
-    description: `Frame ${i}`
-  }));
+  return Array.from({ length: count }, (_, i) =>
+    mockFrame(i * 100000, {
+      // Each frame is 100ms apart
+      line: i + 1,
+      generateDescription: () => `Frame ${i}`
+    })
+  );
 }
 
 // Helper to create mock orchestrator
@@ -28,7 +29,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setCurrentTestTimelineTime: jest.fn(),
+    setCurrentTestTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -41,12 +42,14 @@ function createMockOrchestrator(): Orchestrator {
 // Helper to setup store mock
 function setupStoreMock(
   currentFrame: Frame | null = null,
-  timelineTime: number = 0,
+  time: number = 0,
   prevFrame: Frame | undefined = undefined,
   nextFrame: Frame | undefined = undefined
 ) {
   (useOrchestratorStore as jest.Mock).mockReturnValue({
-    currentTest: currentFrame ? { currentFrame, timelineTime, prevFrame, nextFrame } : null
+    currentTest: currentFrame ? { currentFrame, time } : null,
+    prevFrame,
+    nextFrame
   });
 }
 
@@ -154,9 +157,9 @@ describe("FrameStepperButtons Component", () => {
       const prevButton = screen.getByLabelText("Previous frame");
       fireEvent.click(prevButton);
 
-      // Should navigate to the previous frame's timeline time
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(200);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledTimes(1);
+      // Should navigate to the previous frame's time (in microseconds)
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(200000);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledTimes(1);
     });
 
     it("should not navigate when no previous frame exists", () => {
@@ -175,8 +178,8 @@ describe("FrameStepperButtons Component", () => {
       // Button should be disabled, but let's test the handler logic
       fireEvent.click(prevButton);
 
-      // Should not call setCurrentTestTimelineTime
-      expect(mockOrchestrator.setCurrentTestTimelineTime).not.toHaveBeenCalled();
+      // Should not call setCurrentTestTime
+      expect(mockOrchestrator.setCurrentTestTime).not.toHaveBeenCalled();
     });
   });
 
@@ -244,9 +247,9 @@ describe("FrameStepperButtons Component", () => {
       const nextButton = screen.getByLabelText("Next frame");
       fireEvent.click(nextButton);
 
-      // Should navigate to the next frame's timeline time
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(300);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledTimes(1);
+      // Should navigate to the next frame's time (in microseconds)
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(300000);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledTimes(1);
     });
 
     it("should not navigate when no next frame exists", () => {
@@ -265,8 +268,8 @@ describe("FrameStepperButtons Component", () => {
       // Button should be disabled, but let's test the handler logic
       fireEvent.click(nextButton);
 
-      // Should not call setCurrentTestTimelineTime
-      expect(mockOrchestrator.setCurrentTestTimelineTime).not.toHaveBeenCalled();
+      // Should not call setCurrentTestTime
+      expect(mockOrchestrator.setCurrentTestTime).not.toHaveBeenCalled();
     });
   });
 
@@ -346,13 +349,13 @@ describe("FrameStepperButtons Component", () => {
 
       // Navigate to next frame
       fireEvent.click(nextButton);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(300);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(300000);
 
       jest.clearAllMocks();
 
       // Navigate to previous frame
       fireEvent.click(prevButton);
-      expect(mockOrchestrator.setCurrentTestTimelineTime).toHaveBeenCalledWith(100);
+      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(100000);
     });
   });
 });

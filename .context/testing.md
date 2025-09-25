@@ -44,10 +44,22 @@ The project uses two testing approaches:
 ### E2E Test Configuration
 
 - **Jest Config**: `jest.e2e.config.mjs` - Separate Jest configuration for E2E tests
-- **Puppeteer Config**: `jest-puppeteer.config.js` - Browser launch and server settings
+- **Puppeteer Config**: `jest-puppeteer.config.js` - Browser launch settings
+- **Test Runner**: `scripts/run-e2e-tests.js` - Manages shared dev server for all tests
 - Test environment: `jest-environment-puppeteer`
-- Automatically starts dev server on port 3060
+- Shared dev server on port 3070 for all tests (started once, shared across test files)
 - Headless mode by default (set `HEADLESS=false` for debugging)
+
+#### E2E Performance Optimization
+
+E2E tests use a custom runner script that:
+
+1. Starts a single Next.js dev server on port 3070 before tests
+2. Runs all test files against this shared server
+3. Automatically cleans up the server and port after tests complete
+4. Handles interrupts gracefully with proper cleanup
+
+This shared-server approach dramatically improves test speed by eliminating per-test-file server startup overhead (from ~20s per test file to ~2-5s).
 
 ### TypeScript Support
 
@@ -76,9 +88,12 @@ pnpm test:watch  # Run unit tests in watch mode
 ### E2E Tests
 
 ```bash
-pnpm test:e2e          # Run E2E tests in headless mode
+pnpm test:e2e          # Run E2E tests with shared server (fast)
 pnpm test:e2e:watch    # Run E2E tests in watch mode
 pnpm test:e2e:headful  # Run E2E tests with visible browser (debugging)
+
+# Run specific test files
+pnpm test:e2e -- tests/e2e/home.test.ts
 ```
 
 ### All Tests
@@ -183,7 +198,7 @@ export default function TestPage() {
     const frames = createTestFrames();
     const testState = {
       frames,
-      timelineTime: 0,
+      time: 0,
       currentFrame: frames[0],
       // ... other test state
     };
@@ -229,7 +244,7 @@ describe("Feature E2E", () => {
     await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       orchestrator.setBreakpoints([1, 3, 5]);
-      orchestrator.setCurrentTestTimelineTime(300);
+      orchestrator.setCurrentTestTime(300);
     });
 
     // Verify UI updates

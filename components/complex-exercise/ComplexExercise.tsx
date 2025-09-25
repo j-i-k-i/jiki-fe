@@ -13,10 +13,7 @@ import TestResultsView from "./ui/test-results-view/TestResultsView";
 export default function ComplexExercise() {
   // Use ref to ensure single orchestrator instance
   const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator(
-      "example-exercise-001",
-      `// Custom initial code\nfunction greet(name) {\n  return "Hello, " + name + "!";\n}\n\nconsole.log(greet("World"));`
-    )
+    new Orchestrator("example-exercise-001", `move()\nmove()\nmove()\nmove()\nmove()`)
   );
   const orchestrator = orchestratorRef.current;
 
@@ -28,7 +25,7 @@ export default function ComplexExercise() {
   }, [orchestrator]);
 
   // Call the hook directly with the orchestrator
-  const { output, status, error, currentTest, inspectedTestResult } = useOrchestratorStore(orchestrator);
+  const { output, status, error, currentTest } = useOrchestratorStore(orchestrator);
 
   return (
     <OrchestratorProvider orchestrator={orchestrator}>
@@ -50,8 +47,8 @@ export default function ComplexExercise() {
               <TestResultsView />
             </div>
 
-            {/* Single scrubber that updates based on inspected test result */}
-            {currentTest && inspectedTestResult?.frames && inspectedTestResult.frames.length > 1 && (
+            {/* Single scrubber that updates based on current test */}
+            {currentTest?.frames && currentTest.frames.length > 1 && (
               <div className="border-t border-gray-200 px-4 py-2">
                 <div className="flex items-center gap-4">
                   <div className="text-sm font-medium text-gray-700">Timeline:</div>

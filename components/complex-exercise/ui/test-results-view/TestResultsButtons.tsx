@@ -4,59 +4,50 @@ import { useCallback } from "react";
 import { assembleClassNames } from "../../../../utils/assemble-classnames";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { NewTestResult } from "../../lib/test-results-types";
+import type { TestResult } from "../../lib/test-results-types";
 
 const TRANSITION_DELAY = 0.1;
 
-interface TestResultsButtonsProps {
-  isBonus?: boolean;
-}
-
-export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps) {
+export function TestResultsButtons() {
   const orchestrator = useOrchestrator();
-  const { testSuiteResult, bonusTestSuiteResult, inspectedTestResult } = useOrchestratorStore(orchestrator);
-
-  const testResults = isBonus ? bonusTestSuiteResult : testSuiteResult;
+  const { testSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   const handleTestResultSelection = useCallback(
-    (test: NewTestResult) => {
-      if (!testResults) {
+    (test: TestResult) => {
+      if (!testSuiteResult) {
         return;
       }
 
-      // Set the inspected test result using the orchestrator
-      orchestrator.setInspectedTestResult(test);
+      // Pass TestResult directly
+      orchestrator.setCurrentTest(test);
 
       // Set information widget data for single frame tests
       if (test.frames.length === 1) {
         const frame = test.frames[0];
         orchestrator.setInformationWidgetData({
-          html: frame.description || "",
+          html: frame.generateDescription() || "",
           line: frame.line,
           status: frame.status
         });
       }
     },
-    [orchestrator, testResults]
+    [orchestrator, testSuiteResult]
   );
 
-  if (isBonus && !testResults) {
-    return null;
-  }
-  if (!testResults) {
+  if (!testSuiteResult) {
     return null;
   }
 
   return (
     <div
-      className={isBonus ? "test-selector-buttons bonus" : "test-selector-buttons"}
+      className="test-selector-buttons"
       style={{
         display: "flex",
         gap: "8px",
         flexWrap: "wrap"
       }}
     >
-      {testResults.tests.map((test, idx) => (
+      {testSuiteResult.tests.map((test, idx) => (
         <button
           key={(test.slug || test.name) + idx}
           onClick={() => handleTestResultSelection(test)}
@@ -74,7 +65,7 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
           className={assembleClassNames(
             "test-button",
             test.status,
-            inspectedTestResult?.slug === test.slug || inspectedTestResult?.name === test.name ? "selected" : ""
+            currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""
           )}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "#f3f4f6";
@@ -83,7 +74,7 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
             e.currentTarget.style.backgroundColor = "#fff";
           }}
         >
-          {isBonus ? "★" : idx + 1}
+          {idx + 1}
         </button>
       ))}
 

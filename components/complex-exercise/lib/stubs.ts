@@ -1,32 +1,5 @@
 // Type stubs for useScrubber and related components
 
-export interface AnimationTimeline {
-  pause: () => void;
-  play: () => void;
-  paused: boolean;
-  duration: number;
-  progress: number;
-  currentTime: number;
-  completed: boolean;
-  hasPlayedOrScrubbed?: boolean;
-  seek: (time: number) => void;
-  seekEndOfTimeline: () => void;
-  onUpdate: (callback: (anime: AnimationTimeline) => void) => void;
-  timeline: {
-    duration: number;
-    currentTime: number;
-  };
-}
-
-export interface Frame {
-  line: number;
-  interpreterTime: number;
-  timelineTime: number;
-  status: "SUCCESS" | "ERROR";
-  description?: string;
-  error?: StaticError;
-}
-
 export interface StaticError {
   message: string;
   line?: number;

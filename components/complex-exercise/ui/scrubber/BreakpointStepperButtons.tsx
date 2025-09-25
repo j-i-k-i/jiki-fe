@@ -1,7 +1,7 @@
 import React from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { Frame } from "../../lib/stubs";
+import type { Frame } from "interpreters";
 
 interface BreakpointStepperButtonsProps {
   enabled: boolean;
@@ -9,16 +9,12 @@ interface BreakpointStepperButtonsProps {
 
 export default function BreakpointStepperButtons({ enabled }: BreakpointStepperButtonsProps) {
   const orchestrator = useOrchestrator();
-  const { currentTest, breakpoints } = useOrchestratorStore(orchestrator);
+  const { currentTest, breakpoints, prevBreakpointFrame, nextBreakpointFrame } = useOrchestratorStore(orchestrator);
 
   // Don't render if no breakpoints or no current test
   if (!currentTest || breakpoints.length === 0) {
     return null;
   }
-
-  // Get prev/next breakpoint frames directly from the store
-  const prevBreakpointFrame = currentTest.prevBreakpointFrame;
-  const nextBreakpointFrame = currentTest.nextBreakpointFrame;
 
   return (
     <div data-testid="breakpoint-stepper-buttons" className="breakpoint-stepper-buttons flex gap-1">

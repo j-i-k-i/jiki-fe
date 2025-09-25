@@ -1,5 +1,5 @@
 import type { StoreApi } from "zustand/vanilla";
-import type { Frame } from "../stubs";
+import type { Frame } from "interpreters";
 import type { OrchestratorStore } from "../types";
 
 /**
@@ -34,7 +34,7 @@ export class BreakpointManager {
 
     // Find all frames before current frame that match a visible breakpoint
     const candidateFrames = frames.filter((frame) => {
-      return frame.timelineTime < currentFrame.timelineTime && visibleBreakpoints.includes(frame.line);
+      return frame.time < currentFrame.time && visibleBreakpoints.includes(frame.line);
     });
 
     if (candidateFrames.length === 0) {
@@ -71,7 +71,7 @@ export class BreakpointManager {
 
     // Find the first frame after current that matches a visible breakpoint
     for (const frame of frames) {
-      if (frame.timelineTime > currentFrame.timelineTime && visibleBreakpoints.includes(frame.line)) {
+      if (frame.time > currentFrame.time && visibleBreakpoints.includes(frame.line)) {
         return frame;
       }
     }
@@ -84,8 +84,8 @@ export class BreakpointManager {
    */
   goToPrevBreakpoint(): void {
     const state = this.store.getState();
-    if (state.currentTest?.prevBreakpointFrame) {
-      state.setCurrentTestTimelineTime(state.currentTest.prevBreakpointFrame.timelineTime);
+    if (state.prevBreakpointFrame) {
+      state.setCurrentTestTime(state.prevBreakpointFrame.time);
     }
   }
 
@@ -94,8 +94,8 @@ export class BreakpointManager {
    */
   goToNextBreakpoint(): void {
     const state = this.store.getState();
-    if (state.currentTest?.nextBreakpointFrame) {
-      state.setCurrentTestTimelineTime(state.currentTest.nextBreakpointFrame.timelineTime);
+    if (state.nextBreakpointFrame) {
+      state.setCurrentTestTime(state.nextBreakpointFrame.time);
     }
   }
 }

@@ -1,22 +1,23 @@
 "use client";
+import { mockFrame } from "@/tests/mocks";
 
 import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
 
 // Create frames for testing
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
-    { interpreterTime: 0.01, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
-    { interpreterTime: 0.02, timelineTime: 200, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
-    { interpreterTime: 0.03, timelineTime: 300, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
-    { interpreterTime: 0.04, timelineTime: 400, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame,
-    { interpreterTime: 0.05, timelineTime: 500, line: 6, status: "SUCCESS", description: "Frame 6" } as Frame,
-    { interpreterTime: 0.06, timelineTime: 600, line: 7, status: "SUCCESS", description: "Frame 7" } as Frame,
-    { interpreterTime: 0.07, timelineTime: 700, line: 8, status: "SUCCESS", description: "Frame 8" } as Frame
+    mockFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    mockFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    mockFrame(200000, { line: 3, generateDescription: () => "Frame 3" }), // 200ms
+    mockFrame(300000, { line: 4, generateDescription: () => "Frame 4" }), // 300ms
+    mockFrame(400000, { line: 5, generateDescription: () => "Frame 5" }), // 400ms
+    mockFrame(500000, { line: 6, generateDescription: () => "Frame 6" }), // 500ms
+    mockFrame(600000, { line: 7, generateDescription: () => "Frame 7" }), // 600ms
+    mockFrame(700000, { line: 8, generateDescription: () => "Frame 8" }) // 700ms
   ];
 }
 
@@ -34,10 +35,15 @@ export default function BreakpointStepperButtonsTestPage() {
   const { currentTest, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state similar to what would come from the test runner
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 8,
@@ -56,18 +62,14 @@ export default function BreakpointStepperButtonsTestPage() {
           currentTime: 0
         }
       } as any,
-      timelineTime: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: undefined,
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      time: 0,
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state
     orchestrator.setCurrentTest(testState);
     orchestrator.setBreakpoints([2, 4, 6]);
-    orchestrator.setCurrentTestTimelineTime(0);
+    orchestrator.setCurrentTestTime(0);
 
     // Expose orchestrator to window for E2E testing
     (window as any).testOrchestrator = orchestrator;
@@ -106,7 +108,7 @@ export default function BreakpointStepperButtonsTestPage() {
   };
 
   const currentFrame = currentTest?.currentFrame;
-  const timelineTime = currentTest?.timelineTime || 0;
+  const time = currentTest?.time || 0;
 
   if (!currentFrame) {
     return <div>Loading...</div>;
@@ -123,9 +125,9 @@ export default function BreakpointStepperButtonsTestPage() {
 
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Current State</h2>
-          <div data-testid="current-frame">Frame: {currentFrame.description}</div>
+          <div data-testid="current-frame">Frame: {currentFrame.generateDescription()}</div>
           <div data-testid="frame-line">Line: {currentFrame.line}</div>
-          <div data-testid="frame-time">Timeline Time: {timelineTime}</div>
+          <div data-testid="frame-time">Timeline Time: {time}</div>
         </div>
 
         <div className="mb-4 p-4 border rounded">
@@ -194,11 +196,11 @@ export default function BreakpointStepperButtonsTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Manual Navigation</h2>
           <div className="space-x-2">
-            {createTestFrames().map((frame, idx) => (
+            {mockFrames().map((frame, idx) => (
               <button
                 key={idx}
                 data-testid={`goto-frame-${idx + 1}`}
-                onClick={() => orchestrator.setCurrentTestTimelineTime(frame.timelineTime)}
+                onClick={() => orchestrator.setCurrentTestTime(frame.time)}
                 className={`px-2 py-1 border rounded ${
                   currentFrame.line === frame.line ? "bg-green-500 text-white" : "bg-gray-200"
                 }`}
@@ -212,10 +214,10 @@ export default function BreakpointStepperButtonsTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Debug Info</h2>
           <div data-testid="prev-breakpoint">
-            Prev Breakpoint: {orchestrator.getStore().getState().currentTest?.prevBreakpointFrame?.line ?? "None"}
+            Prev Breakpoint: {orchestrator.getStore().getState().prevBreakpointFrame?.line ?? "None"}
           </div>
           <div data-testid="next-breakpoint">
-            Next Breakpoint: {orchestrator.getStore().getState().currentTest?.nextBreakpointFrame?.line ?? "None"}
+            Next Breakpoint: {orchestrator.getStore().getState().nextBreakpointFrame?.line ?? "None"}
           </div>
         </div>
       </div>

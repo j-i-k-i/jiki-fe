@@ -1,7 +1,7 @@
 import React from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { Frame } from "../../lib/stubs";
+import type { Frame } from "interpreters";
 
 interface FrameStepperButtonsProps {
   enabled: boolean;
@@ -9,11 +9,7 @@ interface FrameStepperButtonsProps {
 
 export default function FrameStepperButtons({ enabled }: FrameStepperButtonsProps) {
   const orchestrator = useOrchestrator();
-  const { currentTest } = useOrchestratorStore(orchestrator);
-
-  // Get prev/next frames directly from the store
-  const prevFrame = currentTest?.prevFrame;
-  const nextFrame = currentTest?.nextFrame;
+  const { prevFrame, nextFrame } = useOrchestratorStore(orchestrator);
 
   return (
     <div data-testid="frame-stepper-buttons" className="frame-stepper-buttons flex gap-1">
@@ -43,12 +39,12 @@ export default function FrameStepperButtons({ enabled }: FrameStepperButtonsProp
 
 function handleGoToPreviousFrame(orchestrator: ReturnType<typeof useOrchestrator>, prevFrame: Frame | undefined) {
   if (prevFrame) {
-    orchestrator.setCurrentTestTimelineTime(prevFrame.timelineTime);
+    orchestrator.setCurrentTestTime(prevFrame.time);
   }
 }
 
 function handleGoToNextFrame(orchestrator: ReturnType<typeof useOrchestrator>, nextFrame: Frame | undefined) {
   if (nextFrame) {
-    orchestrator.setCurrentTestTimelineTime(nextFrame.timelineTime);
+    orchestrator.setCurrentTestTime(nextFrame.time);
   }
 }

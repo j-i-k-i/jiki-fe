@@ -3,9 +3,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -13,14 +14,11 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 }));
 
 // Helper to create mock frames
-function createMockFrame(line: number, timelineTime: number): Frame {
-  return {
-    interpreterTime: timelineTime / 10000,
-    timelineTime,
+function createMockFrame(line: number, time: number): Frame {
+  return mockFrame(time, {
     line,
-    status: "SUCCESS" as const,
-    description: `Frame at line ${line}`
-  };
+    generateDescription: () => `Frame at line ${line}`
+  });
 }
 
 // Helper to create mock orchestrator
@@ -28,7 +26,7 @@ function createMockOrchestrator(): Orchestrator {
   return {
     exerciseUuid: "test-uuid",
     setCode: jest.fn(),
-    setCurrentTestTimelineTime: jest.fn(),
+    setCurrentTestTime: jest.fn(),
     setCurrentTest: jest.fn(),
     setHasCodeBeenEdited: jest.fn(),
     setIsSpotlightActive: jest.fn(),
@@ -55,12 +53,12 @@ function setupStoreMock({
   (useOrchestratorStore as jest.Mock).mockReturnValue({
     currentTest: currentFrame
       ? {
-          currentFrame,
-          prevBreakpointFrame,
-          nextBreakpointFrame
+          currentFrame
         }
       : null,
-    breakpoints
+    breakpoints,
+    prevBreakpointFrame,
+    nextBreakpointFrame
   });
 }
 

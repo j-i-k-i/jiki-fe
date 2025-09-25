@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { mockFrame } from "@/tests/mocks";
 
-// Create frames for testing
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    { interpreterTime: 0, timelineTime: 0, line: 1, status: "SUCCESS", description: "Frame 1" } as Frame,
-    { interpreterTime: 0.01, timelineTime: 100, line: 2, status: "SUCCESS", description: "Frame 2" } as Frame,
-    { interpreterTime: 0.02, timelineTime: 200, line: 3, status: "SUCCESS", description: "Frame 3" } as Frame,
-    { interpreterTime: 0.03, timelineTime: 300, line: 4, status: "SUCCESS", description: "Frame 4" } as Frame,
-    { interpreterTime: 0.04, timelineTime: 400, line: 5, status: "SUCCESS", description: "Frame 5" } as Frame,
-    { interpreterTime: 0.05, timelineTime: 500, line: 6, status: "SUCCESS", description: "Frame 6" } as Frame,
-    { interpreterTime: 0.06, timelineTime: 600, line: 7, status: "SUCCESS", description: "Frame 7" } as Frame,
-    { interpreterTime: 0.07, timelineTime: 700, line: 8, status: "SUCCESS", description: "Frame 8" } as Frame
+    mockFrame(0, { line: 1 }),
+    mockFrame(100000, { line: 2 }), // 100ms
+    mockFrame(200000, { line: 3 }), // 200ms
+    mockFrame(300000, { line: 4 }), // 300ms
+    mockFrame(400000, { line: 5 }), // 400ms
+    mockFrame(500000, { line: 6 }), // 500ms
+    mockFrame(600000, { line: 7 }), // 600ms
+    mockFrame(700000, { line: 8 }) // 700ms
   ];
 }
 
@@ -42,10 +42,15 @@ export default function BreakpointGutterTestPage() {
   const { breakpoints } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 8,
@@ -64,17 +69,13 @@ export default function BreakpointGutterTestPage() {
           currentTime: 0
         }
       } as any,
-      timelineTime: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: frames[1],
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      time: 0,
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state
     orchestrator.setCurrentTest(testState);
-    orchestrator.setCurrentTestTimelineTime(0);
+    orchestrator.setCurrentTestTime(0);
     orchestrator.setShouldAutoRunCode(false);
 
     // Expose orchestrator to window for E2E testing
@@ -95,9 +96,9 @@ export default function BreakpointGutterTestPage() {
 
   const handleToggleBreakpoint = (line: number) => {
     if (breakpoints.includes(line)) {
-      orchestrator.setBreakpoints(breakpoints.filter((b) => b !== line));
+      orchestrator.setBreakpoints(breakpoints.filter((b: number) => b !== line));
     } else {
-      orchestrator.setBreakpoints([...breakpoints, line].sort((a, b) => a - b));
+      orchestrator.setBreakpoints([...breakpoints, line].sort((a: number, b: number) => a - b));
     }
   };
 
@@ -123,7 +124,7 @@ export default function BreakpointGutterTestPage() {
           <div data-testid="breakpoints-display" className="mb-4">
             {breakpoints.length > 0 ? (
               <div className="space-y-1">
-                {breakpoints.map((line) => (
+                {breakpoints.map((line: number) => (
                   <div
                     key={line}
                     data-testid={`breakpoint-line-${line}`}

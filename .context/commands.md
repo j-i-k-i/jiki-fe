@@ -2,10 +2,10 @@
 
 ## Core Commands
 
-- `./bin/dev` or `pnpm run dev` - Start development server on port 3060
+- `./bin/dev` or `pnpm run dev` - Start development server on port 3060 (uses webpack)
 - `npx tsc --noEmit` - Check TypeScript types (preferred for type checking)
 - `pnpm run lint` - Run ESLint for code quality checks
-- `pnpm run build` - Build production bundle with Turbopack (AVOID during dev - can break dev server)
+- `pnpm run build` - Build production bundle
 - `pnpm run start` - Start production server
 
 ## Testing Commands
@@ -18,10 +18,11 @@
 
 ### E2E Tests
 
-- `pnpm test:e2e` - Run E2E tests in headless mode
+- `pnpm test:e2e` - Run E2E tests with shared server (fast)
 - `pnpm test:e2e:watch` - Run E2E tests in watch mode
 - `pnpm test:e2e:headful` - Run E2E tests with visible browser
 - `pnpm test:all` - Run both unit and E2E tests
+- `pnpm test:e2e -- tests/e2e/home.test.ts` - Run specific test file
 
 ### Setup
 
@@ -48,13 +49,9 @@ This project uses pnpm for package management:
 The dev server runs on port 3060 by default:
 
 - URL: http://localhost:3060
-- Uses Next.js Turbopack for fast refresh
+- Uses webpack (Turbopack disabled due to pnpm workspace compatibility issues)
 - Hot module replacement enabled
 
-### Troubleshooting Dev Server
+### Note on Turbopack
 
-**ENOENT buildManifest.js.tmp errors**: If you encounter these errors after running `pnpm run build`, the dev server's Turbopack cache is corrupted. Fix by:
-
-1. Stop the dev server (Ctrl+C)
-2. Restart with `pnpm run dev` (manual restart fixes the cache)
-3. Avoid running `pnpm run build` while developing - use `npx tsc --noEmit` for type checking instead
+Turbopack is currently disabled due to incompatibility with pnpm workspaces and the interpreters package. The dev server uses webpack instead, which fully supports all features but with slightly slower build times.

@@ -1,7 +1,8 @@
 import { AnimationTimeline } from "@/components/complex-exercise/lib/AnimationTimeline";
 import { createTimeline } from "animejs";
 import type { Timeline, DefaultsParams } from "animejs";
-import type { Frame } from "@/components/complex-exercise/lib/stubs";
+import type { Frame } from "interpreters";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock animejs
 jest.mock("animejs", () => ({
@@ -12,18 +13,14 @@ describe("AnimationTimeline", () => {
   let mockTimeline: Partial<Timeline>;
   let animationTimeline: AnimationTimeline;
   const mockFrames: Frame[] = [
-    { line: 1, interpreterTime: 0, timelineTime: 0, status: "SUCCESS" },
-    { line: 2, interpreterTime: 30, timelineTime: 30, status: "SUCCESS" },
-    { line: 3, interpreterTime: 60, timelineTime: 60, status: "SUCCESS" },
-    {
+    mockFrame(0, { line: 1 }),
+    mockFrame(30000, { line: 2 }), // 30ms
+    mockFrame(60000, { line: 3 }), // 60ms
+    mockFrame(90000, {
       line: 4,
-      interpreterTime: 90,
-      timelineTime: 90,
       status: "ERROR",
-      // TypeScript fix: StaticError interface requires 'type' property
-      // Added 'type: "runtime"' to satisfy the StaticError type definition
       error: { message: "Test error", type: "runtime" }
-    }
+    })
   ];
 
   beforeEach(() => {
@@ -150,8 +147,8 @@ describe("AnimationTimeline", () => {
       mockTimeline.duration = 50;
       animationTimeline.populateTimeline([], false);
 
-      // Should set duration to the last frame's time (90ms)
-      expect(mockTimeline.duration).toBe(90);
+      // Should set duration to the last frame's time (90000 microseconds = 90ms)
+      expect(mockTimeline.duration).toBe(90000);
     });
 
     it("should handle empty frames array", () => {

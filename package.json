@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3060",
-    "build": "next build --turbopack",
+    "dev": "next dev --port 3060",
+    "build": "next build",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "jest --config jest.e2e.config.mjs",
-    "test:e2e:watch": "jest --config jest.e2e.config.mjs --watch",
-    "test:e2e:headful": "HEADLESS=false jest --config jest.e2e.config.mjs",
+    "test:e2e": "node scripts/run-e2e-tests.js",
+    "test:e2e:watch": "node scripts/run-e2e-tests.js --watch",
+    "test:e2e:headful": "HEADLESS=false node scripts/run-e2e-tests.js",
     "test:all": "pnpm test && pnpm test:e2e",
     "lint": "eslint",
     "format": "prettier --write .",
@@ -74,6 +74,7 @@
     "puppeteer": "^24.21.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^9.0.1"
   }
 }

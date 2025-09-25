@@ -6,7 +6,7 @@ import {
   type TargetsParam,
   type TimelinePosition
 } from "animejs";
-import type { Frame } from "./stubs";
+import type { Frame } from "interpreters";
 
 export type Animation =
   | (AnimationParams & { targets?: TargetsParam })
@@ -96,18 +96,19 @@ export class AnimationTimeline {
 
      For example:
      - the total animation duration is 60ms
-     - a new frame is added after the animation, incrementing interpreterTime by 1ms (see Executor.addFrame - executor.ts#L868).
-     - the last frame is now at interpreterTime 61ms, but the timeline duration remains 60ms because the last frame is not animated.
-     - this discrepancy prevents seeking to the last frame (interpreterTime 61ms) as the timeline caps at 60ms.
+     - a new frame is added after the animation, incrementing time by 1ms (see Executor.addFrame - executor.ts#L868).
+     - the last frame is now at time 61ms, but the timeline duration remains 60ms because the last frame is not animated.
+     - this discrepancy prevents seeking to the last frame (time 61ms) as the timeline caps at 60ms.
 
-     On the other hand ensure the full duration of the last animation is present. hence the max function. 
+     On the other hand ensure the full duration of the last animation is present. hence the max function.
     */
 
     const animationDurationAfterAnimations = this.animationTimeline.duration;
     const lastFrame = this.frames[this.frames.length - 1];
+
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const lastFrameTime = lastFrame ? lastFrame.interpreterTime : 0;
+    const lastFrameTime = lastFrame ? lastFrame.time : 0;
     this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrameTime);
     return this;
   }
@@ -120,13 +121,17 @@ export class AnimationTimeline {
     return this.animationTimeline.duration;
   }
 
+  public get currentTime() {
+    return this.progress;
+  }
+
   private updateScrubber(anim: Timeline) {
     this.progress = anim.currentTime;
 
     const reversedIndex = this.frames
       .slice()
       .reverse()
-      .findIndex((frame) => frame.interpreterTime <= this.progress);
+      .findIndex((frame) => frame.timeInMs <= this.progress);
 
     this.currentIndex = this.frames.length - 1 - reversedIndex;
 
@@ -141,7 +146,7 @@ export class AnimationTimeline {
     const reversedIndex = this.frames
       .slice()
       .reverse()
-      .findIndex((frame) => frame.interpreterTime <= time);
+      .findIndex((frame) => frame.timeInMs <= time);
 
     const index = this.frames.length - 1 - reversedIndex;
 
@@ -169,7 +174,7 @@ export class AnimationTimeline {
   }
 
   public seekLastFrame() {
-    this.animationTimeline.seek(this.frames[this.frames.length - 1].interpreterTime);
+    this.animationTimeline.seek(this.frames[this.frames.length - 1].timeInMs);
   }
 
   public seekEndOfTimeline() {

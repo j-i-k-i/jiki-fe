@@ -8,14 +8,15 @@ module.exports = {
       "--disable-accelerated-2d-canvas",
       "--no-first-run",
       "--no-zygote",
-      "--single-process",
       "--disable-gpu"
     ]
   },
-  server: {
-    command: "next dev --turbopack --port 3070",
-    port: 3070,
-    launchTimeout: 10000,
-    debug: true
-  }
+  ...(process.env.SKIP_SERVER !== "true" && {
+    server: {
+      command: "next dev --port 3070",
+      port: 3070,
+      launchTimeout: 10000,
+      debug: true
+    }
+  })
 };

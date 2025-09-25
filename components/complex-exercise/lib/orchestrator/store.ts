@@ -5,7 +5,6 @@ import { createStore, type StoreApi } from "zustand/vanilla";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";
-import { mockTest } from "./mocks";
 import { TimelineManager } from "./TimelineManager";
 
 const ONE_MINUTE = 60 * 1000;
@@ -20,7 +19,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       output: "",
       status: "idle",
       error: null,
-      currentTest: mockTest, // Temporary: using mock test instead of null
+      currentTest: null,
       hasCodeBeenEdited: false,
       isSpotlightActive: false,
       foldedLines: [],
@@ -45,40 +44,51 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results state
       testSuiteResult: null,
-      bonusTestSuiteResult: null,
-      inspectedTestResult: null,
-      shouldShowBonusTasks: false,
       shouldAutoplayAnimation: false,
+
+      // Frame navigation state (moved from currentTest to top level)
+      prevFrame: undefined,
+      nextFrame: undefined,
+      prevBreakpointFrame: undefined,
+      nextBreakpointFrame: undefined,
+
+      // Test time persistence - maps test slugs to their current time positions
+      testCurrentTimes: {},
 
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
         if (!state.currentTest) {
+          set({
+            prevFrame: undefined,
+            nextFrame: undefined
+          });
           return;
         }
 
         const prevFrame = TimelineManager.findPrevFrame(
           state.currentTest.frames,
-          state.currentTest.timelineTime,
+          state.currentTest.time,
           state.foldedLines
         );
         const nextFrame = TimelineManager.findNextFrame(
           state.currentTest.frames,
-          state.currentTest.timelineTime,
+          state.currentTest.time,
           state.foldedLines
         );
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            prevFrame,
-            nextFrame
-          }
+          prevFrame,
+          nextFrame
         });
       },
       recalculateBreakpointFrames: () => {
         const state = get();
         if (!state.currentTest) {
+          set({
+            prevBreakpointFrame: undefined,
+            nextBreakpointFrame: undefined
+          });
           return;
         }
 
@@ -96,11 +106,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         );
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            prevBreakpointFrame,
-            nextBreakpointFrame
-          }
+          prevBreakpointFrame,
+          nextBreakpointFrame
         });
       },
       setCode: (code) => set({ code, hasCodeBeenEdited: true }),
@@ -108,12 +115,35 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setOutput: (output) => set({ output }),
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
-      setCurrentTest: (test) =>
+      setCurrentTest: (test) => {
+        if (!test) {
+          set({
+            currentTest: test,
+            highlightedLine: 0
+          });
+          return;
+        }
+
+        const state = get();
+        // Check if we have a saved time for this test
+        const savedTime = state.testCurrentTimes[test.slug];
+        const timeToUse = savedTime !== undefined ? savedTime : test.time;
+
+        // Create test with the appropriate time
+        const testWithTime = {
+          ...test,
+          time: timeToUse
+        };
+
         set({
-          currentTest: test,
+          currentTest: testWithTime,
           // Update highlighted line when setting a new test
-          highlightedLine: test?.currentFrame?.line ?? 0
-        }),
+          highlightedLine: testWithTime.currentFrame?.line ?? 0
+        });
+
+        // Trigger frame calculations with the restored/initial time
+        get().setCurrentTestTime(timeToUse);
+      },
       setCurrentFrame: (frame) => {
         const state = get();
         if (!state.currentTest) {
@@ -132,22 +162,26 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         get().recalculateNavigationFrames();
         get().recalculateBreakpointFrames();
       },
-      setCurrentTestTimelineTime: (time) => {
+      setCurrentTestTime: (time) => {
         const state = get();
         if (!state.currentTest) {
           return;
         }
 
-        // Update timeline time
+        // Update timeline time and persist it for this test
         set({
           currentTest: {
             ...state.currentTest,
-            timelineTime: time
+            time: time
+          },
+          testCurrentTimes: {
+            ...state.testCurrentTimes,
+            [state.currentTest.slug]: time
           }
         });
 
         // Check if we landed on an exact frame and update if so
-        const exactFrame = state.currentTest.frames.find((f) => f.timelineTime === time);
+        const exactFrame = state.currentTest.frames.find((f) => f.time === time);
         if (exactFrame) {
           get().setCurrentFrame(exactFrame);
         }
@@ -186,10 +220,14 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setLatestValueSnapshot: (value) => set({ latestValueSnapshot: value }),
 
       // Test results actions
-      setTestSuiteResult: (result) => set({ testSuiteResult: result }),
-      setBonusTestSuiteResult: (result) => set({ bonusTestSuiteResult: result }),
-      setInspectedTestResult: (result) => set({ inspectedTestResult: result }),
-      setShouldShowBonusTasks: (show) => set({ shouldShowBonusTasks: show }),
+      setTestSuiteResult: (result) => {
+        set({ testSuiteResult: result });
+        // Also set the first test as current by default
+        if (result && result.tests.length > 0) {
+          // Call setCurrentTest which will handle all the logic including setting time
+          get().setCurrentTest(result.tests[0]);
+        }
+      },
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
 
       // Exercise data initialization with priority logic
@@ -300,7 +338,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           output: "",
           status: "idle",
           error: null,
-          currentTest: mockTest, // Temporary: reset to mock test for testing
+          currentTest: null,
           hasCodeBeenEdited: false,
           isSpotlightActive: false,
           foldedLines: [],
@@ -325,10 +363,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset test results state
           testSuiteResult: null,
-          bonusTestSuiteResult: null,
-          inspectedTestResult: null,
-          shouldShowBonusTasks: false,
-          shouldAutoplayAnimation: false
+          shouldAutoplayAnimation: false,
+
+          // Reset frame navigation state
+          prevFrame: undefined,
+          nextFrame: undefined,
+          prevBreakpointFrame: undefined,
+          nextBreakpointFrame: undefined
         })
     }))
   );
@@ -370,10 +411,16 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
 
       // Test results state
       testSuiteResult: state.testSuiteResult,
-      bonusTestSuiteResult: state.bonusTestSuiteResult,
-      inspectedTestResult: state.inspectedTestResult,
-      shouldShowBonusTasks: state.shouldShowBonusTasks,
-      shouldAutoplayAnimation: state.shouldAutoplayAnimation
+      shouldAutoplayAnimation: state.shouldAutoplayAnimation,
+
+      // Frame navigation state
+      prevFrame: state.prevFrame,
+      nextFrame: state.nextFrame,
+      prevBreakpointFrame: state.prevBreakpointFrame,
+      nextBreakpointFrame: state.nextBreakpointFrame,
+
+      // Test time persistence
+      testCurrentTimes: state.testCurrentTimes
     }))
   );
 }
