@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock localStorage functions
 jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
@@ -75,23 +75,24 @@ describe("Orchestrator", () => {
 
       // Create custom test frames
       const testFrames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 }),
-        createTestFrame(300000, { line: 4 }),
-        createTestFrame(400000, { line: 5 })
+        mockFrame(0, { line: 1 }),
+        mockFrame(100000, { line: 2 }),
+        mockFrame(200000, { line: 3 }),
+        mockFrame(300000, { line: 4 }),
+        mockFrame(400000, { line: 5 })
       ];
 
       // Set up test state with custom frames
       orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
         frames: testFrames,
         animationTimeline: null as any,
         time: 0,
-        currentFrame: testFrames[0],
-        prevFrame: undefined,
-        nextFrame: testFrames[1],
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined
+        currentFrame: testFrames[0]
       });
 
       const state = orchestrator.getStore().getState();
@@ -115,22 +116,23 @@ describe("Orchestrator", () => {
 
       // Create custom test frames
       const testFrames = [
-        createTestFrame(0, { line: 1 }),
-        createTestFrame(100000, { line: 2 }),
-        createTestFrame(200000, { line: 3 }),
-        createTestFrame(300000, { line: 4 })
+        mockFrame(0, { line: 1 }),
+        mockFrame(100000, { line: 2 }),
+        mockFrame(200000, { line: 3 }),
+        mockFrame(300000, { line: 4 })
       ];
 
       // Set up test state with custom frames at line 2
       orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
         frames: testFrames,
         animationTimeline: null as any,
         time: 100000,
-        currentFrame: testFrames[1],
-        prevFrame: testFrames[0],
-        nextFrame: testFrames[2],
-        prevBreakpointFrame: undefined,
-        nextBreakpointFrame: undefined
+        currentFrame: testFrames[1]
       });
 
       // Verify initial state
@@ -145,8 +147,8 @@ describe("Orchestrator", () => {
       expect(state.currentTest?.currentFrame?.line).toBe(2);
 
       // But navigation frames should skip the folded line
-      expect(state.currentTest?.prevFrame?.line).toBe(1);
-      expect(state.currentTest?.nextFrame?.line).toBe(3);
+      expect(state.prevFrame?.line).toBe(1);
+      expect(state.nextFrame?.line).toBe(3);
     });
   });
 

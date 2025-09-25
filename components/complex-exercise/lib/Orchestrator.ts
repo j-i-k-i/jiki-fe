@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 // This is an orchestration class for the whole page.
 // When the page loads, this is created and then is the thing that's
 // passed around, controls the state, etc.
@@ -10,9 +9,8 @@ import { EditorManager } from "./orchestrator/EditorManager";
 import { createOrchestratorStore } from "./orchestrator/store";
 import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
-import type { Frame } from "interpreters";
-import type { TestSuiteResult } from "./test-results-types";
-import type { InformationWidgetData, OrchestratorStore, ProcessedExpect, TestState, UnderlineRange } from "./types";
+import type { TestExpect, TestResult } from "./test-results-types";
+import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
 
 class Orchestrator {
   exerciseUuid: string;
@@ -117,23 +115,10 @@ class Orchestrator {
 
   setCurrentTestTime(time: number) {
     this.timelineManager.setTime(time);
-    this.testSuiteManager.updateCurrentTestTime(time);
   }
 
-  setCurrentTest(test: TestState | null) {
+  setCurrentTest(test: TestResult | null) {
     this.store.getState().setCurrentTest(test);
-  }
-
-  // UNUSED: This function is currently not called.
-  // UNUSED: This function is currently not called.
-  setHasCodeBeenEdited(value: boolean) {
-    this.store.getState().setHasCodeBeenEdited(value);
-  }
-
-  // UNUSED: This function is currently not called.
-  // UNUSED: This function is currently not called.
-  setIsSpotlightActive(value: boolean) {
-    this.store.getState().setIsSpotlightActive(value);
   }
 
   setFoldedLines(lines: number[]) {
@@ -148,7 +133,6 @@ class Orchestrator {
   }
 
   // Editor store public methods
-  // UNUSED: This function is currently not called.
   // UNUSED: This function is currently not called.
   setDefaultCode(code: string) {
     this.store.getState().setDefaultCode(code);
@@ -201,21 +185,8 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
-  // Test results store public methods - delegate to TestSuiteManager
-  setTestSuiteResult(result: TestSuiteResult | null) {
-    this.testSuiteManager.setTestSuiteResult(result);
-  }
-
-  setBonusTestSuiteResult(result: TestSuiteResult | null) {
-    this.testSuiteManager.setBonusTestSuiteResult(result);
-  }
-
-  setShouldShowBonusTasks(show: boolean) {
-    this.testSuiteManager.setShouldShowBonusTasks(show);
-  }
-
   setShouldAutoplayAnimation(autoplay: boolean) {
-    this.testSuiteManager.setShouldAutoplayAnimation(autoplay);
+    this.store.getState().setShouldAutoplayAnimation(autoplay);
   }
 
   // Error store public methods
@@ -234,15 +205,6 @@ class Orchestrator {
     return this.timelineManager.getNearestCurrentFrame();
   }
 
-  // Frame navigation methods - delegate to TimelineManager
-  findNextFrame(currentIdx?: number): Frame | undefined {
-    return this.timelineManager.findNextFrame(currentIdx);
-  }
-
-  findPrevFrame(currentIdx?: number): Frame | undefined {
-    return this.timelineManager.findPrevFrame(currentIdx);
-  }
-
   // Breakpoint navigation methods - delegate to BreakpointManager
   goToPrevBreakpoint() {
     this.breakpointManager.goToPrevBreakpoint();
@@ -253,26 +215,11 @@ class Orchestrator {
   }
 
   async runCode() {
-    const state = this.store.getState();
-    state.setStatus("running");
-    state.setError(null);
+    // Get the current code from the editor
+    const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
-    try {
-      // Get the current code from the editor
-      const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
-
-      console.log("Running code:", currentCode);
-
-      // Run tests using the test suite manager
-      await this.testSuiteManager.runTests();
-
-      const output = `Running exercise ${this.exerciseUuid}...\n\n> ${currentCode}\n\nTests completed. Check test results below.`;
-      state.setOutput(output);
-      state.setStatus("success");
-    } catch (error) {
-      state.setError(error instanceof Error ? error.message : "Unknown error");
-      state.setStatus("error");
-    }
+    // Delegate to TestSuiteManager
+    await this.testSuiteManager.runCode(currentCode);
   }
 
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager
@@ -309,15 +256,7 @@ class Orchestrator {
   }
 
   // Test result processing methods - delegate to TestSuiteManager
-  getProcessedExpects(): ProcessedExpect[] {
-    return this.testSuiteManager.getProcessedExpects();
-  }
-
-  getFirstFailingExpect(): ProcessedExpect | null {
-    return this.testSuiteManager.getFirstFailingExpect();
-  }
-
-  getFirstExpect(): ProcessedExpect | null {
+  getFirstExpect(): TestExpect | null {
     return this.testSuiteManager.getFirstExpect();
   }
 }

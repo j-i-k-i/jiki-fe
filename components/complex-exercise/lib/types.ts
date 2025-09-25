@@ -1,7 +1,5 @@
-import type { Change } from "diff";
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "./stubs";
-import type { TestSuiteResult } from "./test-results-types";
+import type { TestResult, TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types
 export interface UnderlineRange {
@@ -15,39 +13,6 @@ export interface InformationWidgetData {
   status: "SUCCESS" | "ERROR";
 }
 
-// Test result processing types
-export interface ProcessedExpect {
-  diff: Change[];
-  type: "io" | "state";
-  actual: any;
-  pass: boolean;
-  codeRun?: string;
-  errorHtml?: string;
-  expected?: any;
-}
-
-export type ProcessedExpects = ProcessedExpect[];
-
-// Actual types for the orchestrator pattern
-export interface TestState {
-  frames: Frame[];
-  animationTimeline: AnimationTimeline;
-  time: number;
-  currentFrame: Frame | null; // Current frame based on timeline position
-  prevFrame: Frame | undefined; // Previous non-folded frame from current position
-  nextFrame: Frame | undefined; // Next non-folded frame from current position
-  prevBreakpointFrame: Frame | undefined; // Previous frame on a breakpoint line
-  nextBreakpointFrame: Frame | undefined; // Next frame on a breakpoint line
-  // Optional properties from NewTestResult for display purposes
-  name?: string;
-  status?: "pass" | "fail" | "idle";
-  type?: "io" | "state";
-  expects?: any[];
-  view?: HTMLElement;
-  imageSlug?: string;
-  slug?: string;
-}
-
 // Public read-only state that components can access
 export interface OrchestratorState {
   exerciseUuid: string;
@@ -56,7 +21,7 @@ export interface OrchestratorState {
   output: string;
   status: "idle" | "running" | "success" | "error";
   error: string | null;
-  currentTest: TestState | null;
+  currentTest: TestResult | null;
   hasCodeBeenEdited: boolean;
   isSpotlightActive: boolean;
   foldedLines: number[]; // Line numbers that are currently folded in the editor
@@ -81,9 +46,16 @@ export interface OrchestratorState {
 
   // Test results state
   testSuiteResult: TestSuiteResult | null;
-  bonusTestSuiteResult: TestSuiteResult | null;
-  shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
+
+  // Frame navigation state (moved from currentTest to top level)
+  prevFrame?: Frame;
+  nextFrame?: Frame;
+  prevBreakpointFrame?: Frame;
+  nextBreakpointFrame?: Frame;
+
+  // Test time persistence - maps test slugs to their current time positions
+  testCurrentTimes: Record<string, number | undefined>;
 }
 
 // Private actions only accessible within the orchestrator
@@ -93,7 +65,7 @@ export interface OrchestratorActions {
   setOutput: (output: string) => void;
   setStatus: (status: OrchestratorState["status"]) => void;
   setError: (error: string | null) => void;
-  setCurrentTest: (test: TestState | null) => void;
+  setCurrentTest: (test: TestResult | null) => void;
   setCurrentFrame: (frame: Frame) => void;
   setCurrentTestTime: (time: number) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
@@ -120,8 +92,6 @@ export interface OrchestratorActions {
 
   // Test results actions
   setTestSuiteResult: (result: TestSuiteResult | null) => void;
-  setBonusTestSuiteResult: (result: TestSuiteResult | null) => void;
-  setShouldShowBonusTasks: (show: boolean) => void;
   setShouldAutoplayAnimation: (autoplay: boolean) => void;
 
   // Exercise data initialization

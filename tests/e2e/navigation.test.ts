@@ -3,7 +3,7 @@ describe("Navigation E2E", () => {
     await page.goto("http://localhost:3070", {
       waitUntil: "networkidle2"
     });
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should navigate between pages", async () => {
     const links = await page.$$eval('a[href^="/"]', (links) =>
@@ -25,7 +25,7 @@ describe("Navigation E2E", () => {
         await page.goBack();
       }
     }
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should handle 404 pages gracefully", async () => {
     await page.goto("http://localhost:3070/non-existent-page", {

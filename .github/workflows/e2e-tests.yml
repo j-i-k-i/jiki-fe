@@ -55,6 +55,7 @@ jobs:
         run: pnpm run build
 
       - name: Install Puppeteer browser and dependencies
+        working-directory: fe
         run: |
           # Install Chrome browser for Puppeteer
           npx puppeteer browsers install chrome

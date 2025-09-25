@@ -6,7 +6,7 @@ import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrato
 import type { Frame } from "interpreters";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock the orchestrator store hook
 jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
@@ -16,7 +16,7 @@ jest.mock("@/components/complex-exercise/lib/Orchestrator", () => ({
 // Helper to create mock frames
 function createMockFrames(count: number): Frame[] {
   return Array.from({ length: count }, (_, i) =>
-    createTestFrame(i * 100000, {
+    mockFrame(i * 100000, {
       // Each frame is 100ms apart
       line: i + 1,
       generateDescription: () => `Frame ${i}`
@@ -47,7 +47,9 @@ function setupStoreMock(
   nextFrame: Frame | undefined = undefined
 ) {
   (useOrchestratorStore as jest.Mock).mockReturnValue({
-    currentTest: currentFrame ? { currentFrame, time, prevFrame, nextFrame } : null
+    currentTest: currentFrame ? { currentFrame, time } : null,
+    prevFrame,
+    nextFrame
   });
 }
 

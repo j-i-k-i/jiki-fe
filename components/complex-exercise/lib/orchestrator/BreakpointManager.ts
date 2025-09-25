@@ -84,8 +84,8 @@ export class BreakpointManager {
    */
   goToPrevBreakpoint(): void {
     const state = this.store.getState();
-    if (state.currentTest?.prevBreakpointFrame) {
-      state.setCurrentTestTime(state.currentTest.prevBreakpointFrame.time);
+    if (state.prevBreakpointFrame) {
+      state.setCurrentTestTime(state.prevBreakpointFrame.time);
     }
   }
 
@@ -94,8 +94,8 @@ export class BreakpointManager {
    */
   goToNextBreakpoint(): void {
     const state = this.store.getState();
-    if (state.currentTest?.nextBreakpointFrame) {
-      state.setCurrentTestTime(state.currentTest.nextBreakpointFrame.time);
+    if (state.nextBreakpointFrame) {
+      state.setCurrentTestTime(state.nextBreakpointFrame.time);
     }
   }
 }

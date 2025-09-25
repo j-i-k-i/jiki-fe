@@ -58,7 +58,7 @@ The test runner system executes student code against predefined tests, generatin
 
 - **Jikiscript**: Interpreter generates frames during execution
   - One frame per expression parsed
-  - Each frame increments time by 1ms
+  - Each frame has time in microseconds and timeInMs in milliseconds
   - Contains status (SUCCESS/ERROR) and execution details
 
 - **JavaScript**: External execution with error handling
@@ -144,12 +144,14 @@ setupFunctions: [
 
 The test runner provides:
 
-- `frames`: Array of execution frames with timing
+- `frames`: Array of execution frames with timing (Frame type from interpreters package)
+  - `time`: Microseconds for scrubber precision
+  - `timeInMs`: Milliseconds for animation compatibility
 - `animationTimeline`: Timeline synchronized with frames
-- Both use same time scale (1 frame = 1ms)
+- Uses TIME_SCALE_FACTOR (1000) for microsecond/millisecond conversion
 
 This enables the scrubber to:
 
-- Navigate through code execution
-- Sync visual animations
+- Navigate through code execution with microsecond precision
+- Sync visual animations using millisecond timings
 - Show frame information at each step

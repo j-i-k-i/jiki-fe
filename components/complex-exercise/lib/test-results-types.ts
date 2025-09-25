@@ -1,7 +1,5 @@
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "./stubs";
-
-export type TestsType = "io" | "state";
+import type { AnimationTimeline } from "./AnimationTimeline";
 
 export interface TestExpect {
   pass: boolean;
@@ -17,28 +15,32 @@ export interface TestFrame {
   status: "SUCCESS" | "ERROR";
 }
 
-export interface NewTestResult {
+// Unified TestResult type that includes both test data and navigation state
+export interface TestResult {
+  // Core test properties
   slug: string;
   name: string;
   status: "pass" | "fail" | "idle";
-  type: TestsType;
   expects: TestExpect[];
-  frames: Frame[]; // Execution frames for scrubber timeline (was scrubberFrames)
+  frames: Frame[]; // Execution frames for scrubber timeline
   codeRun?: string;
-  view?: HTMLElement;
   imageSlug?: string;
-  animationTimeline: AnimationTimeline | null; // Timeline for scrubber navigation
-  time: number; // Current scrubber position
+
+  // Required display and timeline properties
+  view: HTMLElement;
+  animationTimeline: AnimationTimeline; // Always required for scrubber navigation
+  time: number; // Current scrubber position in microseconds
+
+  // Navigation properties (calculated by store via setCurrentTestTime)
+  currentFrame?: Frame; // Current frame based on timeline position
 }
 
 export interface TestSuiteResult {
-  tests: NewTestResult[];
+  tests: TestResult[];
   status: "pass" | "fail" | "running" | "idle";
 }
 
 export interface TestResultsState {
   testSuiteResult: TestSuiteResult | null;
-  bonusTestSuiteResult: TestSuiteResult | null;
-  shouldShowBonusTasks: boolean;
   shouldAutoplayAnimation: boolean;
 }

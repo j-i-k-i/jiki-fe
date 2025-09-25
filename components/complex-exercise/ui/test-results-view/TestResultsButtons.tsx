@@ -4,52 +4,22 @@ import { useCallback } from "react";
 import { assembleClassNames } from "../../../../utils/assemble-classnames";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { NewTestResult } from "../../lib/test-results-types";
+import type { TestResult } from "../../lib/test-results-types";
 
 const TRANSITION_DELAY = 0.1;
 
-interface TestResultsButtonsProps {
-  isBonus?: boolean;
-}
-
-export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps) {
+export function TestResultsButtons() {
   const orchestrator = useOrchestrator();
-  const { testSuiteResult, bonusTestSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
-
-  const testResults = isBonus ? bonusTestSuiteResult : testSuiteResult;
+  const { testSuiteResult, currentTest } = useOrchestratorStore(orchestrator);
 
   const handleTestResultSelection = useCallback(
-    (test: NewTestResult) => {
-      if (!testResults) {
+    (test: TestResult) => {
+      if (!testSuiteResult) {
         return;
       }
 
-      // Merge NewTestResult properties into TestState format
-      if (test.animationTimeline) {
-        const testState = {
-          // Core TestState properties
-          frames: test.frames,
-          animationTimeline: test.animationTimeline,
-          time: test.time,
-          currentFrame: test.frames.find((f) => f.time === test.time) || test.frames[0],
-          prevFrame: undefined,
-          nextFrame: undefined,
-          prevBreakpointFrame: undefined,
-          nextBreakpointFrame: undefined,
-          // NewTestResult properties
-          name: test.name,
-          status: test.status,
-          type: test.type,
-          expects: test.expects,
-          view: test.view,
-          imageSlug: test.imageSlug,
-          slug: test.slug
-        };
-        orchestrator.setCurrentTest(testState);
-      } else {
-        // For tests without animation timeline, just set to null
-        orchestrator.setCurrentTest(null);
-      }
+      // Pass TestResult directly
+      orchestrator.setCurrentTest(test);
 
       // Set information widget data for single frame tests
       if (test.frames.length === 1) {
@@ -61,26 +31,23 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
         });
       }
     },
-    [orchestrator, testResults]
+    [orchestrator, testSuiteResult]
   );
 
-  if (isBonus && !testResults) {
-    return null;
-  }
-  if (!testResults) {
+  if (!testSuiteResult) {
     return null;
   }
 
   return (
     <div
-      className={isBonus ? "test-selector-buttons bonus" : "test-selector-buttons"}
+      className="test-selector-buttons"
       style={{
         display: "flex",
         gap: "8px",
         flexWrap: "wrap"
       }}
     >
-      {testResults.tests.map((test, idx) => (
+      {testSuiteResult.tests.map((test, idx) => (
         <button
           key={(test.slug || test.name) + idx}
           onClick={() => handleTestResultSelection(test)}
@@ -107,7 +74,7 @@ export function TestResultsButtons({ isBonus = false }: TestResultsButtonsProps)
             e.currentTarget.style.backgroundColor = "#fff";
           }}
         >
-          {isBonus ? "★" : idx + 1}
+          {idx + 1}
         </button>
       ))}
 

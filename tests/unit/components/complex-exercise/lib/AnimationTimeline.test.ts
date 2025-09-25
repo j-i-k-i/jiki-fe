@@ -2,7 +2,7 @@ import { AnimationTimeline } from "@/components/complex-exercise/lib/AnimationTi
 import { createTimeline } from "animejs";
 import type { Timeline, DefaultsParams } from "animejs";
 import type { Frame } from "interpreters";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 // Mock animejs
 jest.mock("animejs", () => ({
@@ -13,10 +13,10 @@ describe("AnimationTimeline", () => {
   let mockTimeline: Partial<Timeline>;
   let animationTimeline: AnimationTimeline;
   const mockFrames: Frame[] = [
-    createTestFrame(0, { line: 1 }),
-    createTestFrame(30000, { line: 2 }), // 30ms
-    createTestFrame(60000, { line: 3 }), // 60ms
-    createTestFrame(90000, {
+    mockFrame(0, { line: 1 }),
+    mockFrame(30000, { line: 2 }), // 30ms
+    mockFrame(60000, { line: 3 }), // 60ms
+    mockFrame(90000, {
       line: 4,
       status: "ERROR",
       error: { message: "Test error", type: "runtime" }
@@ -147,8 +147,8 @@ describe("AnimationTimeline", () => {
       mockTimeline.duration = 50;
       animationTimeline.populateTimeline([], false);
 
-      // Should set duration to the last frame's time (90ms)
-      expect(mockTimeline.duration).toBe(90);
+      // Should set duration to the last frame's time (90000 microseconds = 90ms)
+      expect(mockTimeline.duration).toBe(90000);
     });
 
     it("should handle empty frames array", () => {

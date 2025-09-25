@@ -1,8 +1,7 @@
 import React, { forwardRef } from "react";
 import type { Frame } from "interpreters";
-import type { AnimationTimeline } from "../../lib/stubs";
+import type { AnimationTimeline } from "../../lib/AnimationTimeline";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import { TIME_SCALE_FACTOR } from "interpreters";
 
 interface ScrubberInputProps {
   frames: Frame[];
@@ -90,6 +89,6 @@ function calculateMinInputValue(frames: Frame[]) {
 }
 
 function calculateMaxInputValue(animationTimeline: AnimationTimeline | { duration: number }) {
-  // Convert animation duration from milliseconds to microseconds
-  return Math.round(animationTimeline.duration * TIME_SCALE_FACTOR);
+  // The duration is already in microseconds (from frame.time)
+  return Math.round(animationTimeline.duration);
 }

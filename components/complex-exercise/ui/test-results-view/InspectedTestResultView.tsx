@@ -2,16 +2,15 @@ import { assembleClassNames } from "@/utils/assemble-classnames";
 import { useEffect, useRef } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import type { NewTestResult } from "../../lib/test-results-types";
-import type { ProcessedExpect } from "../../lib/types";
+import type { TestExpect, TestResult } from "../../lib/test-results-types";
 import { PassMessage } from "./PassMessage";
 import { TestResultInfo } from "./TestResultInfo";
 
 export function InspectedTestResultView() {
   const orchestrator = useOrchestrator();
   const { currentTest } = useOrchestratorStore(orchestrator);
-  // currentTest now has NewTestResult properties merged in
-  const result = currentTest && currentTest.expects ? (currentTest as unknown as NewTestResult) : null;
+
+  const result = currentTest ? (currentTest as unknown as TestResult) : null;
   const viewContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -22,33 +21,15 @@ export function InspectedTestResultView() {
       return;
     }
 
-    if (result.view) {
-      if (viewContainerRef.current.children.length > 0) {
-        const oldView = viewContainerRef.current.children[0] as HTMLElement;
-        document.body.appendChild(oldView);
-        oldView.style.display = "none";
-      }
-
-      viewContainerRef.current.innerHTML = "";
-      viewContainerRef.current.appendChild(result.view);
-      result.view.style.display = "block";
-    } else {
-      let img;
-      if (viewContainerRef.current.children.length > 0) {
-        img = viewContainerRef.current.children[0] as HTMLElement;
-      } else {
-        img = document.createElement("div");
-        img.classList.add("io-image");
-        viewContainerRef.current.appendChild(img);
-      }
-
-      if (result.imageSlug) {
-        img.style.backgroundImage = `url('https://assets.exercism.org/bootcamp/scenarios/${result.imageSlug}')`;
-      }
-
-      const viewDisplay = result.imageSlug === undefined ? "none" : "block";
-      viewContainerRef.current.style.display = viewDisplay;
+    if (viewContainerRef.current.children.length > 0) {
+      const oldView = viewContainerRef.current.children[0] as HTMLElement;
+      document.body.appendChild(oldView);
+      oldView.style.display = "none";
     }
+
+    viewContainerRef.current.innerHTML = "";
+    viewContainerRef.current.appendChild(result.view);
+    result.view.style.display = "block";
   }, [result]);
 
   const firstExpect = orchestrator.getFirstExpect();
@@ -65,7 +46,7 @@ export function InspectedTestResultView() {
         result={result}
       />
 
-      <div className={assembleClassNames("spotlight")} ref={viewContainerRef} id="view-container" />
+      <div className={assembleClassNames("spotlight", "flex-grow")} ref={viewContainerRef} id="view-container" />
     </div>
   );
 }
@@ -74,8 +55,8 @@ export function InspectedTestResultViewLHS({
   result,
   firstExpect
 }: {
-  result: NewTestResult;
-  firstExpect: ProcessedExpect | null;
+  result: TestResult;
+  firstExpect: TestExpect | null;
 }) {
   return (
     <div data-ci="inspected-test-result-view" className="scenario-lhs">
@@ -86,7 +67,7 @@ export function InspectedTestResultViewLHS({
         </h3>
 
         {result.status === "pass" && <PassMessage testIdx={0} />}
-        <TestResultInfo result={result} firstExpect={firstExpect} />
+        <TestResultInfo firstExpect={firstExpect} />
       </div>
     </div>
   );

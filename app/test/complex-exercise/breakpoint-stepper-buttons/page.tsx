@@ -1,5 +1,5 @@
 "use client";
-import { createTestFrame } from "@/components/complex-exercise/lib/test-utils/createTestFrame";
+import { mockFrame } from "@/tests/mocks";
 
 import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
@@ -8,16 +8,16 @@ import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/
 import type { Frame } from "interpreters";
 
 // Create frames for testing
-function createTestFrames(): Frame[] {
+function mockFrames(): Frame[] {
   return [
-    createTestFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
-    createTestFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
-    createTestFrame(200000, { line: 3, generateDescription: () => "Frame 3" }), // 200ms
-    createTestFrame(300000, { line: 4, generateDescription: () => "Frame 4" }), // 300ms
-    createTestFrame(400000, { line: 5, generateDescription: () => "Frame 5" }), // 400ms
-    createTestFrame(500000, { line: 6, generateDescription: () => "Frame 6" }), // 500ms
-    createTestFrame(600000, { line: 7, generateDescription: () => "Frame 7" }), // 600ms
-    createTestFrame(700000, { line: 8, generateDescription: () => "Frame 8" }) // 700ms
+    mockFrame(0, { line: 1, generateDescription: () => "Frame 1" }),
+    mockFrame(100000, { line: 2, generateDescription: () => "Frame 2" }), // 100ms
+    mockFrame(200000, { line: 3, generateDescription: () => "Frame 3" }), // 200ms
+    mockFrame(300000, { line: 4, generateDescription: () => "Frame 4" }), // 300ms
+    mockFrame(400000, { line: 5, generateDescription: () => "Frame 5" }), // 400ms
+    mockFrame(500000, { line: 6, generateDescription: () => "Frame 6" }), // 500ms
+    mockFrame(600000, { line: 7, generateDescription: () => "Frame 7" }), // 600ms
+    mockFrame(700000, { line: 8, generateDescription: () => "Frame 8" }) // 700ms
   ];
 }
 
@@ -35,10 +35,15 @@ export default function BreakpointStepperButtonsTestPage() {
   const { currentTest, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
-    const frames = createTestFrames();
+    const frames = mockFrames();
 
     // Create test state similar to what would come from the test runner
     const testState = {
+      slug: "test-1",
+      name: "Test 1",
+      status: "pass" as const,
+      expects: [],
+      view: document.createElement("div"),
       frames,
       animationTimeline: {
         duration: 8,
@@ -58,11 +63,7 @@ export default function BreakpointStepperButtonsTestPage() {
         }
       } as any,
       time: 0,
-      currentFrame: frames[0],
-      prevFrame: undefined,
-      nextFrame: undefined,
-      prevBreakpointFrame: undefined,
-      nextBreakpointFrame: undefined
+      currentFrame: frames[0]
     };
 
     // Initialize the orchestrator with test state
@@ -195,7 +196,7 @@ export default function BreakpointStepperButtonsTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Manual Navigation</h2>
           <div className="space-x-2">
-            {createTestFrames().map((frame, idx) => (
+            {mockFrames().map((frame, idx) => (
               <button
                 key={idx}
                 data-testid={`goto-frame-${idx + 1}`}
@@ -213,10 +214,10 @@ export default function BreakpointStepperButtonsTestPage() {
         <div className="mb-4 p-4 border rounded">
           <h2 className="font-bold mb-2">Debug Info</h2>
           <div data-testid="prev-breakpoint">
-            Prev Breakpoint: {orchestrator.getStore().getState().currentTest?.prevBreakpointFrame?.line ?? "None"}
+            Prev Breakpoint: {orchestrator.getStore().getState().prevBreakpointFrame?.line ?? "None"}
           </div>
           <div data-testid="next-breakpoint">
-            Next Breakpoint: {orchestrator.getStore().getState().currentTest?.nextBreakpointFrame?.line ?? "None"}
+            Next Breakpoint: {orchestrator.getStore().getState().nextBreakpointFrame?.line ?? "None"}
           </div>
         </div>
       </div>

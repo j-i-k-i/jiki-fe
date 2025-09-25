@@ -100,14 +100,15 @@ export class AnimationTimeline {
      - the last frame is now at time 61ms, but the timeline duration remains 60ms because the last frame is not animated.
      - this discrepancy prevents seeking to the last frame (time 61ms) as the timeline caps at 60ms.
 
-     On the other hand ensure the full duration of the last animation is present. hence the max function. 
+     On the other hand ensure the full duration of the last animation is present. hence the max function.
     */
 
     const animationDurationAfterAnimations = this.animationTimeline.duration;
     const lastFrame = this.frames[this.frames.length - 1];
+
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const lastFrameTime = lastFrame ? lastFrame.timeInMs : 0;
+    const lastFrameTime = lastFrame ? lastFrame.time : 0;
     this.animationTimeline.duration = Math.max(animationDurationAfterAnimations, lastFrameTime);
     return this;
   }
@@ -118,6 +119,10 @@ export class AnimationTimeline {
 
   public get duration() {
     return this.animationTimeline.duration;
+  }
+
+  public get currentTime() {
+    return this.progress;
   }
 
   private updateScrubber(anim: Timeline) {
