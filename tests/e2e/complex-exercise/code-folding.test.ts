@@ -21,10 +21,10 @@
 describe("Code Folding E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/code-folding");
-    await page.waitForSelector('[data-testid="code-folding-container"]', { timeout: 2000 });
+    await page.waitForSelector('[data-testid="code-folding-container"]', { timeout: 5000 });
     // Wait for CodeMirror to fully initialize
     await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Initial State", () => {
     it("should render with no folded lines initially", async () => {
@@ -49,7 +49,7 @@ describe("Code Folding E2E", () => {
       // Should have indicators for foldable blocks
       expect(foldIndicators.length).toBeGreaterThanOrEqual(0);
     });
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Folding via Gutter Click", () => {
     it("should fold a code block when clicking fold indicator", async () => {

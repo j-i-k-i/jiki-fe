@@ -3,7 +3,7 @@ describe("FrameStepper Buttons E2E", () => {
     await page.goto("http://localhost:3070/test/complex-exercise/frame-stepper-buttons", {
       waitUntil: "networkidle2"
     });
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should render with initial state - prev button disabled, next button enabled", async () => {
     // Wait for the component to be rendered
@@ -37,7 +37,7 @@ describe("FrameStepper Buttons E2E", () => {
 
     const frameTime = await page.$eval('[data-testid="frame-time"]', (el) => el.textContent);
     expect(frameTime).toContain("Timeline Time: 0");
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should navigate forward through frames with next button", async () => {
     await page.waitForSelector('[data-testid="frame-stepper-buttons"]');

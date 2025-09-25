@@ -1,7 +1,7 @@
 describe("Orchestrator-CodeMirror E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/orchestrator-codemirror");
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should render the CodeMirror editor with initial code", async () => {
     // Wait for the editor container to be visible
@@ -18,7 +18,7 @@ describe("Orchestrator-CodeMirror E2E", () => {
 
     expect(codeContent).toContain("// Initial code");
     expect(codeContent).toContain("const x = 42");
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should toggle breakpoint when clicking on line numbers", async () => {
     // Wait for CodeMirror to be ready

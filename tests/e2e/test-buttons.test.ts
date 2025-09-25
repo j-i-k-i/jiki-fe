@@ -1,14 +1,14 @@
 describe("Test Buttons E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/test-buttons");
-    await page.waitForSelector('[data-testid="test-buttons-container"]', { timeout: 2000 });
+    await page.waitForSelector('[data-testid="test-buttons-container"]', { timeout: 5000 });
 
     // Wait for tests to be ready
-    await page.waitForFunction(() => (window as any).testsReady === true, { timeout: 2000 });
+    await page.waitForFunction(() => (window as any).testsReady === true, { timeout: 5000 });
 
     // Wait for the buttons to appear
-    await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 2000 });
-  });
+    await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 5000 });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Regular Test Buttons", () => {
     it("should display regular test buttons", async () => {
@@ -61,7 +61,7 @@ describe("Test Buttons E2E", () => {
           const element = document.querySelector('[data-testid="inspected-test-name"]');
           return element && element.textContent && !element.textContent.includes("None");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       // Check that a test is now inspected
@@ -81,7 +81,7 @@ describe("Test Buttons E2E", () => {
           const button = document.querySelector('[data-testid="regular-test-buttons"] button:first-child');
           return button && button.className.includes("selected");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       const buttonClasses = await firstButton!.evaluate((el) => el.className);
@@ -103,7 +103,7 @@ describe("Test Buttons E2E", () => {
           const button = document.querySelector('[data-testid="regular-test-buttons"] button:first-child');
           return button && button.className.includes("selected");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       // Click second button
@@ -113,7 +113,7 @@ describe("Test Buttons E2E", () => {
           const button = document.querySelector('[data-testid="regular-test-buttons"] button:nth-child(2)');
           return button && button.className.includes("selected");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       // Check that first button is no longer selected
@@ -132,12 +132,12 @@ describe("Test Buttons E2E", () => {
       await firstButton!.click();
 
       // Wait for inspected test result view to appear
-      await page.waitForSelector('[data-testid="inspected-test-result"]', { timeout: 2000 });
+      await page.waitForSelector('[data-testid="inspected-test-result"]', { timeout: 5000 });
 
       const inspectedTestResult = await page.$('[data-testid="inspected-test-result"]');
       expect(inspectedTestResult).toBeTruthy();
     });
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Bonus Test Buttons", () => {
     it("should display bonus test buttons when available", async () => {
@@ -176,7 +176,7 @@ describe("Test Buttons E2E", () => {
             const element = document.querySelector('[data-testid="inspected-test-name"]');
             return element && element.textContent && !element.textContent.includes("None");
           },
-          { timeout: 2000 }
+          { timeout: 5000 }
         );
 
         // Check that a bonus test is now inspected
@@ -197,7 +197,7 @@ describe("Test Buttons E2E", () => {
             const button = document.querySelector('[data-testid="regular-test-buttons"] button:first-child');
             return button && button.className.includes("selected");
           },
-          { timeout: 2000 }
+          { timeout: 5000 }
         );
 
         // Click bonus button
@@ -207,7 +207,7 @@ describe("Test Buttons E2E", () => {
             const button = document.querySelector('[data-testid="bonus-test-buttons"] button:first-child');
             return button && button.className.includes("selected");
           },
-          { timeout: 2000 }
+          { timeout: 5000 }
         );
 
         // Both should be deselected since they're in different groups
@@ -229,7 +229,7 @@ describe("Test Buttons E2E", () => {
       await firstButton!.click();
 
       // Wait for inspected test result view to appear
-      await page.waitForSelector('[data-testid="inspected-test-result"]', { timeout: 2000 });
+      await page.waitForSelector('[data-testid="inspected-test-result"]', { timeout: 5000 });
 
       // Check that test details are displayed
       const testName = await page.$eval('[data-testid="inspected-test-name"]', (el) => el.textContent);
@@ -253,7 +253,7 @@ describe("Test Buttons E2E", () => {
           const element = document.querySelector('[data-testid="inspected-test-name"]');
           return element && element.textContent && !element.textContent.includes("None");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       const firstTestName = await page.$eval('[data-testid="inspected-test-name"]', (el) => el.textContent);
@@ -265,7 +265,7 @@ describe("Test Buttons E2E", () => {
           const element = document.querySelector('[data-testid="inspected-test-name"]');
           return element && element.textContent !== firstTestName;
         },
-        { timeout: 2000 },
+        { timeout: 5000 },
         firstTestName
       );
 
@@ -301,7 +301,7 @@ describe("Test Buttons E2E", () => {
           const element = document.querySelector('[data-testid="inspected-test-name"]');
           return element && element.textContent && !element.textContent.includes("None");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       // Check that test is inspected
@@ -325,7 +325,7 @@ describe("Test Buttons E2E", () => {
           const button = document.querySelector('[data-testid="regular-test-buttons"] button:first-child');
           return button && button.className.includes("selected");
         },
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       // Check orchestrator state matches UI state

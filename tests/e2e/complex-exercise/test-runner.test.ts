@@ -2,8 +2,8 @@ describe("Test Runner E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/dev/complex-exercise");
     // Wait for specific element instead of network idle to avoid timeouts
-    await page.waitForSelector(".cm-editor", { timeout: 2000 });
-  });
+    await page.waitForSelector(".cm-editor", { timeout: 5000 });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should run tests and display results when clicking Run Code", async () => {
     // Clear existing code and type new code
@@ -21,7 +21,7 @@ describe("Test Runner E2E", () => {
     await page.click('[data-testid="run-button"]');
 
     // Wait for test results to appear
-    await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 2000 });
+    await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Check that test suite results show (2 regular tests + 1 bonus test)
     const testButtons = await page.$$(".test-selector-buttons .test-button");
@@ -54,7 +54,7 @@ describe("Test Runner E2E", () => {
 
     // First test starts at 0, so after 5 moves should be at 100
     expect(characterPosition).toBe(100);
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   it("should show failing tests with fewer moves", async () => {
     // Clear and type insufficient moves
@@ -71,7 +71,7 @@ describe("Test Runner E2E", () => {
     await page.click('[data-testid="run-button"]');
 
     // Wait for test results
-    await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 2000 });
+    await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Check that tests fail
     const testStatus = await page.$eval(".test-selector-buttons", (el) => {
@@ -99,7 +99,7 @@ describe("Test Runner E2E", () => {
     await page.click('[data-testid="run-button"]');
 
     // Wait for test results and buttons
-    await page.waitForSelector(".test-selector-buttons .test-button", { timeout: 2000 });
+    await page.waitForSelector(".test-selector-buttons .test-button", { timeout: 5000 });
 
     // Click second test button
     const testButtons = await page.$$(".test-selector-buttons .test-button");
@@ -137,7 +137,7 @@ describe("Test Runner E2E", () => {
     await page.click('[data-testid="run-button"]');
 
     // Wait for scrubber to appear
-    await page.waitForSelector('[data-testid="scrubber"]', { timeout: 2000 });
+    await page.waitForSelector('[data-testid="scrubber"]', { timeout: 5000 });
 
     // Check that frames were generated via the scrubber range input
     const scrubberInput = await page.$('[data-testid="scrubber-range-input"]');

@@ -26,10 +26,10 @@
 describe("Breakpoint Gutter E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/breakpoint-gutter");
-    await page.waitForSelector('[data-testid="breakpoint-gutter-container"]', { timeout: 2000 });
+    await page.waitForSelector('[data-testid="breakpoint-gutter-container"]', { timeout: 5000 });
     // Wait a bit for CodeMirror to fully initialize
     await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 500)));
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Initial State", () => {
     it("should render with no breakpoints initially", async () => {
@@ -49,7 +49,7 @@ describe("Breakpoint Gutter E2E", () => {
       const lineNumbers = await page.$$(".cm-lineNumbers .cm-gutterElement");
       expect(lineNumbers.length).toBeGreaterThan(0);
     });
-  });
+  }, 20000); // 20s timeout for navigation + compilation
 
   describe("Adding Breakpoints via Gutter Click", () => {
     it("should add a breakpoint when clicking on a line number", async () => {
