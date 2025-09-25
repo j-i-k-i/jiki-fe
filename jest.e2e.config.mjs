@@ -1,7 +1,7 @@
 const config = {
   preset: "jest-puppeteer",
   testMatch: ["<rootDir>/tests/e2e/**/*.test.{js,ts}"],
-  testTimeout: 10000,
+  testTimeout: 30000, // 30s to allow for compilation on page.goto
   transform: {
     "^.+\\.(ts|tsx)$": [
       "ts-jest",
