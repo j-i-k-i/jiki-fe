@@ -8,7 +8,7 @@ describe("Test Buttons E2E", () => {
 
     // Wait for the buttons to appear
     await page.waitForSelector('[data-testid="regular-test-buttons"] button', { timeout: 5000 });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Regular Test Buttons", () => {
     it("should display regular test buttons", async () => {
@@ -137,7 +137,7 @@ describe("Test Buttons E2E", () => {
       const inspectedTestResult = await page.$('[data-testid="inspected-test-result"]');
       expect(inspectedTestResult).toBeTruthy();
     });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Bonus Test Buttons", () => {
     it("should display bonus test buttons when available", async () => {

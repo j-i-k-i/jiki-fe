@@ -2,7 +2,7 @@ describe("ScrubberInput E2E", () => {
   beforeEach(async () => {
     await page.goto("http://localhost:3070/test/complex-exercise/scrubber-input");
     await page.waitForSelector('[data-testid="scrubber-input-container"]', { timeout: 5000 });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Initial State", () => {
     it("should render with correct initial state", async () => {
@@ -28,7 +28,7 @@ describe("ScrubberInput E2E", () => {
       );
       expect(isDisabled).toBe(false);
     });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Frame Snapping on MouseUp", () => {
     it("should snap to nearest frame when releasing mouse", async () => {

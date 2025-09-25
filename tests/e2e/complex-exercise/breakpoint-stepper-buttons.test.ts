@@ -3,7 +3,7 @@ describe("BreakpointStepper Buttons E2E", () => {
     await page.goto("http://localhost:3070/test/complex-exercise/breakpoint-stepper-buttons");
     // Wait for the page to be ready
     await page.waitForSelector('[data-testid="breakpoint-stepper-container"]', { timeout: 5000 });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Initial State", () => {
     it("should render with initial breakpoints and navigation state", async () => {
@@ -49,7 +49,7 @@ describe("BreakpointStepper Buttons E2E", () => {
       );
       expect(nextButtonDisabled).toBe(false);
     });
-  }, 20000); // 20s timeout for navigation + compilation
+  });
 
   describe("Basic Navigation", () => {
     it("should navigate to next breakpoint", async () => {
