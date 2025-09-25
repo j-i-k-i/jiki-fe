@@ -32,8 +32,8 @@ export default function FrameStepperButtonsTestPage() {
 
     // Initialize the orchestrator's test state with frames
     // Calculate initial prev/next frames
-    const initialPrevFrame = TimelineManager.findPrevFrame(frames, 0, []);
-    const initialNextFrame = TimelineManager.findNextFrame(frames, 0, []);
+    const initialPrevFrame = TimelineManager.findPrevFrame(frames, frames[0], []);
+    const initialNextFrame = TimelineManager.findNextFrame(frames, frames[0], []);
 
     orch.getStore().setState({
       currentTest: {
