@@ -22,7 +22,7 @@ interface FillInQuizCardProps {
 }
 
 export function FillInQuizCard({ question, onNext }: FillInQuizCardProps) {
-  const [values, setValues] = useState<Record<string, string>>({});
+  const [values, setValues] = useState<Record<string, string | undefined>>({});
   const [submitted, setSubmitted] = useState(false);
   const [results, setResults] = useState<Record<string, boolean>>({});
   const [allCorrect, setAllCorrect] = useState(false);
@@ -59,8 +59,7 @@ export function FillInQuizCard({ question, onNext }: FillInQuizCardProps) {
   };
 
   const allBlanksHaveValues = Object.keys(question.blanks).every((id) => {
-    const value = values[id];
-    return value && value.trim() !== "";
+    return values[id]?.trim();
   });
 
   const getInfoBoxProps = () => {
