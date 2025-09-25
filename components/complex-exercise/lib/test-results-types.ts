@@ -29,10 +29,6 @@ export interface TestResult {
   // Required display and timeline properties
   view: HTMLElement;
   animationTimeline: AnimationTimeline; // Always required for scrubber navigation
-  time: number; // Current scrubber position in microseconds
-
-  // Navigation properties (calculated by store via setCurrentTestTime)
-  currentFrame?: Frame; // Current frame based on timeline position
 }
 
 export interface TestSuiteResult {

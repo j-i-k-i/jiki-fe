@@ -1,9 +1,9 @@
-import { Exercise } from "./Exercise";
+import { TIME_SCALE_FACTOR } from "interpreters";
 import type { Animation } from "../AnimationTimeline";
+import { Exercise } from "./Exercise";
 
 export class BasicExercise extends Exercise {
   position: number = 0;
-  private view: HTMLElement | null = null;
 
   availableFunctions = [
     {
@@ -19,11 +19,12 @@ export class BasicExercise extends Exercise {
     // Get current time from execution context
     const currentTime = executionCtx.getCurrentTime ? executionCtx.getCurrentTime() : 0;
 
+    console.warn(this.position)
     this.animations.push({
-      targets: ".character",
-      translateX: this.position,
+      targets: `#${this.view.id} .character`,
+      left: this.position,
       duration: 100,
-      offset: currentTime,
+      offset: Math.round(currentTime / TIME_SCALE_FACTOR),
       transformations: {}
     } as Animation);
 
@@ -43,16 +44,9 @@ export class BasicExercise extends Exercise {
     };
   }
 
-  getView(): HTMLElement {
-    if (!this.view) {
-      this.view = this.createView();
-    }
-    this.updateView();
-    return this.view;
-  }
-
-  private createView(): HTMLElement {
+  protected populateView() {
     const container = document.createElement("div");
+    this.view.appendChild(container)
     container.className = "exercise-container";
     container.style.cssText = `
       width: 100%;
@@ -76,34 +70,6 @@ export class BasicExercise extends Exercise {
       transform: translateY(-50%) translateX(${this.position}px);
       transition: transform 0.3s ease;
     `;
-
-    const positionLabel = document.createElement("div");
-    positionLabel.className = "position-label";
-    positionLabel.style.cssText = `
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #666;
-    `;
-    positionLabel.textContent = `Position: ${this.position}px`;
-
     container.appendChild(character);
-    container.appendChild(positionLabel);
-
-    return container;
-  }
-
-  private updateView(): void {
-    if (!this.view) {
-      return;
-    }
-
-    const character = this.view.querySelector(".character") as HTMLElement;
-    const positionLabel = this.view.querySelector(".position-label") as HTMLElement;
-
-    character.style.transform = `translateY(-50%) translateX(${this.position}px)`;
-    positionLabel.textContent = `Position: ${this.position}px`;
   }
 }

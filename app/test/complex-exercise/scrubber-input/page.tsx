@@ -83,8 +83,8 @@ export default function ScrubberInputTestPage() {
     };
   }, [orchestrator]);
 
-  const currentFrame = currentTest?.currentFrame;
-  const time = currentTest?.time || 0;
+  const { currentFrame, currentTestTime } = useOrchestratorStore(orchestrator);
+  const time = currentTestTime || 0;
   const frames = currentTest?.frames || [];
   const animationTimeline = currentTest?.animationTimeline || null;
 

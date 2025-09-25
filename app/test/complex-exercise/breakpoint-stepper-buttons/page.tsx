@@ -32,7 +32,7 @@ export default function BreakpointStepperButtonsTestPage() {
   const orchestrator = orchestratorRef.current;
 
   // Get state from orchestrator store
-  const { currentTest, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
+  const { currentTest, currentFrame, currentTestTime, breakpoints, foldedLines } = useOrchestratorStore(orchestrator);
 
   useEffect(() => {
     const frames = mockFrames();
@@ -107,8 +107,7 @@ export default function BreakpointStepperButtonsTestPage() {
     orchestrator.setBreakpoints([1, 2, 3, 4, 5, 6, 7, 8]);
   };
 
-  const currentFrame = currentTest?.currentFrame;
-  const time = currentTest?.time || 0;
+  const time = currentTestTime || 0;
 
   if (!currentFrame) {
     return <div>Loading...</div>;

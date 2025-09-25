@@ -62,10 +62,11 @@ export default function FrameStepperButtonsTestPage() {
             duration: 5,
             currentTime: 0
           }
-        } as any,
-        time: 0,
-        currentFrame: frames[0]
+        } as any
       },
+      // Current test time and frame at top level
+      currentTestTime: 0,
+      currentFrame: frames[0],
       // Frame navigation state at top level
       prevFrame: initialPrevFrame,
       nextFrame: initialNextFrame

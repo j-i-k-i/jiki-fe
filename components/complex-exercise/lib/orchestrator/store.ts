@@ -55,6 +55,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Test time persistence - maps test slugs to their current time positions
       testCurrentTimes: {},
 
+      // Current test time - extracted from currentTest to prevent rerenders
+      currentTestTime: undefined,
+
+      // Current frame - extracted from currentTest to prevent rerenders
+      currentFrame: undefined,
+
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
         const state = get();
@@ -68,12 +74,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         const prevFrame = TimelineManager.findPrevFrame(
           state.currentTest.frames,
-          state.currentTest.time,
+          state.currentTestTime,
           state.foldedLines
         );
         const nextFrame = TimelineManager.findNextFrame(
           state.currentTest.frames,
-          state.currentTest.time,
+          state.currentTestTime,
           state.foldedLines
         );
 
@@ -93,13 +99,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }
 
         const prevBreakpointFrame = BreakpointManager.findPrevBreakpointFrame(
-          state.currentTest.currentFrame,
+          state.currentFrame,
           state.currentTest.frames,
           state.breakpoints,
           state.foldedLines
         );
         const nextBreakpointFrame = BreakpointManager.findNextBreakpointFrame(
-          state.currentTest.currentFrame,
+          state.currentFrame,
           state.currentTest.frames,
           state.breakpoints,
           state.foldedLines
@@ -119,6 +125,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         if (!test) {
           set({
             currentTest: test,
+            currentTestTime: undefined,
+            currentFrame: undefined,
             highlightedLine: 0
           });
           return;
@@ -127,18 +135,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         const state = get();
         // Check if we have a saved time for this test
         const savedTime = state.testCurrentTimes[test.slug];
-        const timeToUse = savedTime !== undefined ? savedTime : test.time;
-
-        // Create test with the appropriate time
-        const testWithTime = {
-          ...test,
-          time: timeToUse
-        };
+        const timeToUse = savedTime !== undefined ? savedTime : (test.frames.at(0)?.time ?? 0);
 
         set({
-          currentTest: testWithTime,
-          // Update highlighted line when setting a new test
-          highlightedLine: testWithTime.currentFrame?.line ?? 0
+          currentTest: test,
+          currentTestTime: timeToUse,
+          currentFrame: undefined,
+          highlightedLine: 0
         });
 
         // Trigger frame calculations with the restored/initial time
@@ -151,10 +154,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }
 
         set({
-          currentTest: {
-            ...state.currentTest,
-            currentFrame: frame
-          },
+          currentFrame: frame,
           highlightedLine: frame.line
         });
 
@@ -170,10 +170,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         // Update timeline time and persist it for this test
         set({
-          currentTest: {
-            ...state.currentTest,
-            time: time
-          },
+          currentTestTime: time,
           testCurrentTimes: {
             ...state.testCurrentTimes,
             [state.currentTest.slug]: time
@@ -369,7 +366,11 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           prevFrame: undefined,
           nextFrame: undefined,
           prevBreakpointFrame: undefined,
-          nextBreakpointFrame: undefined
+          nextBreakpointFrame: undefined,
+
+          // Reset current test time and frame
+          currentTestTime: undefined,
+          currentFrame: undefined
         })
     }))
   );
@@ -420,7 +421,13 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       nextBreakpointFrame: state.nextBreakpointFrame,
 
       // Test time persistence
-      testCurrentTimes: state.testCurrentTimes
+      testCurrentTimes: state.testCurrentTimes,
+
+      // Current test time
+      currentTestTime: state.currentTestTime,
+
+      // Current frame
+      currentFrame: state.currentFrame
     }))
   );
 }

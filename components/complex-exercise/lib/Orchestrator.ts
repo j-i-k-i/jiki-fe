@@ -127,8 +127,8 @@ class Orchestrator {
     // Set folded lines first
     state.setFoldedLines(lines);
     // Then recalculate the frame with the new folded lines
-    if (state.currentTest) {
-      state.setCurrentTestTime(state.currentTest.time);
+    if (state.currentTest && state.currentTestTime !== undefined) {
+      state.setCurrentTestTime(state.currentTestTime);
     }
   }
 

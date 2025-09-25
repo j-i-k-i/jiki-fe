@@ -6,7 +6,7 @@ import { useOrchestrator } from "../../lib/OrchestratorContext";
 interface ScrubberInputProps {
   frames: Frame[];
   animationTimeline: AnimationTimeline | null;
-  time: number;
+  time: number | undefined;
   enabled: boolean;
 }
 
@@ -25,7 +25,7 @@ const ScrubberInput = forwardRef<HTMLInputElement, ScrubberInputProps>(
         max={calculateMaxInputValue(animationTimeline ?? { duration: 0 })}
         ref={ref}
         onInput={updateInputBackground}
-        value={time}
+        value={time ?? 0}
         onChange={(event) => {
           handleChange(event, orchestrator);
           updateInputBackground();

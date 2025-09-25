@@ -56,6 +56,12 @@ export interface OrchestratorState {
 
   // Test time persistence - maps test slugs to their current time positions
   testCurrentTimes: Record<string, number | undefined>;
+
+  // Current test time - extracted from currentTest to prevent rerenders
+  currentTestTime: number | undefined;
+
+  // Current frame - extracted from currentTest to prevent rerenders
+  currentFrame: Frame | undefined;
 }
 
 // Private actions only accessible within the orchestrator

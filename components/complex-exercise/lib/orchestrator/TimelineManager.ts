@@ -1,7 +1,7 @@
-import type { StoreApi } from "zustand/vanilla";
 import type { Frame } from "interpreters";
-import type { OrchestratorState } from "../types";
 import { TIME_SCALE_FACTOR } from "interpreters";
+import type { StoreApi } from "zustand/vanilla";
+import type { OrchestratorState } from "../types";
 
 /**
  * TimelineManager handles all timeline and frame-related operations.
@@ -187,7 +187,7 @@ export class TimelineManager {
     // Convert microseconds to milliseconds for AnimeJS
     const animationTimeline = state.currentTest?.animationTimeline;
     if (animationTimeline) {
-      animationTimeline.seek(time / TIME_SCALE_FACTOR);
+      animationTimeline.seek(Math.round(time / TIME_SCALE_FACTOR));
     }
   }
 
@@ -197,7 +197,7 @@ export class TimelineManager {
    */
   getNearestCurrentFrame(): Frame | null {
     const state = this.store.getState();
-    const time = state.currentTest?.time;
+    const time = state.currentTestTime;
     if (time === undefined) {
       return null;
     }
@@ -241,7 +241,7 @@ export class TimelineManager {
   findPrevFrame(currentIdx?: number): Frame | undefined {
     const state = this.store.getState();
     const frames = state.currentTest?.frames;
-    const time = state.currentTest?.time;
+    const time = state.currentTestTime;
 
     if (!frames || frames.length === 0) {
       return undefined;
@@ -316,7 +316,7 @@ export class TimelineManager {
   private getCurrentOrFirstFrameIdx(): number | undefined {
     const state = this.store.getState();
     const frames = state.currentTest?.frames;
-    const time = state.currentTest?.time;
+    const time = state.currentTestTime;
 
     if (!frames) {
       return undefined;
@@ -343,7 +343,7 @@ export class TimelineManager {
   private getCurrentOrLastFrameIdx(): number | undefined {
     const state = this.store.getState();
     const frames = state.currentTest?.frames;
-    const time = state.currentTest?.time;
+    const time = state.currentTestTime;
 
     if (!frames) {
       return undefined;

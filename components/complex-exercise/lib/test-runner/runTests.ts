@@ -1,11 +1,10 @@
 import { jikiscript } from "interpreters";
 // Frame type imported for use in type assertions
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Frame } from "interpreters";
-import type { TestSuiteResult, TestResult } from "../test-results-types";
+import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
 import { BasicExercise } from "../mock-exercise/BasicExercise";
 import basicTests from "../mock-exercise/BasicExercise.test";
-import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
+import type { TestResult, TestSuiteResult } from "../test-results-types";
 
 interface Scenario {
   slug: string;
@@ -64,8 +63,7 @@ function runScenario(scenario: Scenario, studentCode: string): TestResult {
     frames,
     codeRun: studentCode,
     view: exercise.getView(),
-    animationTimeline,
-    time: frames[0]?.time || 0
+    animationTimeline
   };
 }
 
