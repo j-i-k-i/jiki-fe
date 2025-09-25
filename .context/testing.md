@@ -387,17 +387,18 @@ const store = mockStore({
 
 ### GitHub Actions
 
-Three separate workflows run in parallel for better performance and clarity:
+Four separate workflows run in parallel for better performance and clarity:
 
 - **Formatting** (`.github/workflows/formatting.yml`): Checks code style with Prettier
 - **Unit Tests** (`.github/workflows/unit-tests.yml`): Runs linting and Jest unit tests with coverage
 - **E2E Tests** (`.github/workflows/e2e-tests.yml`): Runs Puppeteer browser automation tests
+- **Type Check** (`.github/workflows/typecheck.yml`): Validates TypeScript types across the codebase
 
 #### Important CI Notes
 
-- **Ubuntu Compatibility**: Workflows use `ubuntu-latest`. For Ubuntu 24.04+, use `libasound2t64` and `libgtk-3-0t64` instead of the older package names
+- **Ubuntu Compatibility**: Workflows use `ubuntu-latest`
 - **Jest Command Syntax**: Use `pnpm run test --coverage --ci` (not `pnpm test -- --coverage --ci`) to avoid flags being interpreted as test patterns
-- **Node Versions**: Unit tests run on Node 20.x and 22.x matrix, E2E tests run on Node 20.x only
+- **Node Versions**: Tests run on Node 20.x and 22.x matrix
 
 ### Git Hooks
 

@@ -5,7 +5,9 @@
 - `./bin/dev` or `pnpm run dev` - Start development server on port 3060 (uses webpack)
 - `npx tsc --noEmit` - Check TypeScript types (preferred for type checking)
 - `pnpm run lint` - Run ESLint for code quality checks
-- `pnpm run build` - Build production bundle
+- `pnpm run format` - Format code with Prettier
+- `pnpm run format:check` - Check code formatting without changing files
+- `pnpm run build` - Build production bundle (CAUTION: can break dev server)
 - `pnpm run start` - Start production server
 
 ## Testing Commands
@@ -38,11 +40,12 @@
 
 ## Package Management
 
-This project uses pnpm for package management:
+This project uses pnpm with workspaces for monorepo management:
 
-- `pnpm install` - Install dependencies
+- `pnpm install` - Install dependencies (including workspace packages)
 - `pnpm add [package]` - Add new dependency
 - `pnpm remove [package]` - Remove dependency
+- `pnpm prepare` - Set up Husky git hooks (runs automatically after install)
 
 ## Development Server
 
@@ -52,6 +55,8 @@ The dev server runs on port 3060 by default:
 - Uses webpack (Turbopack disabled due to pnpm workspace compatibility issues)
 - Hot module replacement enabled
 
-### Note on Turbopack
+### Important Notes
 
-Turbopack is currently disabled due to incompatibility with pnpm workspaces and the interpreters package. The dev server uses webpack instead, which fully supports all features but with slightly slower build times.
+- **Build Command**: Avoid using `pnpm run build` during development as it can cause the dev server to break with ENOENT errors for buildManifest.js.tmp files
+- **Turbopack**: Currently disabled due to incompatibility with pnpm workspaces and the interpreters package. Using webpack instead
+- **Type Checking**: Always use `npx tsc --noEmit` for type checking instead of the build command
