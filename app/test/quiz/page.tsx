@@ -7,6 +7,7 @@ import { FillInQuizCard } from "@/components/quiz-card/FillInQuizCard";
 import { mockQuizQuestions } from "@/components/quiz-card/mockData";
 import { mockCodingQuizQuestions } from "@/components/quiz-card/mockCodingData";
 import { mockFillInQuizQuestions } from "@/components/quiz-card/mockFillInData";
+import { SoundToggle } from "@/components/ui/SoundToggle";
 
 export default function QuizTestPage() {
   const [quizType, setQuizType] = useState<"multiple-choice" | "coding" | "fill-in">("multiple-choice");
@@ -36,37 +37,40 @@ export default function QuizTestPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Quiz Test Page</h1>
 
-          <div className="flex justify-center gap-4 mb-4">
-            <button
-              onClick={() => setQuizType("multiple-choice")}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                quizType === "multiple-choice"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              Multiple Choice
-            </button>
-            <button
-              onClick={() => setQuizType("coding")}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                quizType === "coding"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              Coding Quiz
-            </button>
-            <button
-              onClick={() => setQuizType("fill-in")}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                quizType === "fill-in"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              Fill in the Blanks
-            </button>
+          <div className="flex justify-center items-center gap-4 mb-4">
+            <div className="flex gap-4">
+              <button
+                onClick={() => setQuizType("multiple-choice")}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  quizType === "multiple-choice"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                Multiple Choice
+              </button>
+              <button
+                onClick={() => setQuizType("coding")}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  quizType === "coding"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                Coding Quiz
+              </button>
+              <button
+                onClick={() => setQuizType("fill-in")}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  quizType === "fill-in"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                Fill in the Blanks
+              </button>
+            </div>
+            <SoundToggle />
           </div>
 
           <p className="text-gray-600">
