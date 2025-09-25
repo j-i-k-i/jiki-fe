@@ -23,9 +23,9 @@ describe("Test Runner E2E", () => {
     // Wait for test results to appear
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 2000 });
 
-    // Check that test suite results show
+    // Check that test suite results show (2 regular tests + 1 bonus test)
     const testButtons = await page.$$(".test-selector-buttons .test-button");
-    expect(testButtons.length).toBe(2);
+    expect(testButtons.length).toBe(3);
 
     // Check test status
     const testStatus = await page.evaluate(() => {
@@ -33,8 +33,8 @@ describe("Test Runner E2E", () => {
       return Array.from(buttons).map((btn) => btn.classList.contains("pass"));
     });
 
-    // Both tests should pass
-    expect(testStatus).toEqual([true, true]);
+    // First two tests should pass (regular tests), bonus test should fail
+    expect(testStatus).toEqual([true, true, false]);
 
     // Check that the view container is present
     const viewContainer = await page.$("#view-container");
@@ -79,8 +79,8 @@ describe("Test Runner E2E", () => {
       return Array.from(buttons).map((btn) => btn.classList.contains("fail"));
     });
 
-    // Both tests should fail
-    expect(testStatus).toEqual([true, true]);
+    // All tests should fail (2 regular + 1 bonus)
+    expect(testStatus).toEqual([true, true, true]);
 
     // Check for error message
     const errorMessage = await page.$(".scenario-lhs-content");
@@ -103,7 +103,7 @@ describe("Test Runner E2E", () => {
 
     // Click second test button
     const testButtons = await page.$$(".test-selector-buttons .test-button");
-    expect(testButtons.length).toBe(2);
+    expect(testButtons.length).toBe(3); // 2 regular + 1 bonus
     await testButtons[1].click();
 
     // Wait for view update
