@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 
 // Register some global shortcuts at module level
 // These persist for the entire app lifetime
-keyboard.on("cmd+h", () => keyboard.showHelp(), {
+keyboard.on("?", () => keyboard.showHelp(), {
   description: "Show keyboard shortcuts help"
 });
 
