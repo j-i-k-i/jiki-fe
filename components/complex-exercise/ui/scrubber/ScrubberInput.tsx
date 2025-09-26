@@ -67,13 +67,7 @@ function handleOnKeyDown(
 // But when they let go of the mouse we need to lock onto a frame. So this
 // does that. It grabs the nearest frame to the current scrub and moves to it.
 function handleOnMouseUp(orchestrator: ReturnType<typeof useOrchestrator>) {
-  const nearestFrame = orchestrator.getNearestCurrentFrame();
-  if (!nearestFrame) {
-    return;
-  }
-
-  // Snap to the nearest frame's timeline position
-  orchestrator.setCurrentTestTime(nearestFrame.time);
+  orchestrator.snapToNearestFrame();
 }
 
 function updateInputBackground() {

@@ -21,7 +21,9 @@ The scrubber uses the orchestrator pattern for centralized state management with
 components/complex-exercise/ui/scrubber/
 ├── Scrubber.tsx              # Main container, coordinates state
 ├── ScrubberInput.tsx          # Range input for timeline scrubbing
-└── FrameStepperButtons.tsx   # Previous/next frame navigation
+├── FrameStepperButtons.tsx   # Previous/next frame navigation
+├── BreakpointStepperButtons.tsx # Breakpoint navigation
+└── PlayPauseButton.tsx        # Play/pause control for animation
 ```
 
 ### Orchestrator Integration
@@ -32,6 +34,7 @@ The orchestrator (`components/complex-exercise/lib/Orchestrator.ts`) manages:
 - Frame navigation logic
 - Timeline time calculations
 - Animation timeline integration
+- Play/pause state (`isPlaying` in store)
 
 ## Key Concepts
 
@@ -47,7 +50,9 @@ The orchestrator provides key navigation methods:
 
 - `setCurrentTestTime(time: number)` - Set time position in microseconds
 - `getNearestCurrentFrame(): Frame | null` - Get nearest frame to current position
-- `getCurrentFrame(): Frame | null` - Get current frame (cached for performance)
+- `snapToNearestFrame()` - Snap to nearest frame (used by pause and scrubber mouseUp)
+- `play()` - Start animation playback
+- `pause()` - Pause animation and snap to nearest frame
 
 **Performance Optimization**: Previous and next frames are now calculated and stored in the Zustand store for better performance. This avoids recalculating frame positions on every render and enables efficient frame navigation.
 
@@ -61,13 +66,19 @@ The orchestrator provides key navigation methods:
 2. **ScrubberInput.tsx**
    - Range input for timeline scrubbing
    - Calls `orchestrator.setCurrentTestTime` on change
-   - Snaps to nearest frame on mouse release
+   - Calls `orchestrator.snapToNearestFrame` on mouse release
    - Keyboard event handlers (space, arrows - TODO)
 
 3. **FrameStepperButtons.tsx**
    - Previous/next frame navigation buttons
    - Calculates frame existence for button states
    - Calls orchestrator methods for navigation
+
+4. **PlayPauseButton.tsx**
+   - Play/pause control using emojis (▶️/⏸️)
+   - Reads `isPlaying` state from orchestrator store
+   - Calls `orchestrator.play()` or `orchestrator.pause()`
+   - Only shows when animation timeline exists
 
 ## Navigation Controls
 
@@ -84,13 +95,31 @@ Planned keyboard shortcuts in ScrubberInput:
 ### Mouse Interactions
 
 - **Scrub**: Drag slider to navigate timeline
-- **Release**: Snaps to nearest frame via `getNearestCurrentFrame()`
+- **Release**: Snaps to nearest frame via `orchestrator.snapToNearestFrame()`
 - **Frame Buttons**: Jump to prev/next frame
 - **Container Click**: Focus input for keyboard control
 
 ## Enabled State Logic
 
 The scrubber calculates enabled state based on whether there's a current test, code hasn't been edited, spotlight isn't active, and there are at least 2 frames. All child components receive this as an `enabled` prop.
+
+## Animation Timeline Management
+
+### Timeline Synchronization
+
+When switching between tests:
+
+1. The old test's `animationTimeline.clearUpdateCallbacks()` is called to clean up callbacks
+2. The new test's `animationTimeline.onUpdate()` is set up to sync timeline position with store
+3. The callback converts AnimeJS milliseconds to microseconds using TIME_SCALE_FACTOR
+
+### Play/Pause Implementation
+
+The play/pause functionality uses the orchestrator pattern:
+
+- **State**: `isPlaying` boolean in orchestrator store
+- **Play**: Sets `isPlaying` to true, hides information widget, calls `animationTimeline.play()`
+- **Pause**: Sets `isPlaying` to false, calls `animationTimeline.pause()`, then `snapToNearestFrame()`
 
 ## Frame Structure
 

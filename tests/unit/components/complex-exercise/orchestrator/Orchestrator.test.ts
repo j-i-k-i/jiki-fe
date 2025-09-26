@@ -1,6 +1,6 @@
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
-import { mockFrame } from "@/tests/mocks";
+import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
 import { renderHook } from "@testing-library/react";
 
 // Mock localStorage functions
@@ -90,7 +90,7 @@ describe("Orchestrator", () => {
         expects: [],
         view: document.createElement("div"),
         frames: testFrames,
-        animationTimeline: null as any
+        animationTimeline: mockAnimationTimeline()
       });
 
       const state = orchestrator.getStore().getState();
@@ -128,7 +128,7 @@ describe("Orchestrator", () => {
         expects: [],
         view: document.createElement("div"),
         frames: testFrames,
-        animationTimeline: null as any
+        animationTimeline: mockAnimationTimeline()
       });
 
       // Verify initial state

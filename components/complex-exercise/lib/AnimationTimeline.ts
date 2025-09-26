@@ -18,21 +18,10 @@ export type Animation =
 
 export class AnimationTimeline {
   private animationTimeline: Timeline;
-  private currentIndex: number = 0;
-  public currentFrame?: Frame;
-  public previousFrame?: Frame | null;
-  public nextFrame?: Frame | null;
-  public progress: number = 0;
   private updateCallbacks: ((anim: Timeline) => void)[] = [];
-  private readonly playCallbacks: ((anim: Timeline) => void)[] = [];
-  private readonly stopCallbacks: ((anim: Timeline) => void)[] = [];
   public hasPlayedOrScrubbed = false;
-  public showPlayButton = true;
 
-  constructor(
-    initialOptions: DefaultsParams,
-    private readonly frames: Frame[] = []
-  ) {
+  constructor(initialOptions: DefaultsParams) {
     this.animationTimeline = createTimeline({
       defaults: {
         ease: "linear",
@@ -40,17 +29,7 @@ export class AnimationTimeline {
       },
       autoplay: false,
       onUpdate: (anim: Timeline) => {
-        this.updateScrubber(anim);
         this.updateCallbacks.forEach((cb) => cb(anim));
-      },
-      onBegin: (anim: Timeline) => {
-        this.playCallbacks.forEach((cb) => cb(anim));
-      },
-      onComplete: (anim: Timeline) => {
-        this.stopCallbacks.forEach((cb) => cb(anim));
-      },
-      onPause: (anim: Timeline) => {
-        this.stopCallbacks.forEach((cb) => cb(anim));
       }
     });
   }
@@ -63,23 +42,13 @@ export class AnimationTimeline {
 
   public onUpdate(callback: (anim: Timeline) => void) {
     this.updateCallbacks.push(callback);
-
-    callback(this.animationTimeline);
-    setTimeout(() => this.updateScrubber(this.animationTimeline), 1);
-  }
-  public onPlay(callback: (anim: Timeline) => void) {
-    this.playCallbacks.push(callback);
-  }
-  public onStop(callback: (anim: Timeline) => void) {
-    this.stopCallbacks.push(callback);
   }
 
-  public removeUpdateCallback(callback: (anim: Timeline) => void) {
-    this.updateCallbacks = this.updateCallbacks.filter((cb) => cb !== callback);
+  public clearUpdateCallbacks() {
+    this.updateCallbacks = [];
   }
 
-  public populateTimeline(animations: Animation[], placeholder: boolean): this {
-    this.showPlayButton = !placeholder;
+  public populateTimeline(animations: Animation[], frames: Frame[] = []): this {
     animations.forEach((animation: Animation) => {
       const { targets, offset, transformations, ...rest } = animation;
       // Using Object.assign instead of spread operator to avoid TypeScript compile-time error
@@ -104,7 +73,7 @@ export class AnimationTimeline {
     */
 
     const animationDurationAfterAnimations = this.animationTimeline.duration;
-    const lastFrame = this.frames[this.frames.length - 1];
+    const lastFrame = frames[frames.length - 1];
 
     // ESLint doesn't realize lastFrame can be undefined when frames array is empty
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -113,80 +82,18 @@ export class AnimationTimeline {
     return this;
   }
 
-  public get timeline() {
-    return this.animationTimeline;
-  }
-
   public get duration() {
     // Translate this back to microseconds
     return this.animationTimeline.duration * TIME_SCALE_FACTOR;
   }
 
-  public get currentTime() {
-    return this.progress;
-  }
+  // public seekEndOfTimeline() {
+  //   this.animationTimeline.seek(this.animationTimeline.duration);
+  // }
 
-  private updateScrubber(anim: Timeline) {
-    this.progress = anim.currentTime;
-
-    const reversedIndex = this.frames
-      .slice()
-      .reverse()
-      .findIndex((frame) => frame.timeInMs <= this.progress);
-
-    this.currentIndex = this.frames.length - 1 - reversedIndex;
-
-    this.currentFrame = this.frames[this.currentIndex];
-
-    this.previousFrame = this.currentIndex > 0 ? this.frames[this.currentIndex - 1] : null;
-
-    this.nextFrame = this.currentIndex < this.frames.length - 1 ? this.frames[this.currentIndex + 1] : null;
-  }
-
-  public frameAtTime(time: number) {
-    const reversedIndex = this.frames
-      .slice()
-      .reverse()
-      .findIndex((frame) => frame.timeInMs <= time);
-
-    const index = this.frames.length - 1 - reversedIndex;
-
-    return this.frames[index];
-  }
-
-  public getProgress() {
-    return this.progress;
-  }
-
-  public getCurrentFrame() {
-    return this.currentFrame;
-  }
-
-  public get currentFrameIndex() {
-    return this.currentIndex;
-  }
-
-  public get framesLength() {
-    return this.frames.length;
-  }
-
-  public seekFirstFrame() {
-    this.animationTimeline.seek(0);
-  }
-
-  public seekLastFrame() {
-    this.animationTimeline.seek(this.frames[this.frames.length - 1].timeInMs);
-  }
-
-  public seekEndOfTimeline() {
-    this.animationTimeline.seek(this.animationTimeline.duration);
-  }
-
-  public getFrames() {
-    return this.frames;
-  }
   public seek(time: number) {
-    this.animationTimeline.seek(time);
+    // Convert microseconds to milliseconds for AnimeJS
+    this.animationTimeline.seek(Math.round(time / TIME_SCALE_FACTOR));
   }
 
   public play(cb?: () => void) {
@@ -214,13 +121,5 @@ export class AnimationTimeline {
 
   public get completed(): boolean {
     return this.animationTimeline.completed;
-  }
-
-  public restart() {
-    this.animationTimeline.restart();
-  }
-
-  public reverse() {
-    this.animationTimeline.reverse();
   }
 }

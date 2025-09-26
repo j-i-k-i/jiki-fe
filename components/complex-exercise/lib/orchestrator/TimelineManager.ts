@@ -1,5 +1,4 @@
 import type { Frame } from "interpreters";
-import { TIME_SCALE_FACTOR } from "interpreters";
 import type { StoreApi } from "zustand/vanilla";
 import type { OrchestratorState } from "../types";
 
@@ -176,10 +175,9 @@ export class TimelineManager {
     state.setCurrentTestTime(time);
 
     // Also seek the animation timeline if it exists
-    // Convert microseconds to milliseconds for AnimeJS
     const animationTimeline = state.currentTest?.animationTimeline;
     if (animationTimeline) {
-      animationTimeline.seek(Math.round(time / TIME_SCALE_FACTOR));
+      animationTimeline.seek(time);
     }
   }
 
@@ -195,6 +193,20 @@ export class TimelineManager {
     }
 
     return TimelineManager.findNearestFrame(state.currentTest?.frames, time, state.foldedLines);
+  }
+
+  /**
+   * Snaps to the nearest frame - used by pause and ScrubberInput mouseUp.
+   * Finds the nearest frame and sets the timeline to that position.
+   */
+  snapToNearestFrame(): void {
+    const nearestFrame = this.getNearestCurrentFrame();
+    if (!nearestFrame) {
+      return;
+    }
+
+    // Snap to the nearest frame's timeline position
+    this.setTime(nearestFrame.time);
   }
 
   /**

@@ -113,12 +113,17 @@ class Orchestrator {
     this.store.getState().setExerciseTitle(title);
   }
 
-  setCurrentTestTime(time: number) {
-    this.timelineManager.setTime(time);
-  }
-
   setCurrentTest(test: TestResult | null) {
     this.store.getState().setCurrentTest(test);
+  }
+
+  /*
+    This method is specifically for when we want to set a specific time.
+    It's not for side-effects (e.g. when the animation is playing and we
+    are syncing the time).
+  */
+  setCurrentTestTime(time: number) {
+    this.timelineManager.setTime(time);
   }
 
   setFoldedLines(lines: number[]) {
@@ -187,6 +192,44 @@ class Orchestrator {
 
   setShouldAutoplayAnimation(autoplay: boolean) {
     this.store.getState().setShouldAutoplayAnimation(autoplay);
+  }
+
+  // Play/pause methods
+  play() {
+    const state = this.store.getState();
+    if (!state.currentTest) {
+      return;
+    }
+
+    // Set isPlaying state
+    state.setIsPlaying(true);
+
+    // Hide information widget on play (matches original behavior)
+    state.setShouldShowInformationWidget(false);
+
+    // Play the animation timeline
+    state.currentTest.animationTimeline.play();
+  }
+
+  pause() {
+    const state = this.store.getState();
+    if (!state.currentTest) {
+      return;
+    }
+
+    // Set isPlaying state
+    state.setIsPlaying(false);
+
+    // Pause the animation timeline
+    state.currentTest.animationTimeline.pause();
+
+    // Snap to nearest frame after pausing
+    this.snapToNearestFrame();
+  }
+
+  // Snap to the nearest frame - delegate to TimelineManager
+  snapToNearestFrame() {
+    this.timelineManager.snapToNearestFrame();
   }
 
   // Error store public methods

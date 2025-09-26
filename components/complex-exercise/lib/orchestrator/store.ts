@@ -2,6 +2,7 @@ import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
+import { TIME_SCALE_FACTOR } from "interpreters";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";
@@ -60,6 +61,9 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Current frame - extracted from currentTest to prevent rerenders
       currentFrame: undefined,
+
+      // Play/pause state
+      isPlaying: false,
 
       // Private actions - not exposed to components
       recalculateNavigationFrames: () => {
@@ -122,6 +126,14 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
       setCurrentTest: (test) => {
+        const state = get();
+        const oldTest = state.currentTest;
+
+        // Clean up old test's animation timeline callbacks
+        if (oldTest?.animationTimeline) {
+          oldTest.animationTimeline.clearUpdateCallbacks();
+        }
+
         if (!test) {
           set({
             currentTest: test,
@@ -132,7 +144,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           return;
         }
 
-        const state = get();
         // Check if we have a saved time for this test
         const savedTime = state.testCurrentTimes[test.slug];
         const timeToUse = savedTime !== undefined ? savedTime : (test.frames.at(0)?.time ?? 0);
@@ -142,6 +153,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           currentTestTime: timeToUse,
           currentFrame: undefined,
           highlightedLine: 0
+        });
+
+        // Set up animation timeline callback to sync with store
+        test.animationTimeline.onUpdate((anim) => {
+          // Convert from milliseconds to microseconds
+          get().setCurrentTestTime(anim.currentTime * TIME_SCALE_FACTOR);
         });
 
         // Trigger frame calculations with the restored/initial time
@@ -230,6 +247,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         }
       },
       setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
+      setIsPlaying: (playing) => set({ isPlaying: playing }),
 
       // Exercise data initialization with priority logic
       initializeExerciseData: (serverData?: {
@@ -374,7 +392,10 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset current test time and frame
           currentTestTime: 0,
-          currentFrame: undefined
+          currentFrame: undefined,
+
+          // Reset play/pause state
+          isPlaying: false
         })
     }))
   );
@@ -431,7 +452,10 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       currentTestTime: state.currentTestTime,
 
       // Current frame
-      currentFrame: state.currentFrame
+      currentFrame: state.currentFrame,
+
+      // Play/pause state
+      isPlaying: state.isPlaying
     }))
   );
 }

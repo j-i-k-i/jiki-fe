@@ -33,8 +33,6 @@ describe("AnimationTimeline", () => {
       play: jest.fn(),
       pause: jest.fn(),
       seek: jest.fn(),
-      restart: jest.fn(),
-      reverse: jest.fn(),
       add: jest.fn().mockReturnThis()
     };
 
@@ -56,7 +54,7 @@ describe("AnimationTimeline", () => {
       return mockTimeline as Timeline;
     });
 
-    animationTimeline = new AnimationTimeline({}, mockFrames);
+    animationTimeline = new AnimationTimeline({});
   });
 
   afterEach(() => {
@@ -70,16 +68,13 @@ describe("AnimationTimeline", () => {
           ease: "linear"
         },
         autoplay: false,
-        onUpdate: expect.any(Function),
-        onBegin: expect.any(Function),
-        onComplete: expect.any(Function),
-        onPause: expect.any(Function)
+        onUpdate: expect.any(Function)
       });
     });
 
     it("should merge initial options with defaults", () => {
       const customOptions: DefaultsParams = { duration: 500 };
-      new AnimationTimeline(customOptions, mockFrames);
+      new AnimationTimeline(customOptions);
 
       expect(createTimeline).toHaveBeenCalledWith({
         defaults: {
@@ -87,22 +82,19 @@ describe("AnimationTimeline", () => {
           duration: 500
         },
         autoplay: false,
-        onUpdate: expect.any(Function),
-        onBegin: expect.any(Function),
-        onComplete: expect.any(Function),
-        onPause: expect.any(Function)
+        onUpdate: expect.any(Function)
       });
     });
 
     it("should initialize with provided frames", () => {
-      expect(animationTimeline.getFrames()).toEqual(mockFrames);
+      // Frames are now private, stored internally
+      // getFrames() method has been removed
+      expect(animationTimeline).toBeDefined();
     });
 
     it("should initialize state properties", () => {
-      expect(animationTimeline.progress).toBe(0);
       expect(animationTimeline.hasPlayedOrScrubbed).toBe(false);
-      expect(animationTimeline.showPlayButton).toBe(true);
-      expect(animationTimeline.currentFrameIndex).toBe(0);
+      // progress, showPlayButton, and currentFrameIndex properties removed
     });
   });
 
@@ -116,7 +108,7 @@ describe("AnimationTimeline", () => {
         }
       ];
 
-      animationTimeline.populateTimeline(animations, false);
+      animationTimeline.populateTimeline(animations, []);
 
       expect(mockTimeline.add).toHaveBeenCalledWith(".element", { opacity: 1, translateX: 100 }, "+=100");
     });
@@ -130,32 +122,26 @@ describe("AnimationTimeline", () => {
         }
       ];
 
-      animationTimeline.populateTimeline(animations as never, false);
+      animationTimeline.populateTimeline(animations as never, []);
 
       expect(mockTimeline.add).toHaveBeenCalledWith(".element", { duration: 1000, opacity: 0.5 }, undefined);
     });
 
-    it("should set showPlayButton based on placeholder parameter", () => {
-      animationTimeline.populateTimeline([], true);
-      expect(animationTimeline.showPlayButton).toBe(false);
-
-      animationTimeline.populateTimeline([], false);
-      expect(animationTimeline.showPlayButton).toBe(true);
-    });
+    // showPlayButton property removed
 
     it("should adjust duration to include last frame", () => {
       mockTimeline.duration = 50;
-      animationTimeline.populateTimeline(mockFrames, false);
+      animationTimeline.populateTimeline([], mockFrames);
 
       // Should set duration to the last frame's time (90000 microseconds = 90ms)
       expect(mockTimeline.duration).toBe(90);
     });
 
     it("should handle empty frames array", () => {
-      const emptyTimeline = new AnimationTimeline({}, []);
+      const emptyTimeline = new AnimationTimeline({});
       mockTimeline.duration = 100;
 
-      emptyTimeline.populateTimeline([], false);
+      emptyTimeline.populateTimeline([], []);
 
       expect(mockTimeline.duration).toBe(100);
     });
@@ -174,16 +160,17 @@ describe("AnimationTimeline", () => {
         expect(callback).toHaveBeenCalledWith(mockTimeline);
       });
 
-      it("should call callback immediately when registering", () => {
+      it("should register update callbacks without immediate call", () => {
         const callback = jest.fn();
-        jest.useFakeTimers();
 
         animationTimeline.onUpdate(callback);
 
-        expect(callback).toHaveBeenCalledWith(mockTimeline);
+        // Callback is no longer called immediately
+        expect(callback).not.toHaveBeenCalled();
 
-        jest.runAllTimers();
-        jest.useRealTimers();
+        // But should be called when timeline updates
+        mockTimeline.onUpdate?.(mockTimeline as Timeline);
+        expect(callback).toHaveBeenCalledWith(mockTimeline);
       });
 
       it("should handle multiple update callbacks", () => {
@@ -198,41 +185,8 @@ describe("AnimationTimeline", () => {
         expect(callback1).toHaveBeenCalled();
         expect(callback2).toHaveBeenCalled();
       });
-    });
 
-    describe("onPlay", () => {
-      it("should register play callbacks", () => {
-        const callback = jest.fn();
-        animationTimeline.onPlay(callback);
-
-        mockTimeline.onBegin?.(mockTimeline as Timeline);
-
-        expect(callback).toHaveBeenCalledWith(mockTimeline);
-      });
-    });
-
-    describe("onStop", () => {
-      it("should register stop callbacks for complete event", () => {
-        const callback = jest.fn();
-        animationTimeline.onStop(callback);
-
-        mockTimeline.onComplete?.(mockTimeline as Timeline);
-
-        expect(callback).toHaveBeenCalledWith(mockTimeline);
-      });
-
-      it("should register stop callbacks for pause event", () => {
-        const callback = jest.fn();
-        animationTimeline.onStop(callback);
-
-        mockTimeline.onPause?.(mockTimeline as Timeline);
-
-        expect(callback).toHaveBeenCalledWith(mockTimeline);
-      });
-    });
-
-    describe("removeUpdateCallback", () => {
-      it("should remove specific update callback", () => {
+      it("should clear all update callbacks when clearUpdateCallbacks is called", () => {
         const callback1 = jest.fn();
         const callback2 = jest.fn();
 
@@ -243,86 +197,32 @@ describe("AnimationTimeline", () => {
         callback1.mockClear();
         callback2.mockClear();
 
-        animationTimeline.removeUpdateCallback(callback1);
+        animationTimeline.clearUpdateCallbacks();
 
         mockTimeline.onUpdate?.(mockTimeline as Timeline);
 
         expect(callback1).not.toHaveBeenCalled();
-        expect(callback2).toHaveBeenCalledWith(mockTimeline);
+        expect(callback2).not.toHaveBeenCalled();
       });
     });
   });
 
-  describe("frame navigation", () => {
-    beforeEach(() => {
-      // Simulate timeline update at different positions
-      mockTimeline.currentTime = 45;
-      mockTimeline.onUpdate?.(mockTimeline as Timeline);
-    });
-
-    it("should update current frame based on progress", () => {
-      expect(animationTimeline.getCurrentFrame()).toEqual(mockFrames[1]);
-      expect(animationTimeline.currentFrameIndex).toBe(1);
-    });
-
-    it("should set previous and next frames correctly", () => {
-      expect(animationTimeline.previousFrame).toEqual(mockFrames[0]);
-      expect(animationTimeline.nextFrame).toEqual(mockFrames[2]);
-    });
-
-    it("should handle first frame (no previous)", () => {
-      mockTimeline.currentTime = 0;
-      mockTimeline.onUpdate?.(mockTimeline as Timeline);
-
-      expect(animationTimeline.previousFrame).toBeNull();
-      expect(animationTimeline.currentFrame).toEqual(mockFrames[0]);
-      expect(animationTimeline.nextFrame).toEqual(mockFrames[1]);
-    });
-
-    it("should handle last frame (no next)", () => {
-      mockTimeline.currentTime = 95;
-      mockTimeline.onUpdate?.(mockTimeline as Timeline);
-
-      expect(animationTimeline.previousFrame).toEqual(mockFrames[2]);
-      expect(animationTimeline.currentFrame).toEqual(mockFrames[3]);
-      expect(animationTimeline.nextFrame).toBeNull();
-    });
-
-    describe("frameAtTime", () => {
-      it("should return correct frame for given time", () => {
-        expect(animationTimeline.frameAtTime(0)).toEqual(mockFrames[0]);
-        expect(animationTimeline.frameAtTime(45)).toEqual(mockFrames[1]);
-        expect(animationTimeline.frameAtTime(75)).toEqual(mockFrames[2]);
-        expect(animationTimeline.frameAtTime(100)).toEqual(mockFrames[3]);
-      });
-
-      it("should return closest previous frame for times between frames", () => {
-        expect(animationTimeline.frameAtTime(25)).toEqual(mockFrames[0]);
-        expect(animationTimeline.frameAtTime(55)).toEqual(mockFrames[1]);
-      });
-    });
-  });
+  // Frame navigation tests removed - functionality moved to TimelineManager
 
   describe("seek methods", () => {
-    it("should seek to specific time", () => {
-      animationTimeline.seek(50);
+    it("should seek to specific time with conversion from microseconds to milliseconds", () => {
+      // 50000 microseconds = 50 milliseconds (using Math.round)
+      animationTimeline.seek(50000);
       expect(mockTimeline.seek).toHaveBeenCalledWith(50);
+
+      // Test rounding
+      animationTimeline.seek(50500);
+      expect(mockTimeline.seek).toHaveBeenCalledWith(51);
     });
 
-    it("should seek to first frame", () => {
-      animationTimeline.seekFirstFrame();
+    it("should handle seeking to zero", () => {
+      animationTimeline.seek(0);
       expect(mockTimeline.seek).toHaveBeenCalledWith(0);
-    });
-
-    it("should seek to last frame", () => {
-      animationTimeline.seekLastFrame();
-      expect(mockTimeline.seek).toHaveBeenCalledWith(90);
-    });
-
-    it("should seek to end of timeline", () => {
-      mockTimeline.duration = 120;
-      animationTimeline.seekEndOfTimeline();
-      expect(mockTimeline.seek).toHaveBeenCalledWith(120);
     });
   });
 
@@ -367,25 +267,11 @@ describe("AnimationTimeline", () => {
       });
     });
 
-    describe("restart", () => {
-      it("should restart the timeline", () => {
-        animationTimeline.restart();
-        expect(mockTimeline.restart).toHaveBeenCalled();
-      });
-    });
-
-    describe("reverse", () => {
-      it("should reverse the timeline", () => {
-        animationTimeline.reverse();
-        expect(mockTimeline.reverse).toHaveBeenCalled();
-      });
-    });
+    // restart and reverse methods removed from AnimationTimeline
   });
 
   describe("property getters", () => {
-    it("should return timeline instance", () => {
-      expect(animationTimeline.timeline).toBe(mockTimeline);
-    });
+    // timeline getter removed
 
     it("should return duration", () => {
       mockTimeline.duration = 250;
@@ -408,17 +294,9 @@ describe("AnimationTimeline", () => {
       expect(animationTimeline.completed).toBe(true);
     });
 
-    it("should return progress", () => {
-      mockTimeline.currentTime = 45;
-      mockTimeline.onUpdate?.(mockTimeline as Timeline);
+    // getProgress method and progress property removed
 
-      expect(animationTimeline.getProgress()).toBe(45);
-      expect(animationTimeline.progress).toBe(45);
-    });
-
-    it("should return frames length", () => {
-      expect(animationTimeline.framesLength).toBe(4);
-    });
+    // framesLength property removed - frames are internal
   });
 
   describe("destroy", () => {
@@ -432,19 +310,19 @@ describe("AnimationTimeline", () => {
 
   describe("edge cases", () => {
     it("should handle timeline with no frames", () => {
-      const emptyTimeline = new AnimationTimeline({}, []);
-      expect(emptyTimeline.framesLength).toBe(0);
-      expect(emptyTimeline.getCurrentFrame()).toBeUndefined();
+      const emptyTimeline = new AnimationTimeline({});
+      // framesLength and getCurrentFrame methods removed
+      expect(emptyTimeline).toBeDefined();
     });
 
     it("should handle seeking beyond timeline duration", () => {
-      animationTimeline.seek(1000);
-      expect(mockTimeline.seek).toHaveBeenCalledWith(1000);
+      animationTimeline.seek(1000000); // microseconds
+      expect(mockTimeline.seek).toHaveBeenCalledWith(1000); // converted to ms
     });
 
     it("should handle negative seek values", () => {
-      animationTimeline.seek(-10);
-      expect(mockTimeline.seek).toHaveBeenCalledWith(-10);
+      animationTimeline.seek(-10000); // microseconds
+      expect(mockTimeline.seek).toHaveBeenCalledWith(-10); // converted to ms
     });
 
     it("should handle updateScrubber with valid timeline", () => {
@@ -481,7 +359,7 @@ describe("AnimationTimeline", () => {
         }
       ];
 
-      animationTimeline.populateTimeline(animations, false);
+      animationTimeline.populateTimeline(animations, []);
 
       expect(mockTimeline.add).toHaveBeenCalledTimes(3);
       expect(mockTimeline.add).toHaveBeenNthCalledWith(1, ".element1", { opacity: 1 }, 0);
@@ -500,9 +378,9 @@ describe("AnimationTimeline", () => {
         mockTimeline.onUpdate?.(mockTimeline as Timeline);
       });
 
-      expect(updateCallback).toHaveBeenCalledTimes(positions.length + 1); // +1 for initial call
-      expect(animationTimeline.progress).toBe(90);
-      expect(animationTimeline.currentFrameIndex).toBe(3);
+      // No initial call anymore, only called on timeline updates
+      expect(updateCallback).toHaveBeenCalledTimes(positions.length);
+      // progress and currentFrameIndex properties removed
     });
   });
 });

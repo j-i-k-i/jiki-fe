@@ -76,7 +76,10 @@ describe("CodeEditor", () => {
 
       // Current test time and frame
       currentTestTime: 0,
-      currentFrame: undefined
+      currentFrame: undefined,
+
+      // Play/pause state
+      isPlaying: false
     });
   });
 

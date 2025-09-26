@@ -46,7 +46,7 @@ function runScenario(scenario: Scenario, studentCode: string): TestResult {
   const frames = result.frames;
 
   // Always create animation timeline (required for scrubber)
-  const animationTimeline = new AnimationTimelineClass({}, frames).populateTimeline(exercise.animations, false);
+  const animationTimeline = new AnimationTimelineClass({}).populateTimeline(exercise.animations, frames);
 
   // Animation timeline is ready for scrubber
 
