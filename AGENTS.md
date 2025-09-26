@@ -24,6 +24,8 @@ Load the relevant context files from `.context/` directory based on your task:
 - [.context/git.md](.context/git.md) - Git hooks configuration
 - [.context/testing.md](.context/testing.md) - Testing setup and guidelines. **ALWAYS READ THIS BEFORE EDITING OR ADDING TESTS.**
 - [.context/eslint.md](.context/eslint.md) - ESLint configuration and how to handle lint errors. **ALWAYS READ THIS BEFORE LINTING**
+- [.context/toasts.md](.context/toasts.md) - Toast notifications with react-hot-toast
+- [.context/modals.md](.context/modals.md) - Global modal system
 
 ### Complex Exercise Context Files
 

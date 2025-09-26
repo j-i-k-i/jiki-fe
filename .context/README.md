@@ -27,6 +27,8 @@ General documentation that applies across the entire codebase:
 - **[git.md](./git.md)** - Git workflow and commit conventions
 - **[tech-stack.md](./tech-stack.md)** - Technologies, frameworks, and dependencies
 - **[testing.md](./testing.md)** - Testing setup, patterns, and guidelines
+- **[toasts.md](./toasts.md)** - Toast notifications system using react-hot-toast
+- **[modals.md](./modals.md)** - Global modal system with Zustand state management
 - **[sound.md](./sound.md)** - Sound system for audio feedback
 
 ### Complex Exercise Context (`complex-exercise/`)
