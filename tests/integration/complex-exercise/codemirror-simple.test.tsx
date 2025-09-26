@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import CodeEditor from "@/components/complex-exercise/ui/CodeEditor";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 // Simple integration test that uses real orchestrator with mocked CodeMirror editor
 jest.mock("@codemirror/view", () => {
@@ -148,7 +149,8 @@ jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
 
 describe("CodeMirror Integration with Real Orchestrator", () => {
   it("renders CodeEditor with real orchestrator and mocked CodeMirror", () => {
-    const orchestrator = new Orchestrator("integration-test", "console.log('Hello World');");
+    const exercise = createTestExercise({ slug: "integration-test", initialCode: "console.log('Hello World');" });
+    const orchestrator = new Orchestrator(exercise);
 
     render(
       <OrchestratorTestProvider orchestrator={orchestrator}>
@@ -162,7 +164,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("integrates orchestrator state management", () => {
-    const orchestrator = new Orchestrator("state-test", "const initial = true;");
+    const exercise = createTestExercise({ slug: "state-test", initialCode: "const initial = true;" });
+    const orchestrator = new Orchestrator(exercise);
 
     render(
       <OrchestratorTestProvider orchestrator={orchestrator}>
@@ -179,7 +182,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("responds to orchestrator state changes", () => {
-    const orchestrator = new Orchestrator("change-test", "const x = 1;");
+    const exercise = createTestExercise({ slug: "change-test", initialCode: "const x = 1;" });
+    const orchestrator = new Orchestrator(exercise);
 
     render(
       <OrchestratorTestProvider orchestrator={orchestrator}>
@@ -203,8 +207,10 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("handles multiple orchestrator instances independently", () => {
-    const orchestrator1 = new Orchestrator("uuid-1", "code1");
-    const orchestrator2 = new Orchestrator("uuid-2", "code2");
+    const exercise1 = createTestExercise({ slug: "uuid-1", initialCode: "code1" });
+    const exercise2 = createTestExercise({ slug: "uuid-2", initialCode: "code2" });
+    const orchestrator1 = new Orchestrator(exercise1);
+    const orchestrator2 = new Orchestrator(exercise2);
 
     const { rerender } = render(
       <OrchestratorTestProvider orchestrator={orchestrator1}>
@@ -237,7 +243,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("exposes editor management methods", () => {
-    const orchestrator = new Orchestrator("methods-test", "test code");
+    const exercise = createTestExercise({ slug: "methods-test", initialCode: "test code" });
+    const orchestrator = new Orchestrator(exercise);
 
     render(
       <OrchestratorTestProvider orchestrator={orchestrator}>
@@ -263,7 +270,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("maintains proper editor state lifecycle", () => {
-    const orchestrator = new Orchestrator("lifecycle-test", "initial code");
+    const exercise = createTestExercise({ slug: "lifecycle-test", initialCode: "initial code" });
+    const orchestrator = new Orchestrator(exercise);
 
     const { unmount } = render(
       <OrchestratorTestProvider orchestrator={orchestrator}>
@@ -285,7 +293,8 @@ describe("CodeMirror Integration with Real Orchestrator", () => {
   });
 
   it("supports editor configuration and extensions", () => {
-    const orchestrator = new Orchestrator("config-test", "test");
+    const exercise = createTestExercise({ slug: "config-test", initialCode: "test" });
+    const orchestrator = new Orchestrator(exercise);
 
     render(
       <OrchestratorTestProvider orchestrator={orchestrator}>

@@ -1,6 +1,7 @@
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
 import { mockAnimationTimeline, mockFrame } from "@/tests/mocks";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import { renderHook } from "@testing-library/react";
 
 // Mock localStorage functions
@@ -24,8 +25,12 @@ describe("Orchestrator", () => {
   });
 
   describe("constructor", () => {
-    it("should initialize with provided exerciseUuid and initial code", () => {
-      const orchestrator = new Orchestrator("test-uuid", "const x = 1;");
+    it("should initialize with provided exercise definition", () => {
+      const exercise = createTestExercise({
+        slug: "test-uuid",
+        initialCode: "const x = 1;"
+      });
+      const orchestrator = new Orchestrator(exercise);
       const state = orchestrator.getStore().getState();
 
       expect(state.exerciseUuid).toBe("test-uuid");
@@ -33,7 +38,11 @@ describe("Orchestrator", () => {
     });
 
     it("should initialize with default values", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
+      const exercise = createTestExercise({
+        slug: "test-uuid",
+        initialCode: ""
+      });
+      const orchestrator = new Orchestrator(exercise);
       const state = orchestrator.getStore().getState();
 
       expect(state.output).toBe("");
@@ -45,8 +54,10 @@ describe("Orchestrator", () => {
     });
 
     it("should create separate instances with separate stores", () => {
-      const orchestrator1 = new Orchestrator("uuid1", "code1");
-      const orchestrator2 = new Orchestrator("uuid2", "code2");
+      const exercise1 = createTestExercise({ slug: "uuid1", initialCode: "code1" });
+      const exercise2 = createTestExercise({ slug: "uuid2", initialCode: "code2" });
+      const orchestrator1 = new Orchestrator(exercise1);
+      const orchestrator2 = new Orchestrator(exercise2);
 
       const state1 = orchestrator1.getStore().getState();
       const state2 = orchestrator2.getStore().getState();
@@ -60,7 +71,8 @@ describe("Orchestrator", () => {
 
   describe("getStore", () => {
     it("should return the store instance", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
       const store = orchestrator.getStore();
 
       expect(store).toBeDefined();
@@ -71,7 +83,8 @@ describe("Orchestrator", () => {
 
   describe("frame synchronization", () => {
     it("should only update currentFrame when landing exactly on a frame", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
 
       // Create custom test frames
       const testFrames = [
@@ -110,7 +123,8 @@ describe("Orchestrator", () => {
     });
 
     it("should recalculate navigation frames when setFoldedLines is called", () => {
-      const orchestrator = new Orchestrator("test-uuid", "");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
 
       // Create custom test frames
       const testFrames = [
@@ -154,7 +168,8 @@ describe("Orchestrator", () => {
 
   describe("useOrchestratorStore hook", () => {
     it("should return the current state", () => {
-      const orchestrator = new Orchestrator("test-uuid", "initial code");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "initial code" });
+      const orchestrator = new Orchestrator(exercise);
 
       const { result } = renderHook(() => useOrchestratorStore(orchestrator));
 
@@ -170,7 +185,8 @@ describe("Orchestrator", () => {
     });
 
     it("should use shallow equality to prevent unnecessary renders", () => {
-      const orchestrator = new Orchestrator("test-uuid", "code");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "code" });
+      const orchestrator = new Orchestrator(exercise);
 
       const { result, rerender } = renderHook(() => useOrchestratorStore(orchestrator));
 
@@ -190,7 +206,8 @@ describe("Orchestrator", () => {
     let orchestrator: Orchestrator;
 
     beforeEach(() => {
-      orchestrator = new Orchestrator("test-uuid", "initial code");
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "initial code" });
+      orchestrator = new Orchestrator(exercise);
     });
 
     describe("showInformationWidget", () => {
@@ -233,21 +250,18 @@ describe("Orchestrator", () => {
   });
 
   describe("initializeExerciseData", () => {
-    it("should initialize data with localStorage priority logic", () => {
+    it("should initialize data automatically in constructor", () => {
       // Arrange
-      const orchestrator = new Orchestrator("test-uuid", "initial code");
-      const serverData = {
-        code: "server code",
-        storedAt: new Date().toISOString()
-      };
+      const exercise = createTestExercise({
+        slug: "test-uuid",
+        initialCode: "initial code"
+      });
+      const orchestrator = new Orchestrator(exercise);
 
-      // Act
-      orchestrator.initializeExerciseData(serverData);
-
-      // Assert
+      // Assert - initializeExerciseData is now called in the constructor
       const state = orchestrator.getStore().getState();
-      expect(state.code).toBe("server code");
-      expect(state.defaultCode).toBe("server code");
+      expect(state.code).toBe("initial code");
+      expect(state.defaultCode).toBe("initial code");
     });
 
     it("should prefer localStorage when it exists and is newer", () => {
@@ -267,14 +281,13 @@ describe("Orchestrator", () => {
         }
       });
 
-      const orchestrator = new Orchestrator("test-uuid", "initial code");
-      const serverData = {
-        code: serverCode,
-        storedAt: serverTime.toISOString()
-      };
+      const exercise = createTestExercise({
+        slug: "test-uuid",
+        initialCode: serverCode
+      });
+      const orchestrator = new Orchestrator(exercise);
 
-      // Act
-      orchestrator.initializeExerciseData(serverData);
+      // Act - initializeExerciseData is called automatically in constructor
 
       // Assert
       const state = orchestrator.getStore().getState();

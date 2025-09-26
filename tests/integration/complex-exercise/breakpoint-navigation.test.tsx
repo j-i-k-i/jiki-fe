@@ -6,6 +6,7 @@ import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/
 import type { Frame } from "interpreters";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 import { mockFrame } from "@/tests/mocks";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 // Helper to create mock frames
 function createMockFrame(line: number, timeInMicroseconds: number): Frame {
@@ -14,7 +15,8 @@ function createMockFrame(line: number, timeInMicroseconds: number): Frame {
 
 // Helper to setup orchestrator with test data
 function setupOrchestrator(frames: Frame[], breakpoints: number[] = [], foldedLines: number[] = []) {
-  const orchestrator = new Orchestrator("test-uuid", "// test code");
+  const exercise = createTestExercise({ slug: "test-uuid", initialCode: "// test code" });
+  const orchestrator = new Orchestrator(exercise);
 
   // Set up test state with proper animation timeline mock
   orchestrator.getStore().setState({

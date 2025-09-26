@@ -6,6 +6,7 @@ import OrchestratorProvider from "@/components/complex-exercise/lib/Orchestrator
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import type { Frame } from "interpreters";
 import { mockFrame } from "@/tests/mocks";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 function mockFrames(): Frame[] {
   return [
@@ -35,7 +36,8 @@ console.log(\`Final answer: \${answer}\`);`;
 
 export default function BreakpointGutterTestPage() {
   // Use ref to ensure single orchestrator instance (following ComplexExercise pattern)
-  const orchestratorRef = useRef<Orchestrator>(new Orchestrator("test-breakpoint-gutter", TEST_CODE));
+  const exercise = createTestExercise({ slug: "test-breakpoint-gutter", initialCode: TEST_CODE });
+  const orchestratorRef = useRef<Orchestrator>(new Orchestrator(exercise));
   const orchestrator = orchestratorRef.current;
 
   // Get state from orchestrator store

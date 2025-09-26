@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import type { Frame } from "interpreters";
 
 // Create frames for testing
@@ -23,12 +24,11 @@ function mockFrames(): Frame[] {
 
 export default function BreakpointStepperButtonsTestPage() {
   // Use ref to ensure single orchestrator instance (following ComplexExercise pattern)
-  const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator(
-      "test-breakpoint-stepper",
-      `// Test code for breakpoint stepper\nconsole.log("Line 1");\nconsole.log("Line 2");\nconsole.log("Line 3");`
-    )
-  );
+  const exercise = createTestExercise({
+    slug: "test-breakpoint-stepper",
+    initialCode: `// Test code for breakpoint stepper\nconsole.log("Line 1");\nconsole.log("Line 2");\nconsole.log("Line 3");`
+  });
+  const orchestratorRef = useRef<Orchestrator>(new Orchestrator(exercise));
   const orchestrator = orchestratorRef.current;
 
   // Get state from orchestrator store

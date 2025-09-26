@@ -6,6 +6,7 @@ import OrchestratorProvider from "@/components/complex-exercise/lib/Orchestrator
 import { CodeMirror } from "@/components/complex-exercise/ui/codemirror/CodeMirror";
 import type { Frame } from "interpreters";
 import { mockFrame } from "@/tests/mocks";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 // Create frames for testing
 function mockFrames(): Frame[] {
@@ -54,7 +55,8 @@ console.log("Statistics:", stats);`;
 
 export default function CodeFoldingTestPage() {
   // Use ref to ensure single orchestrator instance (following ComplexExercise pattern)
-  const orchestratorRef = useRef<Orchestrator>(new Orchestrator("test-code-folding", TEST_CODE));
+  const exercise = createTestExercise({ slug: "test-code-folding", initialCode: TEST_CODE });
+  const orchestratorRef = useRef<Orchestrator>(new Orchestrator(exercise));
   const orchestrator = orchestratorRef.current;
 
   // Get state from orchestrator store

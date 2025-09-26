@@ -1,5 +1,8 @@
 import { runTests } from "@/components/complex-exercise/lib/test-runner/runTests";
 import { jikiscript } from "interpreters";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
+import type { Scenario } from "@/components/exercises/types";
+import { TestExercise } from "@/tests/mocks/test-exercise/Exercise";
 
 // Mock the interpreters module
 jest.mock("interpreters", () => ({
@@ -9,10 +12,10 @@ jest.mock("interpreters", () => ({
   TIME_SCALE_FACTOR: 1000
 }));
 
-// Mock the BasicExercise
-jest.mock("@/components/complex-exercise/lib/mock-exercise/BasicExercise", () => {
+// Mock the TestExercise
+jest.mock("@/tests/mocks/test-exercise/Exercise", () => {
   return {
-    BasicExercise: jest.fn().mockImplementation(() => ({
+    TestExercise: jest.fn().mockImplementation(() => ({
       position: 100, // This will match the expectation for start-at-0
       animations: [],
       availableFunctions: [
@@ -28,35 +31,25 @@ jest.mock("@/components/complex-exercise/lib/mock-exercise/BasicExercise", () =>
   };
 });
 
-// Mock the test scenarios
-jest.mock("@/components/complex-exercise/lib/mock-exercise/BasicExercise.test", () => ({
-  __esModule: true,
-  default: {
-    title: "Basic Movement",
-    exerciseType: "basic",
-    tasks: [
-      {
-        name: "Move the character",
-        scenarios: [
-          {
-            slug: "start-at-0",
-            name: "Starting from position 0",
-            description: "Move the character 5 times starting from position 0",
-            setup: jest.fn(),
-            expectations: jest.fn(() => [{ pass: true }])
-          },
-          {
-            slug: "start-at-50",
-            name: "Starting from position 50",
-            description: "Move the character 5 times starting from position 50",
-            setup: jest.fn(),
-            expectations: jest.fn(() => [{ pass: true }])
-          }
-        ]
-      }
-    ]
+// Create test scenarios
+const testScenarios: Scenario[] = [
+  {
+    slug: "start-at-0",
+    name: "Starting from position 0",
+    description: "Move the character 5 times starting from position 0",
+    taskId: "test-task",
+    setup: jest.fn(),
+    expectations: jest.fn(() => [{ pass: true, actual: 100, expected: 100, errorHtml: "" }])
+  },
+  {
+    slug: "start-at-50",
+    name: "Starting from position 50",
+    description: "Move the character 5 times starting from position 50",
+    taskId: "test-task",
+    setup: jest.fn(),
+    expectations: jest.fn(() => [{ pass: true, actual: 150, expected: 150, errorHtml: "" }])
   }
-}));
+];
 
 // Mock the AnimationTimeline
 jest.mock("@/components/complex-exercise/lib/AnimationTimeline", () => {
@@ -69,8 +62,14 @@ jest.mock("@/components/complex-exercise/lib/AnimationTimeline", () => {
 });
 
 describe("runTests", () => {
+  let testExercise: ReturnType<typeof createTestExercise>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    testExercise = createTestExercise({
+      ExerciseClass: TestExercise,
+      scenarios: testScenarios
+    });
   });
 
   describe("initial scrubber time", () => {
@@ -89,7 +88,7 @@ describe("runTests", () => {
       });
 
       const code = "move()\nmove()\nmove()";
-      const result = runTests(code);
+      const result = runTests(code, testExercise);
 
       // Check that tests have frames
       expect(result.tests[0].frames[0].time).toBe(100000);
@@ -104,7 +103,7 @@ describe("runTests", () => {
       });
 
       const code = "";
-      const result = runTests(code);
+      const result = runTests(code, testExercise);
 
       // Should have empty frames array
       expect(result.tests[0].frames).toEqual([]);
@@ -125,7 +124,7 @@ describe("runTests", () => {
       });
 
       const code = "move()\nmove()";
-      const result = runTests(code);
+      const result = runTests(code, testExercise);
 
       // Should have 2 test scenarios
       expect(result.tests).toHaveLength(2);
@@ -148,7 +147,7 @@ describe("runTests", () => {
       });
 
       const code = "for (let i = 0; i < 5; i++) {\n  move();\n}";
-      const result = runTests(code);
+      const result = runTests(code, testExercise);
 
       // Each test result should have codeRun set to the student code
       expect(result.tests[0].codeRun).toBe(code);

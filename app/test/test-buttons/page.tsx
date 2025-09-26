@@ -5,6 +5,7 @@ import OrchestratorProvider from "@/components/complex-exercise/lib/Orchestrator
 // TestResultsButtons component is not used - we're rendering buttons inline for this test
 // import { TestResultsButtons } from "@/components/complex-exercise/ui/test-results-view/TestResultsButtons";
 import { InspectedTestResultView } from "@/components/complex-exercise/ui/test-results-view/InspectedTestResultView";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import { useEffect, useRef } from "react";
 
 const initialCode = `function hello(name) {
@@ -17,7 +18,12 @@ function add(a, b) {
 
 export default function TestButtonsTestPage() {
   // Create orchestrator once using useRef (prevents re-creation on re-renders)
-  const orchestratorRef = useRef<Orchestrator>(new Orchestrator("test-buttons-e2e-id", initialCode));
+  const exercise = createTestExercise({
+    slug: "test-buttons-e2e-id",
+    initialCode,
+    title: "Test Buttons E2E Test"
+  });
+  const orchestratorRef = useRef<Orchestrator>(new Orchestrator(exercise));
   const orchestrator = orchestratorRef.current;
 
   // Use the orchestrator store hook
@@ -25,9 +31,6 @@ export default function TestButtonsTestPage() {
 
   // Initialize test state in useEffect
   useEffect(() => {
-    // Set up the orchestrator for testing
-    orchestrator.setExerciseTitle("Test Buttons E2E Test");
-
     // Expose orchestrator to window for E2E testing
     (window as any).testOrchestrator = orchestrator;
 
