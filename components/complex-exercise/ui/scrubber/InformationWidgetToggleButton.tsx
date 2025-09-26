@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
 import "./InformationWidgetToggleButton.css";
@@ -7,13 +6,13 @@ export default function InformationWidgetToggleButton({ disabled }: { disabled: 
   const orchestrator = useOrchestrator();
   const { shouldShowInformationWidget } = useOrchestratorStore(orchestrator);
 
-  const handleToggle = useCallback(() => {
+  const handleToggle = () => {
     if (shouldShowInformationWidget) {
       orchestrator.hideInformationWidget();
     } else {
       orchestrator.showInformationWidget();
     }
-  }, [orchestrator, shouldShowInformationWidget]);
+  };
 
   return (
     <button
