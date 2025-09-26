@@ -32,6 +32,11 @@ class SoundManager {
   }
 
   private preloadSounds() {
+    // Only preload sounds in browser environment
+    if (typeof window === "undefined" || typeof Audio === "undefined") {
+      return;
+    }
+
     const soundFiles: Record<SoundName, string> = {
       success: "success.wav",
       error: "error.wav"
