@@ -1,11 +1,11 @@
 import React from "react";
 import { showModal } from "../modal";
-import type { KeyboardHandler, ShortcutOptions } from "./types";
-import { parseShortcut, getKeyComboFromEvent } from "./utils";
+import { KeyboardHelpModal } from "./KeyboardHelpModal";
 import { ScopeManager } from "./ScopeManager";
 import { SequenceBuffer } from "./SequenceBuffer";
 import { ShortcutRegistry } from "./ShortcutRegistry";
-import { KeyboardHelpModal } from "./KeyboardHelpModal";
+import type { KeyboardHandler, ShortcutOptions } from "./types";
+import { getKeyComboFromEvent, parseShortcut } from "./utils";
 
 class KeyboardManager {
   private readonly registry = new ShortcutRegistry();
@@ -122,8 +122,10 @@ class KeyboardManager {
     }
 
     // Skip if user is typing in an input/textarea (unless it's a global shortcut)
-    const target = event.target as HTMLElement;
-    const isTyping = target.matches("input, textarea, [contenteditable=true]");
+    const target = event.target as HTMLElement | undefined;
+
+    const isTyping =
+      target && typeof target.matches === "function" && target.matches("input, textarea, [contenteditable=true]");
 
     // Build the key combo from the event
     const keyCombo = getKeyComboFromEvent(event);

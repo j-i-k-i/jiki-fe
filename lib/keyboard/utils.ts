@@ -128,11 +128,10 @@ export function getKeyComboFromEvent(event: KeyboardEvent): string {
   // Get the actual key pressed
   let key = event.key;
 
-  // Normalize special keys
-  if (key === " ") {
-    key = "space";
-  }
+  // Normalize all keys to lowercase
   if (key.length === 1) {
+    key = key.toLowerCase();
+  } else {
     key = key.toLowerCase();
   }
 
