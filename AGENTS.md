@@ -8,7 +8,7 @@ Context files explain how everything works. If the human MENTIONS something that
 
 ### Documentation Structure
 
-- **[.context/README.md](.context/README.md)** - **START HERE** - Overview of all context documentation
+- **[.context/README.md](.context/README.md)** - **ALWAYS READ THIS FILE BEFORE WORKING ON ANY INSTRUCTION. THIS IS THE FIRST THING YOU DO WHEN A HUMAN GIVES YOU AN INSTRUCTION** - Overview of all context documentation
 - **[.context/complex-exercise/README.md](.context/complex-exercise/README.md)** - Complex exercise system overview
 
 ### General Context Files
@@ -17,7 +17,7 @@ Load the relevant context files from `.context/` directory based on your task:
 
 - **[.context/coding-style.md](.context/coding-style.md)** - **ALWAYS READ THIS FIRST** - Coding style and file organization guidelines
 - [.context/about-jiki.md](.context/about-jiki.md) - Overview of Jiki platform and business model
-- [.context/commands.md](.context/commands.md) - Development commands and scripts
+- [.context/commands.md](.context/commands.md) - Development commands and scripts. **ALWAYS READ THIS FILE WHEN STARTING ON A TASK**.
 - [.context/tech-stack.md](.context/tech-stack.md) - Technologies, frameworks, and dependencies
 - [.context/architecture.md](.context/architecture.md) - Frontend architecture and design decisions
 - [.context/deployment.md](.context/deployment.md) - Deployment process and configuration
@@ -42,10 +42,10 @@ When working on the complex exercise component, load these files from `.context/
 ### Development
 
 ```bash
-./bin/dev
+./bin/dev-claude
 ```
 
-Starts the development server on http://localhost:3060
+Starts the development server on http://localhost:3071
 
 ### Build, TypeScript & Lint
 
