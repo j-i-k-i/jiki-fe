@@ -1,6 +1,7 @@
 import type { StoreApi } from "zustand/vanilla";
 import type { TestExpect } from "../test-results-types";
 import type { OrchestratorStore } from "../types";
+import type { ExerciseDefinition } from "../../../exercises/types";
 
 /**
  * Manages test suite execution, results, and processing
@@ -11,7 +12,8 @@ export class TestSuiteManager {
   /**
    * Run tests on the provided code
    */
-  async runCode(code: string): Promise<void> {
+  async runCode(code: string, exercise: ExerciseDefinition): Promise<void> {
+
     const state = this.store.getState();
     state.setStatus("running");
     state.setError(null);
@@ -19,7 +21,7 @@ export class TestSuiteManager {
     try {
       // Import and run our new test runner
       const { runTests } = await import("../test-runner/runTests");
-      const testResults = runTests(code);
+      const testResults = runTests(code, exercise);
 
       // Set the results in the store (will also set the first test as current)
       state.setTestSuiteResult(testResults);

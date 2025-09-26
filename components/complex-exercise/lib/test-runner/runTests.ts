@@ -1,27 +1,12 @@
 import { jikiscript } from "interpreters";
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
-import { BasicExercise } from "../mock-exercise/BasicExercise";
-import basicTests from "../mock-exercise/BasicExercise.test";
 import type { TestResult, TestSuiteResult } from "../test-results-types";
+import type { ExerciseDefinition, Scenario } from "../../../exercises/types";
+import type { Exercise } from "../mock-exercise/Exercise";
 
-interface Scenario {
-  slug: string;
-  name: string;
-  description: string;
-  setup: (exercise: any) => void;
-  expectations: (exercise: any) => any[];
-}
-
-// Task interface for future use when we implement task grouping
-// interface Task {
-//   name: string;
-//   scenarios: Scenario[];
-//   bonus?: boolean;
-// }
-
-function runScenario(scenario: Scenario, studentCode: string): TestResult {
+function runScenario(scenario: Scenario, studentCode: string, ExerciseClass: new () => Exercise): TestResult {
   // Create fresh exercise instance
-  const exercise = new BasicExercise();
+  const exercise = new ExerciseClass();
 
   // Run setup
   scenario.setup(exercise);
@@ -65,15 +50,13 @@ function runScenario(scenario: Scenario, studentCode: string): TestResult {
   };
 }
 
-export function runTests(studentCode: string): TestSuiteResult {
+export function runTests(studentCode: string, exercise: ExerciseDefinition): TestSuiteResult {
   const tests: TestResult[] = [];
 
-  // Run all scenarios from all tasks
-  for (const task of basicTests.tasks) {
-    for (const scenario of task.scenarios) {
-      const result = runScenario(scenario, studentCode);
-      tests.push(result);
-    }
+  // Run all scenarios
+  for (const scenario of exercise.scenarios) {
+    const result = runScenario(scenario, studentCode, exercise.ExerciseClass);
+    tests.push(result);
   }
 
   // Determine overall status
