@@ -1,6 +1,6 @@
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import * as localStorage from "@/components/complex-exercise/lib/localStorage";
-import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
+import { mockAnimationTimeline, mockFrame } from "@/tests/mocks";
 import { renderHook } from "@testing-library/react";
 
 // Mock localStorage functions
@@ -183,6 +183,52 @@ describe("Orchestrator", () => {
 
       // Should be the same object reference due to useShallow
       expect(firstResult).toBe(secondResult);
+    });
+  });
+
+  describe("information widget methods", () => {
+    let orchestrator: Orchestrator;
+
+    beforeEach(() => {
+      orchestrator = new Orchestrator("test-uuid", "initial code");
+    });
+
+    describe("showInformationWidget", () => {
+      it("should delegate to editorManager when it exists", () => {
+        const mockShowInformationWidget = jest.fn();
+        (orchestrator as any).editorManager = {
+          showInformationWidget: mockShowInformationWidget
+        };
+
+        orchestrator.showInformationWidget();
+
+        expect(mockShowInformationWidget).toHaveBeenCalled();
+      });
+
+      it("should not throw when editorManager is null", () => {
+        (orchestrator as any).editorManager = null;
+
+        expect(() => orchestrator.showInformationWidget()).not.toThrow();
+      });
+    });
+
+    describe("hideInformationWidget", () => {
+      it("should delegate to editorManager when it exists", () => {
+        const mockHideInformationWidget = jest.fn();
+        (orchestrator as any).editorManager = {
+          hideInformationWidget: mockHideInformationWidget
+        };
+
+        orchestrator.hideInformationWidget();
+
+        expect(mockHideInformationWidget).toHaveBeenCalled();
+      });
+
+      it("should not throw when editorManager is null", () => {
+        (orchestrator as any).editorManager = null;
+
+        expect(() => orchestrator.hideInformationWidget()).not.toThrow();
+      });
     });
   });
 

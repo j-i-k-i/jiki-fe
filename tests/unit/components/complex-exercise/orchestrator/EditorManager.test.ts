@@ -11,9 +11,17 @@ jest.mock("@codemirror/language", () => ({
 jest.mock("@codemirror/view", () => ({
   EditorView: Object.assign(
     jest.fn().mockImplementation(() => ({
-      state: { doc: { toString: jest.fn().mockReturnValue("") } },
+      state: {
+        doc: {
+          toString: jest.fn().mockReturnValue(""),
+          line: jest.fn().mockReturnValue({ from: 0, to: 10 })
+        }
+      },
       dispatch: jest.fn(),
-      focus: jest.fn()
+      focus: jest.fn(),
+      lineBlockAt: jest.fn().mockReturnValue({ top: 0, height: 20 }),
+      scrollDOM: { scrollTop: 0, clientHeight: 400, scrollTo: jest.fn() },
+      requestMeasure: jest.fn()
     })),
     {
       editable: { of: jest.fn() },
@@ -188,6 +196,131 @@ describe("EditorManager", () => {
     it("should not dispatch when no editor view is set", () => {
       editorManager.applyBreakpoints([1, 2, 3]);
       // Should not throw
+    });
+  });
+
+  describe("showInformationWidget", () => {
+    it("should enable the widget and scroll to highlighted line if not 0", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+      const setHighlightedLineSpy = jest.fn();
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: false,
+        highlightedLine: 5,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        setHighlightedLine: setHighlightedLineSpy,
+        currentTest: null
+      });
+
+      editorManager.showInformationWidget();
+
+      expect(setShouldShowInformationWidgetSpy).toHaveBeenCalledWith(true);
+    });
+
+    it("should not do anything if widget is already shown", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: true,
+        highlightedLine: 5,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        currentTest: null
+      });
+
+      editorManager.showInformationWidget();
+
+      expect(setShouldShowInformationWidgetSpy).not.toHaveBeenCalled();
+    });
+
+    it("should set highlighted line for single-frame tests", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+      const setHighlightedLineSpy = jest.fn();
+      const mockFrame = {
+        line: 10,
+        code: "test",
+        status: "pass" as const,
+        time: 0,
+        timeInMs: 0,
+        generateDescription: () => "test frame"
+      };
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: false,
+        highlightedLine: 0,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        setHighlightedLine: setHighlightedLineSpy,
+        currentTest: {
+          frames: [mockFrame]
+        } as any
+      });
+
+      editorManager.showInformationWidget();
+
+      expect(setHighlightedLineSpy).toHaveBeenCalledWith(10);
+    });
+  });
+
+  describe("hideInformationWidget", () => {
+    it("should disable the widget", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+      const setHighlightedLineSpy = jest.fn();
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: true,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        setHighlightedLine: setHighlightedLineSpy,
+        currentTest: null
+      });
+
+      editorManager.hideInformationWidget();
+
+      expect(setShouldShowInformationWidgetSpy).toHaveBeenCalledWith(false);
+    });
+
+    it("should not do anything if widget is already hidden", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: false,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        currentTest: null
+      });
+
+      editorManager.hideInformationWidget();
+
+      expect(setShouldShowInformationWidgetSpy).not.toHaveBeenCalled();
+    });
+
+    it("should clear highlighted line for single-frame tests", () => {
+      const setShouldShowInformationWidgetSpy = jest.fn();
+      const setHighlightedLineSpy = jest.fn();
+      const mockFrame = {
+        line: 10,
+        code: "test",
+        status: "pass" as const,
+        time: 0,
+        timeInMs: 0,
+        generateDescription: () => "test frame"
+      };
+
+      jest.spyOn(store, "getState").mockReturnValue({
+        ...store.getState(),
+        shouldShowInformationWidget: true,
+        setShouldShowInformationWidget: setShouldShowInformationWidgetSpy,
+        setHighlightedLine: setHighlightedLineSpy,
+        currentTest: {
+          frames: [mockFrame]
+        } as any
+      });
+
+      editorManager.hideInformationWidget();
+
+      expect(setHighlightedLineSpy).toHaveBeenCalledWith(0);
     });
   });
 });

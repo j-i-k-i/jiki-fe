@@ -27,6 +27,7 @@ import { createEditorExtensions } from "../../ui/codemirror/setup/editorExtensio
 import { getBreakpointLines } from "../../ui/codemirror/utils/getBreakpointLines";
 import { getCodeMirrorFieldValue } from "../../ui/codemirror/utils/getCodeMirrorFieldValue";
 import { getFoldedLines as getCodeMirrorFoldedLines } from "../../ui/codemirror/utils/getFoldedLines";
+import { scrollToLine } from "../../ui/codemirror/utils/scrollToLine";
 import { updateUnfoldableFunctions } from "../../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "../localStorage";
 import type { Orchestrator } from "../Orchestrator";
@@ -129,6 +130,10 @@ export class EditorManager {
 
       if (state.highlightedLine !== previousHighlightedLine) {
         this.applyHighlightLine(state.highlightedLine);
+        // Scroll to the highlighted line when it changes (e.g., when frame changes)
+        if (state.highlightedLine !== 0 && state.shouldShowInformationWidget) {
+          scrollToLine(this.editorView, state.highlightedLine);
+        }
         previousHighlightedLine = state.highlightedLine;
       }
 
@@ -254,6 +259,45 @@ export class EditorManager {
     });
   }
 
+  showInformationWidget() {
+    const state = this.store.getState();
+
+    // If already enabled, do nothing
+    if (state.shouldShowInformationWidget) {
+      return;
+    }
+
+    // If we have a highlighted line and it's not 0 (initial state), scroll to it
+    if (state.highlightedLine !== 0) {
+      scrollToLine(this.editorView, state.highlightedLine);
+    }
+
+    // Enable the widget
+    state.setShouldShowInformationWidget(true);
+
+    // If current test has only one frame, set the highlighted line
+    if (state.currentTest && state.currentTest.frames.length === 1) {
+      state.setHighlightedLine(state.currentTest.frames[0].line);
+    }
+  }
+
+  hideInformationWidget() {
+    const state = this.store.getState();
+
+    // If already disabled, do nothing
+    if (!state.shouldShowInformationWidget) {
+      return;
+    }
+
+    // Disable the widget
+    state.setShouldShowInformationWidget(false);
+
+    // If current test has only one frame, remove the highlight
+    if (state.currentTest && state.currentTest.frames.length === 1) {
+      state.setHighlightedLine(0);
+    }
+  }
+
   applyBreakpoints(breakpoints: number[]) {
     const currentBreakpoints = getBreakpointLines(this.editorView);
     const effects = [];
@@ -292,7 +336,6 @@ export class EditorManager {
     });
   }
 
-  // UNUSED: This function is currently not called.
   applyShouldShowInformationWidget(show: boolean) {
     this.editorView.dispatch({
       effects: showInfoWidgetEffect.of(show)

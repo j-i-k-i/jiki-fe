@@ -197,7 +197,13 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         set({
           currentFrame: frame,
-          highlightedLine: frame.line
+          highlightedLine: frame.line,
+          // Update information widget data whenever frame changes
+          informationWidgetData: {
+            html: frame.generateDescription() || "",
+            line: frame.line,
+            status: frame.status
+          }
         });
 
         // Recalculate both navigation and breakpoint frames after updating current frame

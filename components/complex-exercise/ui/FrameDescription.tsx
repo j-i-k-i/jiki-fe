@@ -34,8 +34,7 @@ export default function FrameDescription() {
             {currentFrame.status}
           </span>
         </div>
-        <span className="text-sm text-gray-700 flex-1">{currentFrame.generateDescription()}</span>
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs ml-auto">
           <span className="text-gray-400">Timeline:</span>
           <span className="font-mono text-gray-600">{(time / TIME_SCALE_FACTOR / 1000).toFixed(3)}s</span>
         </div>

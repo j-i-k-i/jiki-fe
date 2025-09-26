@@ -79,24 +79,18 @@ class Orchestrator {
 
   // UNUSED: This function is currently not called.
   callOnEditorChangeCallback(view: EditorView) {
-    if (this.editorManager) {
-      this.editorManager.callOnEditorChangeCallback(view);
-    }
+    this.editorManager?.callOnEditorChangeCallback(view);
   }
 
   // Auto-save the current editor content - delegate to EditorManager
   // UNUSED: This function is currently not called.
   autoSaveContent(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    if (this.editorManager) {
-      this.editorManager.autoSaveContent(code, readonlyRanges);
-    }
+    this.editorManager?.autoSaveContent(code, readonlyRanges);
   }
 
   // UNUSED: This function is currently not called.
   saveImmediately(code: string, readonlyRanges?: { from: number; to: number }[]) {
-    if (this.editorManager) {
-      this.editorManager.saveImmediately(code, readonlyRanges);
-    }
+    this.editorManager?.saveImmediately(code, readonlyRanges);
   }
 
   // UNUSED: This function is currently not called.
@@ -151,6 +145,14 @@ class Orchestrator {
     this.store.getState().setShouldShowInformationWidget(show);
   }
 
+  showInformationWidget() {
+    this.editorManager?.showInformationWidget();
+  }
+
+  hideInformationWidget() {
+    this.editorManager?.hideInformationWidget();
+  }
+
   setUnderlineRange(range: UnderlineRange | undefined) {
     this.store.getState().setUnderlineRange(range);
   }
@@ -164,15 +166,11 @@ class Orchestrator {
   }
 
   setMultiLineHighlight(fromLine: number, toLine: number) {
-    if (this.editorManager) {
-      this.editorManager.setMultiLineHighlight(fromLine, toLine);
-    }
+    this.editorManager?.setMultiLineHighlight(fromLine, toLine);
   }
 
   setMultipleLineHighlights(lines: number[]) {
-    if (this.editorManager) {
-      this.editorManager.setMultipleLineHighlights(lines);
-    }
+    this.editorManager?.setMultipleLineHighlights(lines);
   }
 
   setInformationWidgetData(data: InformationWidgetData) {
@@ -181,9 +179,7 @@ class Orchestrator {
 
   setBreakpoints(breakpoints: number[]) {
     this.store.getState().setBreakpoints(breakpoints);
-    if (this.editorManager) {
-      this.editorManager.applyBreakpoints(breakpoints);
-    }
+    this.editorManager?.applyBreakpoints(breakpoints);
   }
 
   setShouldAutoRunCode(shouldAutoRun: boolean) {
@@ -272,9 +268,7 @@ class Orchestrator {
     exercise: unknown,
     unfoldableFunctionNames: string[]
   ) {
-    if (this.editorManager) {
-      this.editorManager.initializeEditor(code, exercise, unfoldableFunctionNames);
-    }
+    this.editorManager?.initializeEditor(code, exercise, unfoldableFunctionNames);
   }
 
   // Reset editor to stub code and save to localStorage - delegate to EditorManager
@@ -293,9 +287,7 @@ class Orchestrator {
     defaultReadonlyRanges: { from: number; to: number }[],
     unfoldableFunctionNames: string[]
   ) {
-    if (this.editorManager) {
-      this.editorManager.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
-    }
+    this.editorManager?.resetEditorToStub(stubCode, defaultReadonlyRanges, unfoldableFunctionNames);
   }
 
   // Test result processing methods - delegate to TestSuiteManager

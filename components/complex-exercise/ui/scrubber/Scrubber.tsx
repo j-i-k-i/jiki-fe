@@ -5,6 +5,7 @@ import ScrubberInput from "./ScrubberInput";
 import FrameStepperButtons from "./FrameStepperButtons";
 import BreakpointStepperButtons from "./BreakpointStepperButtons";
 import PlayPauseButton from "./PlayPauseButton";
+import InformationWidgetToggleButton from "./InformationWidgetToggleButton";
 
 export default function Scrubber() {
   const orchestrator = useOrchestrator();
@@ -38,9 +39,7 @@ export default function Scrubber() {
       />
       <FrameStepperButtons enabled={isEnabled} />
       <BreakpointStepperButtons enabled={isEnabled} />
-      {/* <InformationWidgetToggleButton
-        disabled={hasCodeBeenEdited || isSpotlightActive}
-      /> */}
+      <InformationWidgetToggleButton disabled={hasCodeBeenEdited || isSpotlightActive} />
       {/* <TooltipInformation
         hasCodeBeenEdited={hasCodeBeenEdited}
         notEnoughFrames={frames.length === 1}
