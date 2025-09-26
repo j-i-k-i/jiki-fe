@@ -164,7 +164,7 @@ const eslintConfig = [
 
       // === Noise control ===
       // Allow console.warn and console.error, but discourage other console usage.
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": ["warn", { allow: ["warn", "error", "debug"] }],
 
       // Warn when else is redundant after return.
       "no-else-return": "warn"
