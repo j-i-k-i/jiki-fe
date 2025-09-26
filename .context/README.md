@@ -30,6 +30,7 @@ General documentation that applies across the entire codebase:
 - **[toasts.md](./toasts.md)** - Toast notifications system using react-hot-toast
 - **[modals.md](./modals.md)** - Global modal system with Zustand state management
 - **[sound.md](./sound.md)** - Sound system for audio feedback
+- **[exercises.md](./exercises.md)** - Exercise system structure and creation guide
 
 ### Complex Exercise Context (`complex-exercise/`)
 

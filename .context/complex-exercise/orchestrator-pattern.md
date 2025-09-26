@@ -29,22 +29,31 @@ The orchestrator uses a **facade pattern** with internal composition. It maintai
 
 See `components/complex-exercise/lib/Orchestrator.ts` for the implementation.
 
+**Constructor:**
+
+- Takes a single `ExerciseDefinition` parameter containing all exercise metadata
+- Initializes the store with the exercise configuration
+- Creates internal managers (except EditorManager which is created lazily)
+- No static factory methods - direct instantiation via `new Orchestrator(exercise)`
+
 **Key Principles:**
 
-- **Single orchestrator instance** passed around the component tree
+- **Single orchestrator instance** stored in useRef to prevent recreation
 - **Public methods persist** on orchestrator, providing stable API
 - **Internal delegation** to specialized managers for implementation
 - **No direct access** to internal managers from components
 - **Maintains backwards compatibility** when refactoring internals
 - **Lazy instantiation** of EditorManager when DOM element becomes available
-- **Stable ref callbacks** for React lifecycle management
+- **Stable ref callbacks** created via `setupEditor()` for React lifecycle management
 - **Direct method calls** instead of callback indirection for cleaner architecture
+- **Proper cleanup** with `editorView.destroy()` to handle React StrictMode
 
 **Internal Managers:**
 
 - **TimelineManager** - Handles frame navigation and timeline positioning
-- **EditorManager** - Manages CodeMirror editor integration (created lazily)
+- **EditorManager** - Manages CodeMirror editor integration (created/destroyed with DOM element lifecycle)
 - **BreakpointManager** - Handles breakpoint navigation and state
+- **TestSuiteManager** - Manages test execution and results
 
 ### 2. React Hook
 
@@ -105,6 +114,24 @@ The ComplexExercise feature demonstrates this pattern:
 - `components/complex-exercise/ComplexExercise.tsx` - Root component
 - `components/complex-exercise/CodeEditor.tsx` - Child using orchestrator
 - `components/complex-exercise/RunButton.tsx` - Child using orchestrator
+
+### Component Implementation
+
+The root ComplexExercise component:
+
+1. Uses `useRef` to store the orchestrator instance (prevents recreation)
+2. Loads the exercise definition asynchronously
+3. Creates the orchestrator once with `new Orchestrator(exercise)`
+4. Passes orchestrator to children via props
+
+### React StrictMode Compatibility
+
+The editor setup properly handles React StrictMode's double-mounting:
+
+1. `setupEditor()` returns a stable ref callback
+2. EditorManager is cleaned up (with `editorView.destroy()`) when element is null
+3. EditorManager is recreated when element is provided again
+4. This ensures no duplicate editors in development mode
 
 Each child component receives the orchestrator and uses `useOrchestratorStore(orchestrator)` to subscribe to state changes.
 
