@@ -30,7 +30,6 @@ import { getFoldedLines as getCodeMirrorFoldedLines } from "../../ui/codemirror/
 import { scrollToLine } from "../../ui/codemirror/utils/scrollToLine";
 import { updateUnfoldableFunctions } from "../../ui/codemirror/utils/unfoldableFunctionNames";
 import { loadCodeMirrorContent, saveCodeMirrorContent } from "../localStorage";
-import type { Orchestrator } from "../Orchestrator";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "../types";
 
 const ONE_MINUTE = 60 * 1000;
@@ -44,14 +43,17 @@ export class EditorManager {
     element: HTMLDivElement,
     private readonly store: StoreApi<OrchestratorStore>,
     private readonly exerciseUuid: string,
-    private readonly orchestrator: Orchestrator,
-    value: string,
-    readonly: boolean,
-    highlightedLine: number,
-    shouldAutoRunCode: boolean
+    private readonly runCode: (code: string) => void
   ) {
     this.initializeAutoSave();
     this.initializeSubscriptions();
+
+    // Get values from store
+    const state = this.store.getState();
+    const value = state.defaultCode;
+    const readonly = state.readonly;
+    const highlightedLine = state.highlightedLine;
+    const shouldAutoRunCode = state.shouldAutoRunCode;
 
     // Create event handlers
     const onBreakpointChange = this.createBreakpointChangeHandler();
@@ -102,6 +104,9 @@ export class EditorManager {
     if (this.saveDebounced) {
       this.saveDebounced.cancel();
     }
+
+    // Destroy the editor view to remove it from DOM
+    this.editorView.destroy();
   }
 
   private initializeSubscriptions() {
@@ -521,7 +526,8 @@ export class EditorManager {
 
       () => {
         if (shouldAutoRunCode) {
-          void this.orchestrator.runCode();
+          const currentCode = this.getValue();
+          this.runCode(currentCode);
         }
       },
 
@@ -544,6 +550,6 @@ export class EditorManager {
   }
 
   createCloseInfoWidgetHandler(): () => void {
-    return () => this.orchestrator.setShouldShowInformationWidget(false);
+    return () => this.store.getState().setShouldShowInformationWidget(false);
   }
 }

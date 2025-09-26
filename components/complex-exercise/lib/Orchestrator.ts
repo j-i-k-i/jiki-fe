@@ -48,31 +48,20 @@ class Orchestrator {
   }
 
   // Setup the editor - returns a stable ref callback that manages EditorManager lifecycle
-  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+  setupEditor() {
     // Create ref callback only once to ensure stability across renders
     // React requires ref callbacks to be stable to avoid unnecessary re-runs
     if (!this.editorRefCallback) {
       this.editorRefCallback = (element: HTMLDivElement | null) => {
+        // Always clean up existing EditorManager first
+        if (this.editorManager) {
+          this.editorManager.cleanup();
+          this.editorManager = null;
+        }
+
+        // Create new EditorManager if element is provided
         if (element) {
-          // Create EditorManager when element is available
-          if (!this.editorManager) {
-            this.editorManager = new EditorManager(
-              element,
-              this.store,
-              this.exercise.slug,
-              this,
-              value,
-              readonly,
-              highlightedLine,
-              shouldAutoRunCode
-            );
-          }
-        } else {
-          // Cleanup when element is removed
-          if (this.editorManager) {
-            this.editorManager.cleanup();
-            this.editorManager = null;
-          }
+          this.editorManager = new EditorManager(element, this.store, this.exercise.slug, this.runCode.bind(this));
         }
       };
     }

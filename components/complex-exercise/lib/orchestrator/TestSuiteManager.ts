@@ -13,7 +13,6 @@ export class TestSuiteManager {
    * Run tests on the provided code
    */
   async runCode(code: string, exercise: ExerciseDefinition): Promise<void> {
-
     const state = this.store.getState();
     state.setStatus("running");
     state.setError(null);

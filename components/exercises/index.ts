@@ -1,6 +1,6 @@
 // Auto-generated or manually maintained registry
 export const exercises = {
-  'basic-movement': () => import('./basic-movement'),
+  "basic-movement": () => import("./basic-movement")
   // Future exercises will be added here:
   // 'loop-basics': () => import('./loop-basics'),
   // 'conditionals': () => import('./conditionals'),

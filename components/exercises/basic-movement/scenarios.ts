@@ -1,15 +1,15 @@
-import type { Task, Scenario } from '../types';
-import type BasicMovementExercise from './Exercise';
+import type { Task, Scenario } from "../types";
+import type BasicMovementExercise from "./Exercise";
 
 export const tasks: Task[] = [
   {
-    id: 'move-character',
-    name: 'Move the character',
+    id: "move-character",
+    name: "Move the character",
     bonus: false
   },
   {
-    id: 'bonus-challenges',
-    name: 'Bonus challenges',
+    id: "bonus-challenges",
+    name: "Bonus challenges",
     bonus: true
   }
 ];

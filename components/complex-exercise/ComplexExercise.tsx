@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { exercises, type ExerciseSlug } from "../exercises";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
@@ -16,7 +16,9 @@ interface ComplexExerciseProps {
 }
 
 export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) {
-  const [orchestrator, setOrchestrator] = useState<Orchestrator | null>(null);
+  // Use ref to store the orchestrator instance to prevent recreation
+  const orchestratorRef = useRef<Orchestrator | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Load the exercise and create orchestrator on mount
@@ -27,15 +29,18 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
         const loader = exercises[exerciseSlug];
         const exercise = (await loader()).default;
 
-        // Create orchestrator with the loaded exercise
-        setOrchestrator(new Orchestrator(exercise));
+        // Create orchestrator only once and store in ref
+        orchestratorRef.current = new Orchestrator(exercise);
+        setIsLoading(false);
       } catch (error) {
-        setLoadError(error instanceof Error ? error.message : 'Unknown error');
+        setLoadError(error instanceof Error ? error.message : "Unknown error");
+        setIsLoading(false);
       }
     };
 
     void loadExercise();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Error state
   if (loadError) {
@@ -47,7 +52,7 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
   }
 
   // Loading state
-  if (!orchestrator) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-lg text-gray-600">Loading exercise...</div>
@@ -55,7 +60,8 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
     );
   }
 
-  return <ComplexExerciseContent orchestrator={orchestrator} />;
+  // At this point, orchestratorRef.current is guaranteed to be set
+  return <ComplexExerciseContent orchestrator={orchestratorRef.current!} />;
 }
 
 // Separate component that assumes orchestrator is loaded

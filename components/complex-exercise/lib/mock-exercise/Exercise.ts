@@ -11,7 +11,6 @@ export abstract class Exercise {
   }>;
 
   abstract getState(): Record<string, any>;
-  protected populateView() {}
 
   constructor() {
     this.view = document.createElement("div");
@@ -21,6 +20,8 @@ export abstract class Exercise {
 
     this.populateView();
   }
+
+  protected populateView() {}
 
   getView(): HTMLElement {
     return this.view;

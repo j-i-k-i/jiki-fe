@@ -28,7 +28,7 @@ export interface Scenario {
   slug: string;
   name: string;
   description: string;
-  taskId: string;  // References the task this scenario belongs to
+  taskId: string; // References the task this scenario belongs to
   setup: (exercise: any) => void;
   expectations: (exercise: any) => TestExpect[];
 }
