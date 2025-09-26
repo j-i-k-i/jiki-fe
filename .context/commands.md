@@ -2,7 +2,7 @@
 
 ## Core Commands
 
-- `./bin/dev` or `pnpm run dev` - Start development server on port 3060 (uses webpack)
+- `./bin/dev-claude` - Start development server on port 3071 (for AI assistants)
 - `npx tsc --noEmit` - Check TypeScript types (preferred for type checking)
 - `pnpm run lint` - Run ESLint for code quality checks
 - `pnpm run format` - Format code with Prettier
