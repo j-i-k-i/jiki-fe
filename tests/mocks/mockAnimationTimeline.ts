@@ -3,8 +3,6 @@ import type { AnimationTimeline } from "@/components/complex-exercise/lib/Animat
 interface MockAnimationTimelineOptions {
   duration?: number; // in microseconds
   paused?: boolean;
-  progress?: number;
-  currentTime?: number;
   completed?: boolean;
   hasPlayedOrScrubbed?: boolean;
 }
@@ -20,8 +18,6 @@ export function mockAnimationTimeline(options: MockAnimationTimelineOptions = {}
   const {
     duration = 1000000, // Default 1 second in microseconds
     paused = true,
-    progress = 0,
-    currentTime = 0,
     completed = false,
     hasPlayedOrScrubbed = false
   } = options;
@@ -34,26 +30,21 @@ export function mockAnimationTimeline(options: MockAnimationTimelineOptions = {}
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const seek = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const seekEndOfTimeline = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const onUpdate = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const clearUpdateCallbacks = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
 
   return {
     pause,
     play,
     paused,
     duration,
-    progress,
-    currentTime,
     completed,
     hasPlayedOrScrubbed,
     seek,
-    seekEndOfTimeline,
     onUpdate,
-    timeline: {
-      duration,
-      currentTime
-    } as any // Timeline is from anime.js, we only need these properties for testing
+    clearUpdateCallbacks,
+    showPlayButton: true
   } as unknown as AnimationTimeline;
 }
 

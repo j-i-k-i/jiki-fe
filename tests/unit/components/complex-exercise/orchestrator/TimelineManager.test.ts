@@ -206,7 +206,7 @@ describe("TimelineManager", () => {
 
         const state = store.getState() as any;
         expect(state.currentTestTime).toBe(200000);
-        expect(mockSeek).toHaveBeenCalledWith(200); // 200000 / 1000 for microseconds to milliseconds
+        expect(mockSeek).toHaveBeenCalledWith(200000); // Now expects microseconds directly
       });
 
       it("should not seek if no animation timeline exists", () => {

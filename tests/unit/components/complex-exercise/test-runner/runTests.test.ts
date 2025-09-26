@@ -61,9 +61,8 @@ jest.mock("@/components/complex-exercise/lib/mock-exercise/BasicExercise.test", 
 // Mock the AnimationTimeline
 jest.mock("@/components/complex-exercise/lib/AnimationTimeline", () => {
   return {
-    AnimationTimeline: jest.fn().mockImplementation((options, frames) => ({
-      frames,
-      duration: frames[frames.length - 1]?.time || 0,
+    AnimationTimeline: jest.fn().mockImplementation((_options) => ({
+      duration: 0,
       populateTimeline: jest.fn().mockReturnThis()
     }))
   };

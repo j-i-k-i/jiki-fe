@@ -212,9 +212,8 @@ describe("ScrubberInput Component", () => {
     it("should snap to nearest frame on mouse up", () => {
       const mockOrchestrator = createMockOrchestrator();
       const mockTimeline = mockAnimationTimeline({ duration: 10 });
-      const nearestFrame = createMockFrames(5)[2]; // Frame at index 2
 
-      mockOrchestrator.getNearestCurrentFrame = jest.fn().mockReturnValue(nearestFrame);
+      mockOrchestrator.snapToNearestFrame = jest.fn();
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
@@ -230,15 +229,14 @@ describe("ScrubberInput Component", () => {
       const input = screen.getByRole("slider");
       fireEvent.mouseUp(input);
 
-      expect(mockOrchestrator.getNearestCurrentFrame).toHaveBeenCalled();
-      expect(mockOrchestrator.setCurrentTestTime).toHaveBeenCalledWith(nearestFrame.time);
+      expect(mockOrchestrator.snapToNearestFrame).toHaveBeenCalled();
     });
 
-    it("should not snap if no nearest frame is found", () => {
+    it("should call snapToNearestFrame regardless of frame availability", () => {
       const mockOrchestrator = createMockOrchestrator();
       const mockTimeline = mockAnimationTimeline({ duration: 10 });
 
-      mockOrchestrator.getNearestCurrentFrame = jest.fn().mockReturnValue(null);
+      mockOrchestrator.snapToNearestFrame = jest.fn();
 
       render(
         <OrchestratorTestProvider orchestrator={mockOrchestrator}>
@@ -249,9 +247,8 @@ describe("ScrubberInput Component", () => {
       const input = screen.getByRole("slider");
       fireEvent.mouseUp(input);
 
-      expect(mockOrchestrator.getNearestCurrentFrame).toHaveBeenCalled();
-      // Should not call setCurrentTestTime when no frame is found
-      expect(mockOrchestrator.setCurrentTestTime).not.toHaveBeenCalled();
+      // snapToNearestFrame is always called, it handles the null case internally
+      expect(mockOrchestrator.snapToNearestFrame).toHaveBeenCalled();
     });
   });
 

@@ -62,6 +62,9 @@ export interface OrchestratorState {
 
   // Current frame - extracted from currentTest to prevent rerenders
   currentFrame: Frame | undefined;
+
+  // Play/pause state for animation timeline
+  isPlaying: boolean;
 }
 
 // Private actions only accessible within the orchestrator
@@ -98,6 +101,9 @@ export interface OrchestratorActions {
 
   // Test results actions
   setTestSuiteResult: (result: TestSuiteResult | null) => void;
+
+  // Play/pause action
+  setIsPlaying: (playing: boolean) => void;
   setShouldAutoplayAnimation: (autoplay: boolean) => void;
 
   // Exercise data initialization

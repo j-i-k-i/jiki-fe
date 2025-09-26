@@ -4,6 +4,7 @@ import { useOrchestrator } from "../../lib/OrchestratorContext";
 import ScrubberInput from "./ScrubberInput";
 import FrameStepperButtons from "./FrameStepperButtons";
 import BreakpointStepperButtons from "./BreakpointStepperButtons";
+import PlayPauseButton from "./PlayPauseButton";
 
 export default function Scrubber() {
   const orchestrator = useOrchestrator();
@@ -27,16 +28,7 @@ export default function Scrubber() {
       tabIndex={-1}
       className="relative group flex-1"
     >
-      {/* <PlayPauseButton
-        animationTimeline={animationTimeline}
-        enabled={isEnabled}
-        onPlay={() => {
-          animationTimeline.play(() => setShouldShowInformationWidget(false))
-        }}
-        onPause={() => {
-          animationTimeline.pause()
-        }}
-      /> */}
+      <PlayPauseButton disabled={!isEnabled} />
       <ScrubberInput
         ref={rangeRef}
         frames={frames}

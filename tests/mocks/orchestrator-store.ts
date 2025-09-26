@@ -56,6 +56,9 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
       // Current frame
       currentFrame: undefined,
 
+      // Play/pause state
+      isPlaying: false,
+
       // Apply overrides
       ...overrides,
 
@@ -106,6 +109,9 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
       // Test results actions
       setTestSuiteResult: jest.fn(),
       setShouldAutoplayAnimation: jest.fn(),
+
+      // Play/pause action
+      setIsPlaying: jest.fn(),
 
       // Exercise data initialization
       initializeExerciseData: jest.fn(),
