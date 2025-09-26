@@ -1,8 +1,8 @@
 "use client";
 
-import { keyboard } from "@/lib/keyboard";
+import { keyboard, useKeyboard } from "@/lib/keyboard";
 import { showModal } from "@/lib/modal";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 // Register some global shortcuts at module level
 // These persist for the entire app lifetime
@@ -25,146 +25,106 @@ export default function TestKeyboardPage() {
   const [log, setLog] = useState<string[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [scopedActive, setScopedActive] = useState(false);
-  const cleanupRef = useRef<(() => void)[]>([]);
-  const scopeCleanupRef = useRef<(() => void) | null>(null);
 
   const addLog = (message: string) => {
     setLog((prev) => [`${new Date().toLocaleTimeString()}: ${message}`, ...prev].slice(0, 10));
   };
 
-  // Register component-level shortcuts when recording starts
   const startRecording = () => {
-    if (isRecording) {
-      return;
-    }
-
     setIsRecording(true);
     addLog("Started recording keyboard shortcuts");
-
-    // Register shortcuts that only work while recording
-    cleanupRef.current = [
-      keyboard.on(
-        "escape",
-        () => {
-          addLog("Escape pressed!");
-          stopRecording();
-        },
-        { description: "Stop recording" }
-      ),
-
-      keyboard.on(
-        "space",
-        (e) => {
-          e.preventDefault();
-          addLog("Space pressed!");
-        },
-        { description: "Log space press" }
-      ),
-
-      keyboard.on(
-        "cmd+s",
-        (e) => {
-          e.preventDefault();
-          addLog("Save shortcut triggered!");
-        },
-        { description: "Save (prevented default)" }
-      ),
-
-      keyboard.on("up", () => addLog("Up arrow pressed"), { description: "Navigate up" }),
-      keyboard.on("down", () => addLog("Down arrow pressed"), { description: "Navigate down" }),
-      keyboard.on("left", () => addLog("Left arrow pressed"), { description: "Navigate left" }),
-      keyboard.on("right", () => addLog("Right arrow pressed"), { description: "Navigate right" }),
-
-      // Test chord sequences
-      keyboard.on(
-        "g g",
-        () => {
-          addLog("Double G pressed! (Vim-style)");
-        },
-        { description: "Go to top (Vim-style)" }
-      ),
-
-      keyboard.on(
-        "shift+g shift+g",
-        () => {
-          addLog("Double Shift+G pressed!");
-        },
-        { description: "Go to bottom (Vim-style)" }
-      )
-    ];
   };
 
   const stopRecording = () => {
-    if (!isRecording) {
-      return;
-    }
-
     setIsRecording(false);
     addLog("Stopped recording keyboard shortcuts");
-
-    // Clean up all registered shortcuts
-    cleanupRef.current.forEach((cleanup) => cleanup());
-    cleanupRef.current = [];
   };
 
   const toggleScope = () => {
-    if (scopedActive) {
-      // Remove scope and its shortcuts
-      scopeCleanupRef.current?.();
-      scopeCleanupRef.current = null;
-      setScopedActive(false);
-      addLog("Deactivated modal scope");
-    } else {
-      // Add scope with its shortcuts
-      const removeScope = keyboard.pushScope("modal");
-
-      // Register modal-specific shortcuts
-      const cleanup1 = keyboard.on(
-        "escape",
-        () => {
-          addLog("Modal: Escape pressed (would close modal)");
-          toggleScope();
-        },
-        {
-          scope: "modal",
-          description: "Close modal"
-        }
-      );
-
-      const cleanup2 = keyboard.on(
-        "enter",
-        () => {
-          addLog("Modal: Enter pressed (would confirm)");
-        },
-        {
-          scope: "modal",
-          description: "Confirm modal action"
-        }
-      );
-
-      const cleanup3 = keyboard.on(
-        "tab",
-        (e) => {
-          e.preventDefault();
-          addLog("Modal: Tab pressed (focus trap)");
-        },
-        {
-          scope: "modal",
-          description: "Navigate modal elements"
-        }
-      );
-
-      scopeCleanupRef.current = () => {
-        removeScope();
-        cleanup1();
-        cleanup2();
-        cleanup3();
-      };
-
-      setScopedActive(true);
-      addLog("Activated modal scope");
-    }
+    setScopedActive(!scopedActive);
+    addLog(scopedActive ? "Deactivated modal scope" : "Activated modal scope");
   };
+
+  useKeyboard(
+    "escape",
+    () => {
+      if (scopedActive) {
+        addLog("Modal: Escape pressed (would close modal)");
+        toggleScope();
+      } else if (isRecording) {
+        addLog("Escape pressed!");
+        stopRecording();
+      }
+    },
+    { description: scopedActive ? "Close modal" : "Stop recording", enabled: isRecording || scopedActive }
+  );
+
+  useKeyboard(
+    "space",
+    (e) => {
+      e.preventDefault();
+      addLog("Space pressed!");
+    },
+    { description: "Log space press", enabled: isRecording }
+  );
+
+  useKeyboard(
+    "cmd+s",
+    (e) => {
+      e.preventDefault();
+      addLog("Save shortcut triggered!");
+    },
+    { description: "Save (prevented default)", enabled: isRecording }
+  );
+
+  useKeyboard("up", () => addLog("Up arrow pressed"), { description: "Navigate up", enabled: isRecording });
+  useKeyboard("down", () => addLog("Down arrow pressed"), { description: "Navigate down", enabled: isRecording });
+  useKeyboard("left", () => addLog("Left arrow pressed"), { description: "Navigate left", enabled: isRecording });
+  useKeyboard("right", () => addLog("Right arrow pressed"), {
+    description: "Navigate right",
+    enabled: isRecording
+  });
+
+  useKeyboard(
+    "g g",
+    () => {
+      addLog("Double G pressed! (Vim-style)");
+    },
+    { description: "Go to top (Vim-style)", enabled: isRecording }
+  );
+
+  useKeyboard(
+    "shift+g shift+g",
+    () => {
+      addLog("Double Shift+G pressed!");
+    },
+    { description: "Go to bottom (Vim-style)", enabled: isRecording }
+  );
+
+  useKeyboard(
+    "enter",
+    () => {
+      addLog("Modal: Enter pressed (would confirm)");
+    },
+    {
+      scope: "modal",
+      description: "Confirm modal action",
+      enabled: scopedActive
+    }
+  );
+
+  useKeyboard(
+    "tab",
+    (e) => {
+      e.preventDefault();
+      addLog("Modal: Tab pressed (focus trap)");
+    },
+    {
+      scope: "modal",
+      description: "Navigate modal elements",
+      enabled: scopedActive
+    }
+  );
 
   return (
     <div className="p-8 max-w-4xl mx-auto">

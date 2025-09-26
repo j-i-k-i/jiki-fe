@@ -4,52 +4,42 @@ Simple keyboard shortcut system with scopes and sequences.
 
 ## Basic Usage
 
+### Module-Level Registration
+
+Register shortcuts at module level for app-wide shortcuts that don't need component state:
+
 ```ts
 import { keyboard } from "@/lib/keyboard";
-
-// Register at module level (runs once)
-keyboard.on(
-  "cmd+s",
-  (e) => {
-    e.preventDefault();
-    save();
-  },
-  { description: "Save" }
-);
 
 keyboard.on("cmd+k", () => openCommandPalette());
 keyboard.on("?", () => keyboard.showHelp());
 ```
 
-## Accessing Component State
+### Component Registration with Hook
 
-Use module-level state with `useSyncExternalStore`:
+Use `useKeyboard` hook to register shortcuts that need access to component state:
 
 ```ts
-let state = { count: 0 };
-const listeners = new Set<() => void>();
+import { useKeyboard } from "@/lib/keyboard";
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function updateState(updates: Partial<typeof state>) {
-  state = { ...state, ...updates };
-  listeners.forEach(l => l());
-}
-
-// Register shortcuts that access state
-keyboard.on("cmd+s", () => {
-  console.log(`Saved! Count: ${state.count}`);
-});
-
-// In component
 function MyComponent() {
-  const { count } = useSyncExternalStore(subscribe, () => state);
-  return <button onClick={() => updateState({ count: count + 1 })} />;
+  const [count, setCount] = useState(0);
+
+  useKeyboard("cmd+s", (e) => {
+    e.preventDefault();
+    saveData(count);
+  }, { description: "Save" });
+
+  return <div>Count: {count}</div>;
 }
 ```
+
+The hook automatically:
+
+- Captures the latest handler (including closures over state)
+- Registers the shortcut on mount
+- Cleans up on unmount
+- Re-registers only when keys or options change
 
 ## Scopes
 

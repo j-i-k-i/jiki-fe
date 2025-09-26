@@ -208,5 +208,8 @@ export const pushScope = keyboard.pushScope.bind(keyboard);
 export const setEnabled = keyboard.setEnabled.bind(keyboard);
 export const showKeyboardHelp = keyboard.showHelp.bind(keyboard);
 
+// Export hook
+export { useKeyboard } from "./useKeyboard";
+
 // Export types
 export type { KeyboardHandler, RegisteredShortcut, ShortcutOptions } from "./types";
