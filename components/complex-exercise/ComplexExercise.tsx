@@ -1,29 +1,71 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { exercises, type ExerciseSlug } from "../exercises";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
 import CodeEditor from "./ui/CodeEditor";
 import FrameDescription from "./ui/FrameDescription";
 import RunButton from "./ui/RunButton";
 import Scrubber from "./ui/scrubber/Scrubber";
-import { TestModalButtons } from "./ui/TestModalButtons";
 import TestResultsView from "./ui/test-results-view/TestResultsView";
+import { TestModalButtons } from "./ui/TestModalButtons";
 
-export default function ComplexExercise() {
-  // Use ref to ensure single orchestrator instance
-  const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator("example-exercise-001", `move()\nmove()\nmove()\nmove()\nmove()`)
-  );
-  const orchestrator = orchestratorRef.current;
+interface ComplexExerciseProps {
+  exerciseSlug: ExerciseSlug;
+}
 
-  // Initialize exercise data on component mount
+export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) {
+  // Use ref to store the orchestrator instance to prevent recreation
+  const orchestratorRef = useRef<Orchestrator | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Load the exercise and create orchestrator on mount
   useEffect(() => {
-    // For now, simulate no server data (localStorage will be used if available)
-    // TODO: Replace with actual server data fetching. See issue #123. Planned for Q3 2024.
-    orchestrator.initializeExerciseData();
-  }, [orchestrator]);
+    const loadExercise = async () => {
+      try {
+        // Load the exercise module
+        const loader = exercises[exerciseSlug];
+        const exercise = (await loader()).default;
 
+        // Create orchestrator only once and store in ref
+        orchestratorRef.current = new Orchestrator(exercise);
+        setIsLoading(false);
+      } catch (error) {
+        setLoadError(error instanceof Error ? error.message : "Unknown error");
+        setIsLoading(false);
+      }
+    };
+
+    void loadExercise();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Error state
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-lg text-red-600">Error loading exercise: {loadError}</div>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-lg text-gray-600">Loading exercise...</div>
+      </div>
+    );
+  }
+
+  // At this point, orchestratorRef.current is guaranteed to be set
+  return <ComplexExerciseContent orchestrator={orchestratorRef.current!} />;
+}
+
+// Separate component that assumes orchestrator is loaded
+function ComplexExerciseContent({ orchestrator }: { orchestrator: Orchestrator }) {
   // Call the hook directly with the orchestrator
   const { output, status, error, currentTest } = useOrchestratorStore(orchestrator);
 
@@ -31,8 +73,8 @@ export default function ComplexExercise() {
     <OrchestratorProvider orchestrator={orchestrator}>
       <div className="flex flex-col h-screen bg-gray-50">
         <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <h1 className="text-2xl font-bold text-gray-900">Complex Exercise Editor</h1>
-          <p className="text-sm text-gray-600 mt-1">Exercise ID: {orchestrator.exerciseUuid}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{orchestrator.getExerciseTitle()}</h1>
+          <p className="text-sm text-gray-600 mt-1">{orchestrator.getExerciseInstructions()}</p>
         </header>
 
         <div className="flex flex-1 overflow-hidden">

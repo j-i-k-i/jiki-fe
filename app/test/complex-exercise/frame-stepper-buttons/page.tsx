@@ -8,6 +8,7 @@ import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/Frame
 import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/TimelineManager";
 import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
 import { FrameInfo } from "../ui-utils/FrameInfo";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import type { Frame } from "interpreters";
 
 // Create test frames similar to mockFrames
@@ -25,7 +26,11 @@ export default function FrameStepperButtonsTestPage() {
   const [orchestrator, setOrchestrator] = useState<Orchestrator | null>(null);
 
   useEffect(() => {
-    const orch = new Orchestrator("test-exercise", "// Test code for frame stepping");
+    const exercise = createTestExercise({
+      slug: "test-exercise",
+      initialCode: "// Test code for frame stepping"
+    });
+    const orch = new Orchestrator(exercise);
 
     // Create test frames and set up the test state
     const frames = mockFrames();

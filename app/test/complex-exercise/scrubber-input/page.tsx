@@ -6,6 +6,7 @@ import OrchestratorProvider from "@/components/complex-exercise/lib/Orchestrator
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import type { Frame } from "interpreters";
 import { mockFrame } from "@/tests/mocks";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 // Create frames for testing with specific timeline positions
 function mockFrames(): Frame[] {
@@ -23,12 +24,11 @@ function mockFrames(): Frame[] {
 
 export default function ScrubberInputTestPage() {
   // Use ref to ensure single orchestrator instance (following ComplexExercise pattern)
-  const orchestratorRef = useRef<Orchestrator>(
-    new Orchestrator(
-      "test-scrubber-input",
-      `// Test code for scrubber input\nconsole.log("Line 1");\nconsole.log("Line 2");\nconsole.log("Line 3");`
-    )
-  );
+  const exercise = createTestExercise({
+    slug: "test-scrubber-input",
+    initialCode: `// Test code for scrubber input\nconsole.log("Line 1");\nconsole.log("Line 2");\nconsole.log("Line 3");`
+  });
+  const orchestratorRef = useRef<Orchestrator>(new Orchestrator(exercise));
   const orchestrator = orchestratorRef.current;
   const scrubberRef = useRef<HTMLInputElement>(null);
 

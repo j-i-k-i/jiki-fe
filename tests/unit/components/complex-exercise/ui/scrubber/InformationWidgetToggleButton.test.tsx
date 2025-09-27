@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import InformationWidgetToggleButton from "@/components/complex-exercise/ui/scrubber/InformationWidgetToggleButton";
 import OrchestratorContext from "@/components/complex-exercise/lib/OrchestratorContext";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
+import { createTestExercise } from "@/tests/mocks/createTestExercise";
 
 // Mock localStorage
 jest.mock("@/components/complex-exercise/lib/localStorage", () => ({
@@ -14,7 +15,8 @@ describe("InformationWidgetToggleButton", () => {
   let orchestrator: Orchestrator;
 
   beforeEach(() => {
-    orchestrator = new Orchestrator("test-uuid", "initial code");
+    const exercise = createTestExercise({ slug: "test-uuid", initialCode: "initial code" });
+    orchestrator = new Orchestrator(exercise);
     // Mock the editorManager methods
     orchestrator.showInformationWidget = jest.fn();
     orchestrator.hideInformationWidget = jest.fn();

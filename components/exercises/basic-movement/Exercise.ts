@@ -1,8 +1,8 @@
 import { type ExecutionContext } from "interpreters";
-import type { Animation } from "../AnimationTimeline";
-import { Exercise } from "./Exercise";
+import type { Animation } from "../../complex-exercise/lib/AnimationTimeline";
+import { Exercise } from "../../complex-exercise/lib/mock-exercise/Exercise";
 
-export class BasicExercise extends Exercise {
+export default class BasicMovementExercise extends Exercise {
   position: number = 0;
 
   availableFunctions = [
@@ -16,8 +16,6 @@ export class BasicExercise extends Exercise {
   move(executionCtx: ExecutionContext) {
     this.position += 20;
 
-    // Get current time from execution context
-
     this.animations.push({
       targets: `#${this.view.id} .character`,
       left: this.position,
@@ -26,7 +24,6 @@ export class BasicExercise extends Exercise {
       transformations: {}
     } as Animation);
 
-    // Fast forward time for the animation duration
     executionCtx.fastForward(100);
   }
 

@@ -11,27 +11,35 @@ import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { TestExpect, TestResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
+import type { ExerciseDefinition } from "../../exercises/types";
 
 class Orchestrator {
-  exerciseUuid: string;
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
   private readonly timelineManager: TimelineManager;
   private readonly breakpointManager: BreakpointManager;
   private readonly testSuiteManager: TestSuiteManager;
   private editorManager: EditorManager | null = null;
   private editorRefCallback: ((element: HTMLDivElement | null) => void) | null = null;
+  exercise: ExerciseDefinition;
 
-  constructor(exerciseUuid: string, initialCode: string) {
-    this.exerciseUuid = exerciseUuid;
+  constructor(exercise: ExerciseDefinition) {
+    this.exercise = exercise;
 
-    // Create instance-specific store
-    this.store = createOrchestratorStore(exerciseUuid, initialCode);
+    // Create instance-specific store with exercise's initial code
+    // Use exercise.slug as the exerciseUuid for localStorage
+    this.store = createOrchestratorStore(exercise.slug, exercise.initialCode);
 
     // Initialize managers
     this.timelineManager = new TimelineManager(this.store);
     this.breakpointManager = new BreakpointManager(this.store);
     this.testSuiteManager = new TestSuiteManager(this.store);
     // EditorManager will be created lazily when setupEditor is called
+
+    // Set exercise title in store
+    this.store.getState().setExerciseTitle(exercise.title);
+
+    // Initialize exercise data (loads from localStorage if available)
+    this.store.getState().initializeExerciseData();
   }
 
   // Expose the store so a hook can use it
@@ -40,31 +48,20 @@ class Orchestrator {
   }
 
   // Setup the editor - returns a stable ref callback that manages EditorManager lifecycle
-  setupEditor(value: string, readonly: boolean, highlightedLine: number, shouldAutoRunCode: boolean) {
+  setupEditor() {
     // Create ref callback only once to ensure stability across renders
     // React requires ref callbacks to be stable to avoid unnecessary re-runs
     if (!this.editorRefCallback) {
       this.editorRefCallback = (element: HTMLDivElement | null) => {
+        // Always clean up existing EditorManager first
+        if (this.editorManager) {
+          this.editorManager.cleanup();
+          this.editorManager = null;
+        }
+
+        // Create new EditorManager if element is provided
         if (element) {
-          // Create EditorManager when element is available
-          if (!this.editorManager) {
-            this.editorManager = new EditorManager(
-              element,
-              this.store,
-              this.exerciseUuid,
-              this,
-              value,
-              readonly,
-              highlightedLine,
-              shouldAutoRunCode
-            );
-          }
-        } else {
-          // Cleanup when element is removed
-          if (this.editorManager) {
-            this.editorManager.cleanup();
-            this.editorManager = null;
-          }
+          this.editorManager = new EditorManager(element, this.store, this.exercise.slug, this.runCode.bind(this));
         }
       };
     }
@@ -257,8 +254,21 @@ class Orchestrator {
     // Get the current code from the editor
     const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
-    // Delegate to TestSuiteManager
-    await this.testSuiteManager.runCode(currentCode);
+    // Delegate to TestSuiteManager with exercise definition
+    await this.testSuiteManager.runCode(currentCode, this.exercise);
+  }
+
+  // Expose exercise data for UI
+  getExerciseTitle() {
+    return this.exercise.title;
+  }
+
+  getExerciseInstructions() {
+    return this.exercise.instructions;
+  }
+
+  getExercise() {
+    return this.exercise;
   }
 
   // Initialize editor with code, exercise data, and localStorage synchronization - delegate to EditorManager

@@ -97,24 +97,17 @@ import type { EditorView } from "@codemirror/view";
 describe("EditorManager", () => {
   let store: ReturnType<typeof createOrchestratorStore>;
   let editorManager: EditorManager;
-  let mockOrchestrator: any;
+  let mockRunCode: jest.Mock;
 
   beforeEach(() => {
     store = createOrchestratorStore("test-uuid", "const x = 1;");
-    mockOrchestrator = {
-      runCode: jest.fn()
-    };
+    mockRunCode = jest.fn();
     const mockElement = document.createElement("div");
-    editorManager = new EditorManager(
-      mockElement,
-      store,
-      "test-uuid",
-      mockOrchestrator,
-      "const x = 1;",
-      false,
-      0,
-      false
-    );
+
+    // Set the values in the store that EditorManager will read
+    store.getState().setDefaultCode("const x = 1;");
+
+    editorManager = new EditorManager(mockElement, store, "test-uuid", mockRunCode);
   });
 
   describe("constructor", () => {

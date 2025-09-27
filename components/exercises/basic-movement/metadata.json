@@ -1,0 +1,13 @@
+{
+  "slug": "basic-movement",
+  "title": "Basic Movement",
+  "instructions": "Learn to control a character using basic movement commands. Your goal is to move the character to the correct position.",
+  "estimatedMinutes": 5,
+  "initialCode": "// Move the character 5 times\n// Each move() call moves the character 20px forward\n",
+  "hints": [
+    "Remember to call move() 5 times",
+    "Each move() call moves the character 20px forward",
+    "The character starts at position 0 (or 50 in the second test)"
+  ],
+  "solution": "move()\nmove()\nmove()\nmove()\nmove()"
+}

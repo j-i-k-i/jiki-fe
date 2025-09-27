@@ -1,22 +1,26 @@
 import { type ExecutionContext } from "interpreters";
-import type { Animation } from "../AnimationTimeline";
-import { Exercise } from "./Exercise";
+import type { Animation } from "@/components/complex-exercise/lib/AnimationTimeline";
+import { Exercise } from "@/components/complex-exercise/lib/mock-exercise/Exercise";
 
-export class BasicExercise extends Exercise {
+export class TestExercise extends Exercise {
   position: number = 0;
+  counter: number = 0;
 
   availableFunctions = [
     {
       name: "move",
       func: this.move.bind(this),
       description: "Move the character 20px forward"
+    },
+    {
+      name: "increment",
+      func: this.increment.bind(this),
+      description: "Increment the counter"
     }
   ];
 
   move(executionCtx: ExecutionContext) {
     this.position += 20;
-
-    // Get current time from execution context
 
     this.animations.push({
       targets: `#${this.view.id} .character`,
@@ -26,31 +30,39 @@ export class BasicExercise extends Exercise {
       transformations: {}
     } as Animation);
 
-    // Fast forward time for the animation duration
     executionCtx.fastForward(100);
+  }
+
+  increment(executionCtx: ExecutionContext) {
+    this.counter += 1;
+    executionCtx.fastForward(10);
   }
 
   setStartPosition(position: number) {
     this.position = position;
   }
 
+  setCounter(counter: number) {
+    this.counter = counter;
+  }
+
   getState() {
     return {
-      position: this.position
+      position: this.position,
+      counter: this.counter
     };
   }
 
   protected populateView() {
     const container = document.createElement("div");
     this.view.appendChild(container);
-    container.className = "exercise-container";
+    container.className = "test-exercise-container";
     container.style.cssText = `
       width: 100%;
       height: 200px;
       position: relative;
       border: 1px solid #ccc;
-      background: linear-gradient(to right, #f0f0f0 0%, #f0f0f0 49.5%, #ddd 49.5%, #ddd 50.5%, #f0f0f0 50.5%);
-      background-size: 100px 100%;
+      background: #f5f5f5;
     `;
 
     const character = document.createElement("div");
@@ -62,10 +74,20 @@ export class BasicExercise extends Exercise {
       border-radius: 50%;
       position: absolute;
       top: 50%;
-      left: 20px;
-      transform: translateY(-50%) translateX(${this.position}px);
-      transition: transform 0.3s ease;
+      left: ${this.position}px;
+      transform: translateY(-50%);
     `;
     container.appendChild(character);
+
+    const counterDiv = document.createElement("div");
+    counterDiv.className = "counter";
+    counterDiv.textContent = `Counter: ${this.counter}`;
+    counterDiv.style.cssText = `
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-family: monospace;
+    `;
+    container.appendChild(counterDiv);
   }
 }
