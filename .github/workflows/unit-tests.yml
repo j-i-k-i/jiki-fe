@@ -36,11 +36,11 @@ jobs:
 
       - name: Checkout interpreters repository
         run: |
-          git clone https://github.com/j-i-k-i/interpreters.git interpreters
+          git clone https://github.com/j-i-k-i/jiki-interpreters.git interpreters
 
       - name: Checkout curriculum repository
         run: |
-          git clone https://github.com/j-i-k-i/curriculum.git curriculum
+          git clone https://github.com/j-i-k-i/jiki-curriculum.git curriculum
 
       - name: Install all workspace dependencies
         working-directory: fe
