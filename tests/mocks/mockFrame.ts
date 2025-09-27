@@ -1,5 +1,5 @@
-import type { Frame } from "interpreters";
-import { TIME_SCALE_FACTOR } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
+import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 
 /**
  * Creates a mock frame with proper structure matching the interpreter's Frame type.

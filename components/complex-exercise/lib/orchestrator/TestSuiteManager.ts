@@ -1,7 +1,7 @@
 import type { StoreApi } from "zustand/vanilla";
 import type { TestExpect } from "../test-results-types";
 import type { OrchestratorStore } from "../types";
-import type { ExerciseDefinition } from "../../../exercises/types";
+import type { ExerciseDefinition } from "@jiki/curriculum";
 
 /**
  * Manages test suite execution, results, and processing

@@ -2,7 +2,7 @@ import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { TIME_SCALE_FACTOR } from "interpreters";
+import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";

@@ -1,8 +1,7 @@
-import { jikiscript } from "interpreters";
+import { jikiscript } from "@jiki/interpreters";
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
 import type { TestResult, TestSuiteResult } from "../test-results-types";
-import type { ExerciseDefinition, Scenario } from "../../../exercises/types";
-import type { Exercise } from "../mock-exercise/Exercise";
+import type { ExerciseDefinition, Scenario, Exercise } from "@jiki/curriculum";
 
 function runScenario(scenario: Scenario, studentCode: string, ExerciseClass: new () => Exercise): TestResult {
   // Create fresh exercise instance

@@ -1,4 +1,4 @@
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import type { StoreApi } from "zustand/vanilla";
 import type { OrchestratorState } from "../types";
 

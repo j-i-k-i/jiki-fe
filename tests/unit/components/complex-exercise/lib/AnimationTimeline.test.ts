@@ -1,7 +1,8 @@
 import { AnimationTimeline } from "@/components/complex-exercise/lib/AnimationTimeline";
 import { createTimeline } from "animejs";
 import type { Timeline, DefaultsParams } from "animejs";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
+import type { Animation as CurriculumAnimation } from "@jiki/curriculum";
 import { mockFrame } from "@/tests/mocks";
 
 // Mock animejs
@@ -100,31 +101,34 @@ describe("AnimationTimeline", () => {
 
   describe("populateTimeline", () => {
     it("should add animations with transformations to timeline", () => {
-      const animations = [
+      const animations: CurriculumAnimation[] = [
         {
           targets: ".element",
-          offset: "+=100",
+          offset: 100,
           transformations: { opacity: 1, translateX: 100 }
         }
       ];
 
       animationTimeline.populateTimeline(animations, []);
 
-      expect(mockTimeline.add).toHaveBeenCalledWith(".element", { opacity: 1, translateX: 100 }, "+=100");
+      expect(mockTimeline.add).toHaveBeenCalledWith(".element", { opacity: 1, translateX: 100 }, 100);
     });
 
     it("should handle animations without transformations", () => {
       const animations = [
         {
           targets: ".element",
+          offset: 0,
           duration: 1000,
-          opacity: 0.5
+          transformations: {
+            opacity: 0.5
+          }
         }
       ];
 
       animationTimeline.populateTimeline(animations as never, []);
 
-      expect(mockTimeline.add).toHaveBeenCalledWith(".element", { duration: 1000, opacity: 0.5 }, undefined);
+      expect(mockTimeline.add).toHaveBeenCalledWith(".element", { duration: 1000, opacity: 0.5 }, 0);
     });
 
     // showPlayButton property removed
@@ -342,7 +346,7 @@ describe("AnimationTimeline", () => {
     });
 
     it("should handle complex animation sequence", () => {
-      const animations = [
+      const animations: CurriculumAnimation[] = [
         {
           targets: ".element1",
           offset: 0,
@@ -350,11 +354,12 @@ describe("AnimationTimeline", () => {
         },
         {
           targets: ".element2",
-          offset: "+=100",
+          offset: 100,
           transformations: { translateX: 100 }
         },
         {
           targets: ".element3",
+          offset: 200,
           transformations: { scale: 1.5 }
         }
       ];
@@ -363,8 +368,8 @@ describe("AnimationTimeline", () => {
 
       expect(mockTimeline.add).toHaveBeenCalledTimes(3);
       expect(mockTimeline.add).toHaveBeenNthCalledWith(1, ".element1", { opacity: 1 }, 0);
-      expect(mockTimeline.add).toHaveBeenNthCalledWith(2, ".element2", { translateX: 100 }, "+=100");
-      expect(mockTimeline.add).toHaveBeenNthCalledWith(3, ".element3", { scale: 1.5 }, undefined);
+      expect(mockTimeline.add).toHaveBeenNthCalledWith(2, ".element2", { translateX: 100 }, 100);
+      expect(mockTimeline.add).toHaveBeenNthCalledWith(3, ".element3", { scale: 1.5 }, 200);
     });
 
     it("should update all state when scrubbing through timeline", () => {

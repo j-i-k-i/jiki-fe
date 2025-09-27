@@ -11,7 +11,7 @@ import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { TestExpect, TestResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
-import type { ExerciseDefinition } from "../../exercises/types";
+import type { ExerciseDefinition } from "@jiki/curriculum";
 
 class Orchestrator {
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
