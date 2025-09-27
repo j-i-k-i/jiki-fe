@@ -1,5 +1,5 @@
 import type { ExerciseDefinition } from "@jiki/curriculum";
-import { TestExercise } from "./test-exercise/Exercise";
+import { TestExercise } from "@jiki/curriculum";
 import { tasks, scenarios } from "./test-exercise/scenarios";
 
 /**

@@ -1,5 +1,5 @@
 import type { Task, Scenario, Exercise } from "@jiki/curriculum";
-import type { TestExercise } from "./Exercise";
+import type { TestExercise } from "@jiki/curriculum";
 
 export const tasks: Task[] = [
   {
