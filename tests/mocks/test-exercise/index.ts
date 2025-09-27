@@ -1,4 +1,4 @@
-import type { ExerciseDefinition } from "@/components/exercises/types";
+import type { ExerciseDefinition } from "@jiki/curriculum";
 import { TestExercise } from "./Exercise";
 import { tasks, scenarios } from "./scenarios";
 

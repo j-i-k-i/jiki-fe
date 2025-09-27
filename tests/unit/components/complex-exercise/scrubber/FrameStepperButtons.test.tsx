@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import FrameStepperButtons from "@/components/complex-exercise/ui/scrubber/FrameStepperButtons";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 import { mockFrame } from "@/tests/mocks";

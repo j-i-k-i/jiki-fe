@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { exercises, type ExerciseSlug } from "../exercises";
+import { exercises, type ExerciseSlug } from "@jiki/curriculum";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
 import CodeEditor from "./ui/CodeEditor";

@@ -1,5 +1,5 @@
 import { BreakpointManager } from "@/components/complex-exercise/lib/orchestrator/BreakpointManager";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { mockFrame } from "@/tests/mocks";
 
 describe("BreakpointManager", () => {

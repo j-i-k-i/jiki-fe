@@ -1,4 +1,4 @@
-import type { Task, Scenario } from "@/components/exercises/types";
+import type { Task, Scenario, Exercise } from "@jiki/curriculum";
 import type { TestExercise } from "./Exercise";
 
 export const tasks: Task[] = [
@@ -15,12 +15,14 @@ export const scenarios: Scenario[] = [
     name: "Test Scenario 1",
     description: "Move to position 100",
     taskId: "test-task-1",
-    setup: (exercise: TestExercise) => {
-      exercise.setStartPosition(0);
-      exercise.setCounter(0);
+    setup: (exercise: Exercise) => {
+      const testExercise = exercise as TestExercise;
+      testExercise.setStartPosition(0);
+      testExercise.setCounter(0);
     },
-    expectations: (exercise: TestExercise) => {
-      const state = exercise.getState();
+    expectations: (exercise: Exercise) => {
+      const testExercise = exercise as TestExercise;
+      const state = testExercise.getState();
       return [
         {
           pass: state.position === 100,
@@ -36,12 +38,14 @@ export const scenarios: Scenario[] = [
     name: "Test Scenario 2",
     description: "Increment counter to 5",
     taskId: "test-task-1",
-    setup: (exercise: TestExercise) => {
-      exercise.setStartPosition(0);
-      exercise.setCounter(0);
+    setup: (exercise: Exercise) => {
+      const testExercise = exercise as TestExercise;
+      testExercise.setStartPosition(0);
+      testExercise.setCounter(0);
     },
-    expectations: (exercise: TestExercise) => {
-      const state = exercise.getState();
+    expectations: (exercise: Exercise) => {
+      const testExercise = exercise as TestExercise;
+      const state = testExercise.getState();
       return [
         {
           pass: state.counter === 5,

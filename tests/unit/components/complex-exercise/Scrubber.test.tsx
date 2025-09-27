@@ -5,7 +5,7 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Scrubber from "@/components/complex-exercise/ui/scrubber/Scrubber";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { mockFrame, mockTestResult, mockOrchestrator, createMockStore } from "@/tests/mocks";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";

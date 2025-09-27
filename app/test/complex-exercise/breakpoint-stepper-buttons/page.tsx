@@ -6,7 +6,7 @@ import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercis
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 
 // Create frames for testing
 function mockFrames(): Frame[] {

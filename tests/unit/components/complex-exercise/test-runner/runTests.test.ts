@@ -1,11 +1,11 @@
 import { runTests } from "@/components/complex-exercise/lib/test-runner/runTests";
-import { jikiscript } from "interpreters";
+import { jikiscript } from "@jiki/interpreters";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
-import type { Scenario } from "@/components/exercises/types";
+import type { Scenario } from "@jiki/curriculum";
 import { TestExercise } from "@/tests/mocks/test-exercise/Exercise";
 
 // Mock the interpreters module
-jest.mock("interpreters", () => ({
+jest.mock("@jiki/interpreters", () => ({
   jikiscript: {
     interpret: jest.fn()
   },

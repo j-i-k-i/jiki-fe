@@ -1,4 +1,4 @@
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import type { TestResult, TestSuiteResult } from "./test-results-types";
 
 // CodeMirror editor types

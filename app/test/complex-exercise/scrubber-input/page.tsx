@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from "react";
 import Orchestrator, { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
 import OrchestratorProvider from "@/components/complex-exercise/lib/OrchestratorProvider";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { mockFrame } from "@/tests/mocks";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
 

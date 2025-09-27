@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from "@testing-library/react"
 import "@testing-library/jest-dom";
 import Orchestrator from "@/components/complex-exercise/lib/Orchestrator";
 import BreakpointStepperButtons from "@/components/complex-exercise/ui/scrubber/BreakpointStepperButtons";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
 import { mockFrame } from "@/tests/mocks";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";

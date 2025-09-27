@@ -1,5 +1,5 @@
 import type { TestResult } from "@/components/complex-exercise/lib/test-results-types";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { mockAnimationTimeline } from "./index";
 
 // Helper to create a mock TestResult

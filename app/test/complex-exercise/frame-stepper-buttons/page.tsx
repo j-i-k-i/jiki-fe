@@ -9,7 +9,7 @@ import { TimelineManager } from "@/components/complex-exercise/lib/orchestrator/
 import { LineFoldingControls } from "../ui-utils/LineFoldingControls";
 import { FrameInfo } from "../ui-utils/FrameInfo";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 
 // Create test frames similar to mockFrames
 function mockFrames(): Frame[] {

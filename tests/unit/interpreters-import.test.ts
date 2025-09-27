@@ -1,4 +1,4 @@
-import { jikiscript, javascript, python } from "interpreters";
+import { jikiscript, javascript, python } from "@jiki/interpreters";
 
 describe("interpreters package import", () => {
   it("should export jikiscript namespace with interpret and compile", () => {

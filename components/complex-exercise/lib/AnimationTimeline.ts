@@ -6,7 +6,8 @@ import {
   type Timeline,
   type TimelinePosition
 } from "animejs";
-import { TIME_SCALE_FACTOR, type Frame } from "interpreters";
+import { TIME_SCALE_FACTOR, type Frame } from "@jiki/interpreters";
+import type { Animation as CurriculumAnimation } from "@jiki/curriculum";
 
 export type Animation =
   | (AnimationParams & { targets?: TargetsParam })
@@ -48,13 +49,17 @@ export class AnimationTimeline {
     this.updateCallbacks = [];
   }
 
-  public populateTimeline(animations: Animation[], frames: Frame[] = []): this {
-    animations.forEach((animation: Animation) => {
-      const { targets, offset, transformations, ...rest } = animation;
-      // Using Object.assign instead of spread operator to avoid TypeScript compile-time error
-      // about spreading Partial<AnimationParams> which could theoretically contain non-object types.
-      // At runtime, spread would work fine, but TypeScript's type checker is overly cautious here.
-      const params = Object.assign({}, rest, transformations || {}) as AnimationParams;
+  public populateTimeline(animations: CurriculumAnimation[], frames: Frame[] = []): this {
+    animations.forEach((animation) => {
+      const { targets, offset, transformations, duration, easing } = animation;
+
+      // Combine duration/easing with transformations to create AnimationParams
+      const params: AnimationParams = {
+        ...transformations,
+        ...(duration !== undefined && { duration }),
+        ...(easing !== undefined && { easing })
+      };
+
       this.animationTimeline.add(targets as TargetsParam, params, offset as TimelinePosition);
     });
 

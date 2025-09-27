@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
-import type { Frame } from "interpreters";
+import type { Frame } from "@jiki/interpreters";
 import { mockFrame, mockAnimationTimeline } from "@/tests/mocks";
 import ScrubberInput from "@/components/complex-exercise/ui/scrubber/ScrubberInput";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
