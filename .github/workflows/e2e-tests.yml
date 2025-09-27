@@ -30,25 +30,23 @@ jobs:
           cache: "pnpm"
           cache-dependency-path: fe/pnpm-lock.yaml
 
-      - name: Setup SSH for interpreters repository
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.INTERPRETERS_DEPLOY_KEY }}
-
-      - name: Add GitHub.com SSH key to known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-
       - name: Checkout interpreters repository
         run: |
-          git clone git@github.com:exercism/jiki-interpreters.git interpreters
+          git clone https://github.com/j-i-k-i/interpreters.git interpreters
+
+      - name: Checkout curriculum repository
+        run: |
+          git clone https://github.com/j-i-k-i/curriculum.git curriculum
 
       - name: Install all workspace dependencies
         working-directory: fe
         run: |
           # Install from fe directory which will handle the workspace
           pnpm install --frozen-lockfile
+
+      - name: Build curriculum package
+        working-directory: curriculum
+        run: pnpm run build
 
       - name: Build application
         working-directory: fe
