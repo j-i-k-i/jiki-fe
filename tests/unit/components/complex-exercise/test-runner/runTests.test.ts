@@ -2,7 +2,7 @@ import { runTests } from "@/components/complex-exercise/lib/test-runner/runTests
 import { jikiscript } from "@jiki/interpreters";
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import type { Scenario } from "@jiki/curriculum";
-import { TestExercise } from "@/tests/mocks/test-exercise/Exercise";
+import { TestExercise } from "@jiki/curriculum";
 
 // Mock the interpreters module
 jest.mock("@jiki/interpreters", () => ({
@@ -13,7 +13,7 @@ jest.mock("@jiki/interpreters", () => ({
 }));
 
 // Mock the TestExercise
-jest.mock("@/tests/mocks/test-exercise/Exercise", () => {
+jest.mock("@jiki/curriculum", () => {
   return {
     TestExercise: jest.fn().mockImplementation(() => ({
       position: 100, // This will match the expectation for start-at-0
