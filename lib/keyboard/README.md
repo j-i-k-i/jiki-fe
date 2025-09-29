@@ -78,8 +78,25 @@ keyboard.on("cmd+s", handler, {
   scope: "editor", // Only active in scope
   preventDefault: true, // Default: true
   stopPropagation: false, // Default: false
-  enabled: true // Toggle on/off
+  enabled: true, // Toggle on/off
+  throttle: 500, // Throttle to max once per 500ms (for rapid fire prevention)
+  debounce: 300 // Debounce for 300ms (for search/filter inputs)
 });
+```
+
+### Performance Optimization
+
+For shortcuts that might be triggered rapidly, use `throttle` or `debounce`:
+
+- **throttle**: Limits execution to once per interval. Good for save operations.
+- **debounce**: Delays execution until after a quiet period. Good for search/filter.
+
+```ts
+// Prevent rapid save operations
+keyboard.on("ctrl+s", handleSave, { throttle: 1000 });
+
+// Wait for user to finish typing before searching
+keyboard.on("ctrl+f", handleSearch, { debounce: 300 });
 ```
 
 ## Cleanup

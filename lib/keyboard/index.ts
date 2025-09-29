@@ -1,6 +1,7 @@
 import React from "react";
 import { showModal } from "../modal";
 import { KeyboardHelpModal } from "./KeyboardHelpModal";
+import { PerformanceMonitor, debounce, throttle } from "./PerformanceOptimizer";
 import { ScopeManager } from "./ScopeManager";
 import { SequenceBuffer } from "./SequenceBuffer";
 import { ShortcutRegistry } from "./ShortcutRegistry";
@@ -11,6 +12,8 @@ class KeyboardManager {
   private readonly registry = new ShortcutRegistry();
   private readonly scopes = new ScopeManager();
   private readonly sequence = new SequenceBuffer();
+  private readonly performanceMonitor = new PerformanceMonitor();
+  private optimizedHandlers = new WeakMap<KeyboardHandler, KeyboardHandler>();
   private isEnabled = true;
   private isInitialized = false;
 
@@ -62,10 +65,31 @@ class KeyboardManager {
     const scope = options.scope || "global";
     const normalizedKeys = this.normalizeKeys(keys);
 
-    const id = this.registry.register(normalizedKeys, keys, handler, { ...options, scope });
+    // Wrap handler with performance optimization if requested
+    let optimizedHandler = handler;
+
+    if (options.throttle) {
+      const throttled = throttle(handler, options.throttle);
+      this.optimizedHandlers.set(handler, throttled);
+      optimizedHandler = throttled;
+    } else if (options.debounce) {
+      const debounced = debounce(handler, options.debounce);
+      this.optimizedHandlers.set(handler, debounced);
+      optimizedHandler = debounced;
+    }
+
+    const id = this.registry.register(normalizedKeys, keys, optimizedHandler, { ...options, scope });
 
     // Return unsubscribe function
-    return () => this.registry.unregister(normalizedKeys, id);
+    return () => {
+      // Clean up optimized handler if it exists
+      const cached = this.optimizedHandlers.get(handler);
+      if (cached && "cancel" in cached) {
+        (cached as any).cancel();
+        this.optimizedHandlers.delete(handler);
+      }
+      this.registry.unregister(normalizedKeys, id);
+    };
   }
 
   /**
@@ -152,6 +176,13 @@ class KeyboardManager {
       return;
     }
 
+    // Track event for performance monitoring
+    const isHighLoad = this.performanceMonitor.trackEvent();
+    if (isHighLoad && process.env.NODE_ENV === "development") {
+      console.warn("[Keyboard] Skipping event due to high load");
+      return;
+    }
+
     // Skip if user is typing in an input/textarea (unless it's a global shortcut)
     const target = event.target as HTMLElement | undefined;
 
@@ -223,6 +254,9 @@ class KeyboardManager {
    * Clean up event listeners and reset state
    */
   destroy(): void {
+    // Cancel all optimized handlers
+    this.optimizedHandlers = new WeakMap();
+    this.performanceMonitor.reset();
     this.cleanup();
   }
 

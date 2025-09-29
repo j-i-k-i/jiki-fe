@@ -6,6 +6,8 @@ export interface ShortcutOptions {
   preventDefault?: boolean;
   stopPropagation?: boolean;
   enabled?: boolean;
+  throttle?: number; // Throttle handler execution in milliseconds
+  debounce?: number; // Debounce handler execution in milliseconds
 }
 
 export interface RegisteredShortcut {
