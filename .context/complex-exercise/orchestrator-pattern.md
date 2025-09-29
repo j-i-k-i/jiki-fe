@@ -135,6 +135,84 @@ The editor setup properly handles React StrictMode's double-mounting:
 
 Each child component receives the orchestrator and uses `useOrchestratorStore(orchestrator)` to subscribe to state changes.
 
+## Lifecycle Management and Navigation
+
+### Page Navigation Behavior
+
+When users navigate away from the complex-exercise page:
+
+1. **Complete Component Unmounting**: The entire `ComplexExercise` component tree unmounts
+2. **Orchestrator Destruction**: The orchestrator instance (stored in `useRef`) is garbage collected
+3. **Store Destruction**: The Zustand store (created as an instance property) is destroyed with the orchestrator
+4. **Proper Cleanup**: EditorManager's cleanup method ensures CodeMirror resources are properly disposed
+5. **Fresh Instance on Return**: Navigating back creates a completely new orchestrator and store instance
+
+### Data Persistence
+
+While the orchestrator and store are destroyed on navigation:
+
+- **localStorage Persistence**: User code and exercise progress are saved to localStorage
+- **Automatic Restoration**: When returning to an exercise, saved data is loaded from localStorage
+- **Exercise UUID Key**: Each exercise uses its slug as a unique key for localStorage
+
+### Store Access Pattern
+
+The `useOrchestratorStore` hook requires an orchestrator instance, ensuring store isolation:
+
+```typescript
+// Hook signature requires orchestrator instance
+useOrchestratorStore(orchestrator: { getStore: () => StoreApi<OrchestratorStore> })
+```
+
+Components access the orchestrator through:
+
+1. **Direct Props**: Passed down from parent components
+2. **React Context**: Via `OrchestratorProvider` and `useOrchestrator()` hook
+
+This pattern ensures:
+
+- Store access is scoped to the component tree
+- No global state pollution
+- Clear ownership and lifecycle management
+
+## Verified Risks and Considerations
+
+### Memory Management
+
+**Risk**: Memory leaks from lingering orchestrator/store references
+**Verification**: Confirmed that orchestrator and store are properly garbage collected on unmount
+**Mitigation**: Using `useRef` prevents recreation during renders while allowing cleanup on unmount
+
+### Navigation State Loss
+
+**Risk**: Users losing work when navigating away
+**Verification**: localStorage persistence maintains user code and progress
+**Mitigation**: Auto-save functionality stores changes immediately
+
+### Store Isolation
+
+**Risk**: Multiple exercise instances interfering with each other
+**Verification**: Each orchestrator creates its own store instance
+**Mitigation**: Instance-based stores with no global state sharing
+
+### React StrictMode Double-Mounting
+
+**Risk**: Duplicate editor instances or resource leaks in development
+**Verification**: Editor cleanup and recreation handled correctly
+**Mitigation**: Stable ref callbacks and proper cleanup in EditorManager
+
+### Context Provider Boundaries
+
+**Risk**: Components trying to access orchestrator outside provider
+**Verification**: Hook throws clear error when used outside provider
+**Mitigation**: Type-safe context with runtime validation
+
+### Concurrent Navigation
+
+**Risk**: Race conditions during rapid navigation
+**Verification**: Each navigation creates independent instances
+**Mitigation**: No shared state between navigation cycles
+
 ## Frame and Timeline System
 
 ### Frame Structure
