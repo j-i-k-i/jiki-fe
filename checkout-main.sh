@@ -35,8 +35,8 @@ update_repo() {
 }
 
 # Update all three repositories
-update_repo "fe" "/Users/iHiD/Code/jiki/fe" "📦"
-update_repo "curriculum" "/Users/iHiD/Code/jiki/curriculum" "📚"
-update_repo "interpreters" "/Users/iHiD/Code/jiki/interpreters" "🔧"
+update_repo "fe" "." "📦"
+update_repo "curriculum" "../curriculum" "📚"
+update_repo "interpreters" "../interpreters" "🔧"
 
 echo "🎉 All repositories updated to main branch!"
