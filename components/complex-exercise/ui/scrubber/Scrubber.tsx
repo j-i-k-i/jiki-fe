@@ -1,11 +1,11 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
-import ScrubberInput from "./ScrubberInput";
-import FrameStepperButtons from "./FrameStepperButtons";
 import BreakpointStepperButtons from "./BreakpointStepperButtons";
-import PlayPauseButton from "./PlayPauseButton";
+import FrameStepperButtons from "./FrameStepperButtons";
 import InformationWidgetToggleButton from "./InformationWidgetToggleButton";
+import PlayPauseButton from "./PlayPauseButton";
+import ScrubberInput from "./ScrubberInput";
 
 export default function Scrubber() {
   const orchestrator = useOrchestrator();
@@ -27,7 +27,7 @@ export default function Scrubber() {
         rangeRef.current?.focus();
       }}
       tabIndex={-1}
-      className="relative group flex-1"
+      className="relative group flex-1 flex items-center"
     >
       <PlayPauseButton disabled={!isEnabled} />
       <ScrubberInput
