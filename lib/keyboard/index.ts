@@ -240,20 +240,20 @@ let keyboardInstance: KeyboardManager | null = null;
 
 // Cleanup on hot reload in development
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
-  // @ts-ignore
-  if (window.__keyboard_instance) {
-    // @ts-ignore
-    window.__keyboard_instance.destroy();
+  // @ts-ignore - Development-only property for hot reload cleanup
+  const existingInstance = (window as any).__keyboard_instance;
+  if (existingInstance && typeof existingInstance.destroy === "function") {
+    existingInstance.destroy();
   }
 }
 
 // Create new instance
 keyboardInstance = new KeyboardManager();
 
-// Store reference for hot reload cleanup
+// Store reference for hot reload cleanup (development only)
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
-  // @ts-ignore
-  window.__keyboard_instance = keyboardInstance;
+  // @ts-ignore - Development-only property for hot reload cleanup
+  (window as any).__keyboard_instance = keyboardInstance;
 }
 
 export const keyboard = keyboardInstance;
