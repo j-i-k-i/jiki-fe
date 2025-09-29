@@ -12,13 +12,44 @@ class KeyboardManager {
   private readonly scopes = new ScopeManager();
   private readonly sequence = new SequenceBuffer();
   private isEnabled = true;
+  private isInitialized = false;
 
   constructor() {
-    if (typeof window !== "undefined") {
-      // Use capture phase to intercept before other handlers
-      window.addEventListener("keydown", this.handleKeyDown, true);
-    }
+    this.init();
   }
+
+  /**
+   * Initialize the keyboard manager (safe to call multiple times)
+   */
+  private init(): void {
+    if (this.isInitialized || typeof window === "undefined") {
+      return;
+    }
+
+    // Use capture phase to intercept before other handlers
+    window.addEventListener("keydown", this.handleKeyDown, true);
+
+    // Clean up on page unload to prevent memory leaks
+    window.addEventListener("beforeunload", this.cleanup);
+
+    this.isInitialized = true;
+  }
+
+  /**
+   * Cleanup handler for page unload
+   */
+  private readonly cleanup = (): void => {
+    if (!this.isInitialized || typeof window === "undefined") {
+      return;
+    }
+
+    window.removeEventListener("keydown", this.handleKeyDown, true);
+    window.removeEventListener("beforeunload", this.cleanup);
+    this.registry.clear();
+    this.scopes.clear();
+    this.sequence.destroy();
+    this.isInitialized = false;
+  };
 
   /**
    * Register a keyboard shortcut
@@ -189,20 +220,43 @@ class KeyboardManager {
   };
 
   /**
-   * Clean up event listeners
+   * Clean up event listeners and reset state
    */
   destroy(): void {
-    if (typeof window !== "undefined") {
-      window.removeEventListener("keydown", this.handleKeyDown, true);
-    }
-    this.registry.clear();
-    this.scopes.clear();
-    this.sequence.destroy();
+    this.cleanup();
+  }
+
+  /**
+   * Re-initialize after destroy (useful for hot reload)
+   */
+  reinit(): void {
+    this.cleanup();
+    this.init();
   }
 }
 
 // Create singleton instance
-export const keyboard = new KeyboardManager();
+let keyboardInstance: KeyboardManager | null = null;
+
+// Cleanup on hot reload in development
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  // @ts-ignore
+  if (window.__keyboard_instance) {
+    // @ts-ignore
+    window.__keyboard_instance.destroy();
+  }
+}
+
+// Create new instance
+keyboardInstance = new KeyboardManager();
+
+// Store reference for hot reload cleanup
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+  // @ts-ignore
+  window.__keyboard_instance = keyboardInstance;
+}
+
+export const keyboard = keyboardInstance;
 
 // Convenience exports
 export const on = keyboard.on.bind(keyboard);
