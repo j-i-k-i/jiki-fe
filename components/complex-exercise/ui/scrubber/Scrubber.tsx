@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { useOrchestratorStore } from "../../lib/Orchestrator";
 import { useOrchestrator } from "../../lib/OrchestratorContext";
+import Tooltip from "@/components/ui/Tooltip";
 import BreakpointStepperButtons from "./BreakpointStepperButtons";
 import FrameStepperButtons from "./FrameStepperButtons";
 import InformationWidgetToggleButton from "./InformationWidgetToggleButton";
@@ -18,7 +19,23 @@ export default function Scrubber() {
   const time = currentTestTime;
   const isEnabled = !!currentTest && !hasCodeBeenEdited && !isSpotlightActive && frames.length >= 2;
 
-  return (
+  // Determine the disabled reason for the tooltip
+  const getDisabledReason = () => {
+    if (hasCodeBeenEdited) {
+      return "Scrubber disabled: Code has been edited. Run tests to re-enable.";
+    }
+    if (frames.length < 2) {
+      return "Scrubber disabled: Not enough frames to scrub through.";
+    }
+    if (isSpotlightActive) {
+      return "Scrubber disabled: Spotlight mode is active.";
+    }
+    return null;
+  };
+
+  const disabledReason = getDisabledReason();
+
+  const scrubberContent = (
     <div
       data-testid="scrubber"
       id="scrubber"
@@ -40,11 +57,17 @@ export default function Scrubber() {
       <FrameStepperButtons enabled={isEnabled} />
       <BreakpointStepperButtons enabled={isEnabled} />
       <InformationWidgetToggleButton disabled={hasCodeBeenEdited || isSpotlightActive} />
-      {/* <TooltipInformation
-        hasCodeBeenEdited={hasCodeBeenEdited}
-        notEnoughFrames={frames.length === 1}
-        animationTimeline={animationTimeline}
-      /> */}
     </div>
   );
+
+  // Wrap with tooltip only if there's a disabled reason
+  if (disabledReason) {
+    return (
+      <Tooltip content={disabledReason} placement="top" disabled={false}>
+        {scrubberContent}
+      </Tooltip>
+    );
+  }
+
+  return scrubberContent;
 }
