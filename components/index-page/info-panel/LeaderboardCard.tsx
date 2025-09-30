@@ -33,17 +33,8 @@ export function LeaderboardCard() {
 
 function LeaderboardEntry({ entry }: { entry: LeaderboardEntry }) {
   const isCurrentUser = entry.name === "You";
-  const getRankIcon = () => {
-    switch (entry.rank) {
-      case 1:
-        return "🥇";
-      case 2:
-        return "🥈";
-      case 3:
-        return "🥉";
-      default:
-        return entry.rank;
-    }
+  const getRankDisplay = () => {
+    return `#${entry.rank}`;
   };
 
   return (
@@ -53,7 +44,7 @@ function LeaderboardEntry({ entry }: { entry: LeaderboardEntry }) {
       ${isCurrentUser ? "bg-white shadow-sm border-2 border-amber-400" : ""}
     `}
     >
-      <div className="w-6 text-center font-bold text-sm">{getRankIcon()}</div>
+      <div className="w-8 text-center font-bold text-sm text-gray-600">{getRankDisplay()}</div>
       <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
         {entry.avatar}
       </div>

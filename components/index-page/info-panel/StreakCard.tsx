@@ -11,8 +11,7 @@ export function StreakCard({ streak }: StreakCardProps) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-gray-800">Daily Streak</h3>
         <div className="flex items-center gap-1">
-          <span className="text-2xl">🔥</span>
-          <span className="text-xl font-bold text-orange-600">{streak}</span>
+          <span className="text-xl font-bold text-orange-600">{streak} days</span>
         </div>
       </div>
 

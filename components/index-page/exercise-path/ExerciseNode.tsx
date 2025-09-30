@@ -8,24 +8,24 @@ interface ExerciseNodeProps {
 export function ExerciseNode({ exercise, onClick }: ExerciseNodeProps) {
   const getStatusStyles = () => {
     if (exercise.completed) {
-      return "bg-green-500 border-green-600 text-white shadow-lg";
+      return "bg-green-50 border-green-400 hover:bg-green-100";
     }
     if (exercise.locked) {
-      return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed opacity-60";
+      return "bg-gray-100 border-gray-300 cursor-not-allowed opacity-60";
     }
-    return "bg-white border-blue-400 text-gray-800 hover:scale-105 shadow-lg";
+    return "bg-white border-blue-400 hover:bg-blue-50 hover:border-blue-500";
   };
 
-  const getDifficultyColor = () => {
-    switch (exercise.difficulty) {
-      case "easy":
-        return "text-green-500";
-      case "medium":
-        return "text-yellow-500";
-      case "hard":
-        return "text-red-500";
+  const getCategoryLabel = () => {
+    switch (exercise.type) {
+      case "coding":
+        return "Exercise";
+      case "video":
+        return "Video";
+      case "quiz":
+        return "Quiz";
       default:
-        return "text-gray-500";
+        return exercise.type;
     }
   };
 
@@ -34,20 +34,20 @@ export function ExerciseNode({ exercise, onClick }: ExerciseNodeProps) {
       onClick={onClick}
       disabled={exercise.locked}
       className={`
-        absolute transform -translate-x-1/2 w-24 h-24 rounded-full
-        border-4 transition-all duration-200 flex flex-col items-center
-        justify-center ${getStatusStyles()}
+        absolute transform -translate-x-1/2 w-fit px-6 py-2 rounded-lg
+        border-2 transition-all duration-200 shadow-sm hover:shadow-md
+        cursor-pointer
+        ${getStatusStyles()}
       `}
       style={{
         left: `calc(50% + ${exercise.position.x}px)`,
         top: `${exercise.position.y}px`
       }}
     >
-      <span className="text-3xl mb-1">{exercise.icon}</span>
-      <div className="text-xs font-medium truncate w-full px-2">{exercise.title}</div>
-      {!exercise.locked && (
-        <div className={`absolute -bottom-5 text-xs font-bold ${getDifficultyColor()}`}>{exercise.xpReward} XP</div>
-      )}
+      <div className="text-left">
+        <div className="text-sm font-semibold text-gray-900">{exercise.title}</div>
+        <div className="text-xs text-gray-500 mt-0.5">{getCategoryLabel()}</div>
+      </div>
     </button>
   );
 }

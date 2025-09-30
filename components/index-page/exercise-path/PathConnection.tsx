@@ -5,11 +5,11 @@ interface PathConnectionProps {
 }
 
 export function PathConnection({ from, to, completed }: PathConnectionProps) {
-  const centerX = window?.innerWidth ? window.innerWidth / 2 : 400;
-  const x1 = centerX + from.x;
-  const y1 = from.y + 48;
-  const x2 = centerX + to.x;
-  const y2 = to.y + 48;
+  // Calculate positions relative to the center of the viewBox (100 is center of 200 width viewBox)
+  const x1 = 100 + from.x / 5; // Scale down x coordinates to fit viewBox
+  const y1 = from.y + 25; // Adjusted for new button height
+  const x2 = 100 + to.x / 5;
+  const y2 = to.y + 25;
 
   const controlPoint1X = x1;
   const controlPoint1Y = y1 + (y2 - y1) * 0.4;

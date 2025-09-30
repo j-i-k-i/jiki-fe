@@ -7,12 +7,12 @@ interface SidebarProps {
 }
 
 const navigationItems = [
-  { id: "exercises", label: "Exercises", icon: "📚" },
-  { id: "concepts", label: "Concepts", icon: "💡" },
-  { id: "profile", label: "Profile", icon: "👤" },
-  { id: "achievements", label: "Achievements", icon: "🏆" },
-  { id: "leaderboard", label: "Leaderboard", icon: "🎯" },
-  { id: "settings", label: "Settings", icon: "⚙️" }
+  { id: "exercises", label: "Exercises" },
+  { id: "concepts", label: "Concepts" },
+  { id: "profile", label: "Profile" },
+  { id: "achievements", label: "Achievements" },
+  { id: "leaderboard", label: "Leaderboard" },
+  { id: "settings", label: "Settings" }
 ];
 
 export default function Sidebar({ activeItem = "exercises" }: SidebarProps) {
@@ -25,13 +25,7 @@ export default function Sidebar({ activeItem = "exercises" }: SidebarProps) {
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {navigationItems.map((item) => (
-            <NavigationItem
-              key={item.id}
-              id={item.id}
-              label={item.label}
-              icon={item.icon}
-              isActive={activeItem === item.id}
-            />
+            <NavigationItem key={item.id} id={item.id} label={item.label} isActive={activeItem === item.id} />
           ))}
         </ul>
       </nav>

@@ -1,137 +1,150 @@
+export type ExerciseType = "quiz" | "video" | "coding";
+
 export interface Exercise {
   id: string;
   title: string;
   description: string;
+  type: ExerciseType;
   difficulty: "easy" | "medium" | "hard";
   completed: boolean;
   locked: boolean;
   xpReward: number;
   estimatedTime: number;
-  icon: string;
   position: { x: number; y: number };
+  route: string;
 }
 
 export function generateMockExercises(): Exercise[] {
   const exercises: Exercise[] = [
     {
       id: "1",
-      title: "Hello World",
+      title: "Getting Started with Python",
       description: "Your first program",
+      type: "coding",
       difficulty: "easy",
       completed: true,
       locked: false,
       xpReward: 10,
       estimatedTime: 5,
-      icon: "👋",
-      position: { x: 0, y: 0 }
+      position: { x: 0, y: 0 },
+      route: "/dev/complex-exercise"
     },
     {
       id: "2",
-      title: "Variables",
+      title: "Data Types Fundamentals",
       description: "Learn about variables",
+      type: "quiz",
       difficulty: "easy",
       completed: true,
       locked: false,
       xpReward: 15,
       estimatedTime: 10,
-      icon: "📦",
-      position: { x: 0, y: 150 }
+      position: { x: 0, y: 150 },
+      route: "/test/quiz"
     },
     {
       id: "3",
-      title: "Functions",
-      description: "Create reusable code",
+      title: "Building Your First Function",
+      description: "Video lesson on functions",
+      type: "video",
       difficulty: "easy",
       completed: false,
       locked: false,
       xpReward: 20,
       estimatedTime: 15,
-      icon: "🔧",
-      position: { x: -100, y: 300 }
+      position: { x: -100, y: 300 },
+      route: "/dev/video-exercise"
     },
     {
       id: "4",
-      title: "Arrays",
+      title: "Working with Lists",
       description: "Work with collections",
+      type: "coding",
       difficulty: "medium",
       completed: false,
       locked: false,
       xpReward: 25,
       estimatedTime: 20,
-      icon: "📊",
-      position: { x: 100, y: 300 }
+      position: { x: 100, y: 300 },
+      route: "/dev/complex-exercise"
     },
     {
       id: "5",
-      title: "Loops",
-      description: "Repeat actions",
+      title: "Control Flow Mastery",
+      description: "Test your knowledge",
+      type: "quiz",
       difficulty: "medium",
       completed: false,
       locked: true,
       xpReward: 30,
       estimatedTime: 20,
-      icon: "🔄",
-      position: { x: 0, y: 450 }
+      position: { x: 0, y: 450 },
+      route: "/test/quiz"
     },
     {
       id: "6",
-      title: "Objects",
-      description: "Complex data structures",
+      title: "Object-Oriented Concepts",
+      description: "Video: Complex data structures",
+      type: "video",
       difficulty: "medium",
       completed: false,
       locked: true,
       xpReward: 35,
       estimatedTime: 25,
-      icon: "🎯",
-      position: { x: -100, y: 600 }
+      position: { x: -100, y: 600 },
+      route: "/dev/video-exercise"
     },
     {
       id: "7",
-      title: "Classes",
+      title: "Design Patterns Workshop",
       description: "Object-oriented programming",
+      type: "coding",
       difficulty: "hard",
       completed: false,
       locked: true,
       xpReward: 40,
       estimatedTime: 30,
-      icon: "🏗️",
-      position: { x: 100, y: 600 }
+      position: { x: 100, y: 600 },
+      route: "/dev/complex-exercise"
     },
     {
       id: "8",
-      title: "Async/Await",
-      description: "Handle asynchronous operations",
+      title: "Asynchronous Programming",
+      description: "Video: Asynchronous operations",
+      type: "video",
       difficulty: "hard",
       completed: false,
       locked: true,
       xpReward: 45,
       estimatedTime: 35,
-      icon: "⏱️",
-      position: { x: 0, y: 750 }
+      position: { x: 0, y: 750 },
+      route: "/dev/video-exercise"
     },
     {
       id: "9",
-      title: "Error Handling",
-      description: "Deal with errors gracefully",
+      title: "Exception Management",
+      description: "Test error handling knowledge",
+      type: "quiz",
       difficulty: "hard",
       completed: false,
       locked: true,
       xpReward: 50,
       estimatedTime: 30,
-      icon: "🛡️",
-      position: { x: -100, y: 900 }
+      position: { x: -100, y: 900 },
+      route: "/test/quiz"
     },
     {
       id: "10",
-      title: "Final Project",
+      title: "Build a Web Application",
       description: "Build something amazing",
+      type: "coding",
       difficulty: "hard",
       completed: false,
       locked: true,
       xpReward: 100,
       estimatedTime: 60,
-      icon: "🎓",
-      position: { x: 0, y: 1050 }
+      position: { x: 0, y: 1050 },
+      route: "/dev/complex-exercise"
     }
   ];
 

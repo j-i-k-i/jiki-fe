@@ -10,9 +10,17 @@ export default function VideoExercisePage() {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   useEffect(() => {
-    if (playerRef.current) {
-      void playerRef.current.play();
-    }
+    // Add a small delay to ensure the component is fully mounted
+    const timer = setTimeout(() => {
+      if (playerRef.current) {
+        playerRef.current.play().catch((error) => {
+          // Silently handle the error - this is expected when navigating
+          console.warn("Autoplay was prevented:", error.message);
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleVideoEnd = () => {
