@@ -10,22 +10,9 @@ export default function VideoExercisePage() {
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   useEffect(() => {
-    // Attempt to autoplay after component mounts
-    // This handles browser autoplay policies better
-    const attemptAutoplay = async () => {
-      if (playerRef.current) {
-        try {
-          await playerRef.current.play();
-        } catch (e) {
-          // Autoplay was prevented, show play button
-          console.error("Autoplay failed:", e);
-        }
-      }
-    };
-
-    // Small delay to ensure player is fully mounted
-    const timer = setTimeout(attemptAutoplay, 100);
-    return () => clearTimeout(timer);
+    if (playerRef.current) {
+      void playerRef.current.play();
+    }
   }, []);
 
   const handleVideoEnd = () => {
