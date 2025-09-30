@@ -7,24 +7,30 @@ import { useEffect, useRef, useState } from "react";
 export default function VideoExercisePage() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [videoSkipped, setVideoSkipped] = useState(false);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   useEffect(() => {
     // Add a small delay to ensure the component is fully mounted
-    const timer = setTimeout(() => {
+    const playTimer = setTimeout(() => {
       if (playerRef.current) {
         playerRef.current.play().catch((error) => {
-          // Silently handle the error - this is expected when navigating
+          // Autoplay failed, but still show the video so user can manually play
           console.warn("Autoplay was prevented:", error.message);
+          setIsVideoVisible(true);
         });
       }
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => clearTimeout(playTimer);
   }, []);
 
   const handleVideoEnd = () => {
     setVideoWatched(true);
+  };
+
+  const handleVideoPlay = () => {
+    setIsVideoVisible(true);
   };
 
   const handleSkipClick = () => {
@@ -62,7 +68,11 @@ export default function VideoExercisePage() {
             loop={false}
             muted={false}
             volume={0.5}
-            className="absolute inset-0 w-full h-full"
+            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+              isVideoVisible ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ visibility: isVideoVisible ? "visible" : "hidden" }}
+            onPlay={handleVideoPlay}
             onEnded={handleVideoEnd}
           />
         </div>
