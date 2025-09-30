@@ -1,7 +1,7 @@
+import type { ExerciseDefinition } from "@jiki/curriculum";
 import type { StoreApi } from "zustand/vanilla";
 import type { TestExpect } from "../test-results-types";
 import type { OrchestratorStore } from "../types";
-import type { ExerciseDefinition } from "@jiki/curriculum";
 
 /**
  * Manages test suite execution, results, and processing
@@ -26,6 +26,8 @@ export class TestSuiteManager {
       state.setTestSuiteResult(testResults);
 
       state.setStatus("success");
+      // Reset hasCodeBeenEdited flag when running code
+      state.setHasCodeBeenEdited(false);
     } catch (error) {
       state.setError(error instanceof Error ? error.message : "Unknown error");
       state.setStatus("error");
