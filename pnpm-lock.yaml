@@ -34,6 +34,9 @@ importers:
       "@floating-ui/dom":
         specifier: ^1.7.4
         version: 1.7.4
+      "@floating-ui/react":
+        specifier: ^0.27.16
+        version: 0.27.16(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       "@jiki/curriculum":
         specifier: workspace:*
         version: link:../curriculum
@@ -107,6 +110,9 @@ importers:
       "@testing-library/react":
         specifier: ^16.3.0
         version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.1.9(@types/react@19.1.13))(@types/react@19.1.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      "@testing-library/user-event":
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.1)
       "@types/animejs":
         specifier: ^3.1.13
         version: 3.1.13
@@ -847,6 +853,20 @@ packages:
   "@floating-ui/dom@1.7.4":
     resolution:
       { integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA== }
+
+  "@floating-ui/react-dom@2.1.6":
+    resolution:
+      { integrity: sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw== }
+    peerDependencies:
+      react: ">=16.8.0"
+      react-dom: ">=16.8.0"
+
+  "@floating-ui/react@0.27.16":
+    resolution:
+      { integrity: sha512-9O8N4SeG2z++TSM8QA/KTeKFBVCNEz/AGS7gWPJf6KFRzmRWixFRnCnkPHRDwSVZW6QPDO6uT0P2SpWNKCc9/g== }
+    peerDependencies:
+      react: ">=17.0.0"
+      react-dom: ">=17.0.0"
 
   "@floating-ui/utils@0.2.10":
     resolution:
@@ -1761,6 +1781,13 @@ packages:
         optional: true
       "@types/react-dom":
         optional: true
+
+  "@testing-library/user-event@14.6.1":
+    resolution:
+      { integrity: sha512-vq7fv0rnt+QTXgPxr5Hjc210p6YKq2kmdziLgnsZGgLJ9e6VAShx1pACLuRjd/AS/sr7phAR58OIIpf0LlmQNw== }
+    engines: { node: ">=12", npm: ">=6" }
+    peerDependencies:
+      "@testing-library/dom": ">=7.21.4"
 
   "@tootallnate/quickjs-emscripten@0.23.0":
     resolution:
@@ -5061,6 +5088,10 @@ packages:
       { integrity: sha512-MeQTA1r0litLUf0Rp/iisCaL8761lKAZHaimlbGK4j0HysC4PLfqygQj9srcs0m2RdtDYnF8UuYyKpbjHYp7Jw== }
     engines: { node: ^14.18.0 || >=16.0.0 }
 
+  tabbable@6.2.0:
+    resolution:
+      { integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew== }
+
   tailwindcss@4.1.13:
     resolution:
       { integrity: sha512-i+zidfmTqtwquj4hMEwdjshYYgMbOrPzb9a0M3ZgNa0JMoZeFC6bxZvO8yr8ozS6ix2SDz0+mvryPeBs2TFE+w== }
@@ -6056,6 +6087,20 @@ snapshots:
       "@floating-ui/core": 1.7.3
       "@floating-ui/utils": 0.2.10
 
+  "@floating-ui/react-dom@2.1.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)":
+    dependencies:
+      "@floating-ui/dom": 1.7.4
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+
+  "@floating-ui/react@0.27.16(react-dom@19.1.0(react@19.1.0))(react@19.1.0)":
+    dependencies:
+      "@floating-ui/react-dom": 2.1.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      "@floating-ui/utils": 0.2.10
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      tabbable: 6.2.0
+
   "@floating-ui/utils@0.2.10": {}
 
   "@hapi/address@5.1.1":
@@ -6784,6 +6829,10 @@ snapshots:
     optionalDependencies:
       "@types/react": 19.1.13
       "@types/react-dom": 19.1.9(@types/react@19.1.13)
+
+  "@testing-library/user-event@14.6.1(@testing-library/dom@10.4.1)":
+    dependencies:
+      "@testing-library/dom": 10.4.1
 
   "@tootallnate/quickjs-emscripten@0.23.0": {}
 
@@ -7878,7 +7927,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.44.1(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.36.0(jiti@2.6.0)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.44.1(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.36.0(jiti@2.6.0)))(eslint@9.36.0(jiti@2.6.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -7900,7 +7949,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.36.0(jiti@2.6.0)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.44.1(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@9.36.0(jiti@2.6.0))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.44.1(eslint@9.36.0(jiti@2.6.0))(typescript@5.9.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.36.0(jiti@2.6.0)))(eslint@9.36.0(jiti@2.6.0))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -10076,6 +10125,8 @@ snapshots:
   synckit@0.11.11:
     dependencies:
       "@pkgr/core": 0.2.9
+
+  tabbable@6.2.0: {}
 
   tailwindcss@4.1.13: {}
 
