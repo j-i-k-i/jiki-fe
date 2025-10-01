@@ -1,8 +1,9 @@
 /**
  * API Client
- * Simple, type-safe API client for backend communication
+ * Simple, type-safe API client for backend communication with JWT support
  */
 
+import { getToken, removeToken } from "@/lib/auth/storage";
 import { getApiUrl } from "./config";
 
 export class ApiError extends Error {
@@ -41,13 +42,29 @@ async function request<T = unknown>(path: string, options: RequestOptions = {}):
     });
   }
 
+  // Get auth token
+  const token = getToken();
+
   // Prepare request options
+  const requestHeaders: Record<string, string> = {
+    "Content-Type": "application/json"
+  };
+
+  // Add custom headers
+  Object.entries(headers).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      requestHeaders[key] = value;
+    }
+  });
+
+  // Add Authorization header if token exists
+  if (token) {
+    requestHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   const requestOptions: RequestInit = {
     ...restOptions,
-    headers: {
-      "Content-Type": "application/json",
-      ...headers
-    }
+    headers: requestHeaders
   };
 
   // Add body if present
@@ -70,6 +87,11 @@ async function request<T = unknown>(path: string, options: RequestOptions = {}):
 
     // Handle error responses
     if (!response.ok) {
+      // Handle 401 Unauthorized - clear invalid token
+      if (response.status === 401) {
+        removeToken();
+        // Optionally trigger a re-authentication flow here
+      }
       throw new ApiError(response.status, response.statusText, data);
     }
 
