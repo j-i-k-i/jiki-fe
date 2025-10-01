@@ -2,6 +2,7 @@ import type { Placement } from "@floating-ui/react";
 import {
   autoUpdate,
   flip,
+  FloatingFocusManager,
   FloatingPortal,
   offset,
   shift,
@@ -12,7 +13,7 @@ import {
   useRole
 } from "@floating-ui/react";
 import type { ReactElement } from "react";
-import { cloneElement, isValidElement, useState } from "react";
+import { cloneElement, isValidElement, useId, useState } from "react";
 import type { Exercise } from "../lib/mockData";
 import { TooltipContent } from "./ui/TooltipContent";
 
@@ -30,6 +31,8 @@ export function LessonTooltip({
   offset: offsetValue = 12
 }: LessonTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const headingId = useId();
+  const descriptionId = useId();
 
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
@@ -46,7 +49,10 @@ export function LessonTooltip({
 
   const click = useClick(context);
   const role = useRole(context, { role: "dialog" });
-  const dismiss = useDismiss(context, { outsidePressEvent: "mousedown" });
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: "mousedown",
+    escapeKey: true
+  });
   const { getReferenceProps, getFloatingProps } = useInteractions([click, role, dismiss]);
 
   if (!isValidElement(children)) {
@@ -63,15 +69,24 @@ export function LessonTooltip({
       {childrenWithRef}
       {isOpen && !exercise.locked && (
         <FloatingPortal>
-          <div
-            ref={refs.setFloating}
-            style={floatingStyles}
-            {...getFloatingProps()}
-            className="z-50 bg-white rounded-xl shadow-xl border border-gray-200 p-16 w-fit"
-            role="dialog"
-          >
-            <TooltipContent exercise={exercise} onClose={() => setIsOpen(false)} />
-          </div>
+          <FloatingFocusManager context={context} modal={false}>
+            <div
+              ref={refs.setFloating}
+              style={floatingStyles}
+              {...getFloatingProps()}
+              className="z-50 bg-white rounded-xl shadow-xl border border-gray-200 p-16 w-fit"
+              role="dialog"
+              aria-labelledby={headingId}
+              aria-describedby={descriptionId}
+            >
+              <TooltipContent
+                exercise={exercise}
+                onClose={() => setIsOpen(false)}
+                headingId={headingId}
+                descriptionId={descriptionId}
+              />
+            </div>
+          </FloatingFocusManager>
         </FloatingPortal>
       )}
     </>

@@ -6,6 +6,8 @@ import { CodingIcon, CompletedIcon, QuizIcon, TimeIcon, VideoIcon, XpIcon } from
 interface TooltipContentProps {
   exercise: Exercise;
   onClose: () => void;
+  headingId?: string;
+  descriptionId?: string;
 }
 
 function ExerciseIcon({ type }: { type: Exercise["type"] }) {
@@ -21,15 +23,19 @@ function ExerciseIcon({ type }: { type: Exercise["type"] }) {
   }
 }
 
-export function TooltipContent({ exercise, onClose }: TooltipContentProps) {
+export function TooltipContent({ exercise, onClose, headingId, descriptionId }: TooltipContentProps) {
   return (
     <div className="flex items-start gap-3">
       <div className={`mt-1 ${getDifficultyColor(exercise.difficulty)}`}>
         <ExerciseIcon type={exercise.type} />
       </div>
       <div className="flex-1">
-        <h3 className="font-semibold text-gray-900 text-base">{exercise.title}</h3>
-        <p className="text-sm text-gray-600 mt-1">{exercise.description}</p>
+        <h3 id={headingId} className="font-semibold text-gray-900 text-base">
+          {exercise.title}
+        </h3>
+        <p id={descriptionId} className="text-sm text-gray-600 mt-1">
+          {exercise.description}
+        </p>
 
         <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
