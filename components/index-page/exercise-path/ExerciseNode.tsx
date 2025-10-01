@@ -36,7 +36,7 @@ export const ExerciseNode = forwardRef<HTMLButtonElement, ExerciseNodeProps>(fun
   return (
     <button
       ref={ref}
-      onClick={onClick || (() => {})}
+      onClick={exercise.locked ? undefined : onClick}
       disabled={exercise.locked}
       className={`
         w-fit px-6 py-2 rounded-lg

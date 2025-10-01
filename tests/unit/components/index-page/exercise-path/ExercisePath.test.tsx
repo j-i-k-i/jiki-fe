@@ -3,6 +3,14 @@ import * as mockData from "@/components/index-page/lib/mockData";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
+// Mock Next.js router
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    push: mockPush
+  }))
+}));
+
 jest.mock("@/components/index-page/lib/mockData");
 
 jest.mock("@/components/index-page/exercise-path/LessonTooltip", () => ({
@@ -186,11 +194,22 @@ describe("ExercisePath", () => {
     expect(mockData.generateMockExercises).toHaveBeenCalledTimes(1);
   });
 
-  it("provides empty onClick handler to ExerciseNode", () => {
+  it("navigates to exercise route when clicked", () => {
     render(<ExercisePath />);
 
     const firstButton = screen.getAllByRole("button")[0];
-    expect(() => firstButton.click()).not.toThrow();
+    firstButton.click();
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith("/lesson/1");
+
+    // Test clicking a different exercise
+    mockPush.mockClear();
+    const secondButton = screen.getAllByRole("button")[1];
+    secondButton.click();
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith("/lesson/2");
   });
 
   it("renders with responsive container styling", () => {

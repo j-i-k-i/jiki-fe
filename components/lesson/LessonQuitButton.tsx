@@ -23,7 +23,7 @@ export function LessonQuitButton({ onQuit, className = "" }: LessonQuitButtonPro
         if (onQuit) {
           onQuit();
         } else {
-          router.back();
+          router.push("/");
         }
       }
     });

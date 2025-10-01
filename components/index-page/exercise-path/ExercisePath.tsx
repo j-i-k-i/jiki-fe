@@ -1,11 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { generateMockExercises } from "../lib/mockData";
 import { ExerciseNode } from "./ExerciseNode";
 import { LessonTooltip } from "./LessonTooltip";
 import { PathConnection } from "./PathConnection";
 
 export default function ExercisePath() {
+  const router = useRouter();
   const exercises = generateMockExercises();
 
   return (
@@ -34,7 +36,7 @@ export default function ExercisePath() {
               }}
             >
               <LessonTooltip exercise={exercise} placement="bottom">
-                <ExerciseNode exercise={exercise} onClick={() => {}} />
+                <ExerciseNode exercise={exercise} onClick={() => router.push(exercise.route)} />
               </LessonTooltip>
             </div>
           ))}

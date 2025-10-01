@@ -10,9 +10,11 @@ jest.mock("@/lib/modal", () => ({
 
 // Mock Next.js router
 const mockRouterBack = jest.fn();
+const mockRouterPush = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
-    back: mockRouterBack
+    back: mockRouterBack,
+    push: mockRouterPush
   }))
 }));
 
@@ -66,7 +68,7 @@ describe("LessonQuitButton", () => {
     expect(mockRouterBack).not.toHaveBeenCalled();
   });
 
-  it("should navigate back when no onQuit callback is provided", () => {
+  it("should navigate to home when no onQuit callback is provided", () => {
     render(<LessonQuitButton />);
 
     const button = screen.getByRole("button", { name: "Quit lesson" });
@@ -81,7 +83,9 @@ describe("LessonQuitButton", () => {
       onConfirm();
     });
 
-    expect(mockRouterBack).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith("/");
+    expect(mockRouterBack).not.toHaveBeenCalled();
   });
 
   it("should apply custom className to button", () => {
