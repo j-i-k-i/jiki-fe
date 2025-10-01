@@ -1,19 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { generateMockExercises } from "../lib/mockData";
+import { usePreloadExercise } from "../lib/usePreloadExercise";
 import { ExerciseNode } from "./ExerciseNode";
+import { LessonTooltip } from "./LessonTooltip";
 import { PathConnection } from "./PathConnection";
 
 export default function ExercisePath() {
   const exercises = generateMockExercises();
-  const router = useRouter();
-
-  const handleExerciseClick = (exerciseRoute: string, isLocked: boolean) => {
-    if (!isLocked) {
-      router.push(exerciseRoute);
-    }
-  };
+  const { preloadExercise } = usePreloadExercise();
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 overflow-y-auto overflow-x-hidden">
@@ -31,11 +26,19 @@ export default function ExercisePath() {
 
         <div className="relative" style={{ height: "1200px" }}>
           {exercises.map((exercise) => (
-            <ExerciseNode
+            <div
               key={exercise.id}
-              exercise={exercise}
-              onClick={() => handleExerciseClick(exercise.route, exercise.locked)}
-            />
+              className="absolute"
+              style={{
+                left: `calc(50% + ${exercise.position.x}px)`,
+                top: `${exercise.position.y}px`,
+                transform: "translateX(-50%)"
+              }}
+            >
+              <LessonTooltip exercise={exercise} placement="bottom" onOpen={() => preloadExercise(exercise)}>
+                <ExerciseNode exercise={exercise} onClick={() => {}} />
+              </LessonTooltip>
+            </div>
           ))}
         </div>
       </div>
