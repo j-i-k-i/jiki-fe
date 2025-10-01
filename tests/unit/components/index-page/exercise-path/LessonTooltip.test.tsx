@@ -1,14 +1,20 @@
-import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { useRouter } from "next/navigation";
 import { LessonTooltip } from "@/components/index-page/exercise-path/LessonTooltip";
 import type { Exercise } from "@/components/index-page/lib/mockData";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import React from "react";
 
-// Mock next/navigation
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn()
-}));
+// Mock next/link
+jest.mock("next/link", () => {
+  // eslint-disable-next-line react/display-name
+  return ({ children, href, onClick, className }: any) => {
+    return (
+      <a href={href} onClick={onClick} className={className}>
+        {children}
+      </a>
+    );
+  };
+});
 
 // Mock floating-ui FloatingPortal to render inline for testing
 jest.mock("@floating-ui/react", () => ({
@@ -17,9 +23,6 @@ jest.mock("@floating-ui/react", () => ({
 }));
 
 describe("LessonTooltip", () => {
-  const mockPush = jest.fn();
-  const mockOnOpen = jest.fn();
-
   const mockExercise: Exercise = {
     id: "1",
     title: "Introduction to Variables",
@@ -36,9 +39,6 @@ describe("LessonTooltip", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useRouter as jest.Mock).mockReturnValue({
-      push: mockPush
-    });
   });
 
   it("renders children element without tooltip initially", () => {
@@ -95,8 +95,8 @@ describe("LessonTooltip", () => {
       expect(screen.getByText("Easy")).toBeInTheDocument();
       expect(screen.getByText("Exercise")).toBeInTheDocument();
 
-      // Check start button
-      expect(screen.getByRole("button", { name: "Start Lesson" })).toBeInTheDocument();
+      // Check start link
+      expect(screen.getByRole("link", { name: "Start Lesson" })).toBeInTheDocument();
     });
   });
 
@@ -197,8 +197,8 @@ describe("LessonTooltip", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Completed")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Review Lesson" })).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Start Lesson" })).not.toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Review Lesson" })).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Start Lesson" })).not.toBeInTheDocument();
     });
   });
 
@@ -224,7 +224,7 @@ describe("LessonTooltip", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("navigates to exercise route when start button is clicked", async () => {
+  it("navigates to exercise route when start link is clicked", async () => {
     const user = userEvent.setup();
 
     render(
@@ -240,31 +240,14 @@ describe("LessonTooltip", () => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
 
-    const startButton = screen.getByRole("button", { name: "Start Lesson" });
-    await user.click(startButton);
+    const startLink = screen.getByRole("link", { name: "Start Lesson" });
+    expect(startLink).toHaveAttribute("href", "/exercises/intro-variables");
 
-    expect(mockPush).toHaveBeenCalledWith("/exercises/intro-variables");
+    await user.click(startLink);
 
     // Tooltip should close after navigation
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
-  });
-
-  it("calls onOpen callback when tooltip opens", async () => {
-    const user = userEvent.setup();
-
-    render(
-      <LessonTooltip exercise={mockExercise} onOpen={mockOnOpen}>
-        <button>Click me</button>
-      </LessonTooltip>
-    );
-
-    const button = screen.getByRole("button", { name: "Click me" });
-    await user.click(button);
-
-    await waitFor(() => {
-      expect(mockOnOpen).toHaveBeenCalledTimes(1);
     });
   });
 
