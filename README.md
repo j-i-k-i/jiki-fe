@@ -50,3 +50,7 @@ npx puppeteer browsers install chrome
 - [ ] Svg support
 - [ ] [Fonts](https://nextjs.org/docs/app/getting-started/fonts)
 - [ ] Deploy on Cloudflare
+
+---
+
+Copyright (c) 2025 Jiki Ltd. All rights reserved.
