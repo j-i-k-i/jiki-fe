@@ -1,5 +1,6 @@
 "use client";
 import { showConfirmation } from "@/lib/modal";
+import { LessonQuitButton } from "@/components/lesson/LessonQuitButton";
 import type { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import MuxPlayer from "@mux/mux-player-react";
 import { useEffect, useRef, useState } from "react";
@@ -7,16 +8,30 @@ import { useEffect, useRef, useState } from "react";
 export default function VideoExercisePage() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [videoSkipped, setVideoSkipped] = useState(false);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   useEffect(() => {
-    if (playerRef.current) {
-      void playerRef.current.play();
-    }
+    // Add a small delay to ensure the component is fully mounted
+    const playTimer = setTimeout(() => {
+      if (playerRef.current) {
+        playerRef.current.play().catch((error) => {
+          // Autoplay failed, but still show the video so user can manually play
+          console.warn("Autoplay was prevented:", error.message);
+          setIsVideoVisible(true);
+        });
+      }
+    }, 100);
+
+    return () => clearTimeout(playTimer);
   }, []);
 
   const handleVideoEnd = () => {
     setVideoWatched(true);
+  };
+
+  const handleVideoPlay = () => {
+    setIsVideoVisible(true);
   };
 
   const handleSkipClick = () => {
@@ -40,7 +55,8 @@ export default function VideoExercisePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 relative">
+      <LessonQuitButton />
       <h1 className="text-4xl font-bold mb-8">Welcome!</h1>
       <div className="w-full max-w-4xl relative">
         {/* Reserve space with aspect ratio to prevent layout shift */}
@@ -54,7 +70,11 @@ export default function VideoExercisePage() {
             loop={false}
             muted={false}
             volume={0.5}
-            className="absolute inset-0 w-full h-full"
+            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+              isVideoVisible ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ visibility: isVideoVisible ? "visible" : "hidden" }}
+            onPlay={handleVideoPlay}
             onEnded={handleVideoEnd}
           />
         </div>

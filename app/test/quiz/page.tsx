@@ -8,6 +8,7 @@ import { mockQuizQuestions } from "@/components/quiz-card/mockData";
 import { mockCodingQuizQuestions } from "@/components/quiz-card/mockCodingData";
 import { mockFillInQuizQuestions } from "@/components/quiz-card/mockFillInData";
 import { SoundToggle } from "@/components/ui/SoundToggle";
+import { LessonQuitButton } from "@/components/lesson/LessonQuitButton";
 
 export default function QuizTestPage() {
   const [quizType, setQuizType] = useState<"multiple-choice" | "coding" | "fill-in">("multiple-choice");
@@ -32,7 +33,8 @@ export default function QuizTestPage() {
   const currentFillInQuestion = mockFillInQuizQuestions[fillInIndex];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 relative">
+      <LessonQuitButton />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Quiz Test Page</h1>
