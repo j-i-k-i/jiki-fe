@@ -1,5 +1,6 @@
 "use client";
 import { showConfirmation } from "@/lib/modal";
+import { LessonQuitButton } from "@/components/lesson/LessonQuitButton";
 import type { MuxPlayerRefAttributes } from "@mux/mux-player-react";
 import MuxPlayer from "@mux/mux-player-react";
 import { useEffect, useRef, useState } from "react";
@@ -54,7 +55,8 @@ export default function VideoExercisePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 relative">
+      <LessonQuitButton />
       <h1 className="text-4xl font-bold mb-8">Welcome!</h1>
       <div className="w-full max-w-4xl relative">
         {/* Reserve space with aspect ratio to prevent layout shift */}
