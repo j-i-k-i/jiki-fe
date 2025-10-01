@@ -18,14 +18,14 @@ import type {
  * Extract JWT token from Authorization header
  */
 function extractTokenFromHeaders(headers: Headers): string | null {
-  const authHeader = headers.get("Authorization");
+  const authHeader = headers.get("Authorization") || headers.get("authorization");
   if (!authHeader) {
     return null;
   }
 
   // Format: "Bearer <token>"
   const parts = authHeader.split(" ");
-  if (parts.length !== 2 || parts[0] !== "Bearer") {
+  if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") {
     return null;
   }
 
@@ -37,10 +37,16 @@ function extractTokenFromHeaders(headers: Headers): string | null {
  * POST /v1/auth/login
  */
 export async function login(credentials: LoginCredentials): Promise<User> {
-  const response = await api.post<AuthResponse>("/v1/auth/login", { user: credentials });
+  const response = await api.post<AuthResponse>("/auth/login", { user: credentials });
 
-  // Extract JWT from response headers
-  const token = extractTokenFromHeaders(response.headers);
+  // Try to extract JWT from response headers first
+  let token = extractTokenFromHeaders(response.headers);
+
+  // If not in headers, check response body
+  if (!token) {
+    token = response.data.token || response.data.jwt || response.data.access_token || null;
+  }
+
   if (token) {
     const expiry = getTokenExpiry(token);
     setToken(token, expiry || undefined);
@@ -54,10 +60,16 @@ export async function login(credentials: LoginCredentials): Promise<User> {
  * POST /v1/auth/signup
  */
 export async function signup(userData: SignupData): Promise<User> {
-  const response = await api.post<AuthResponse>("/v1/auth/signup", { user: userData });
+  const response = await api.post<AuthResponse>("/auth/signup", { user: userData });
 
-  // Extract JWT from response headers
-  const token = extractTokenFromHeaders(response.headers);
+  // Try to extract JWT from response headers first
+  let token = extractTokenFromHeaders(response.headers);
+
+  // If not in headers, check response body
+  if (!token) {
+    token = response.data.token || response.data.jwt || response.data.access_token || null;
+  }
+
   if (token) {
     const expiry = getTokenExpiry(token);
     setToken(token, expiry || undefined);
@@ -72,7 +84,7 @@ export async function signup(userData: SignupData): Promise<User> {
  */
 export async function logout(): Promise<void> {
   try {
-    await api.delete("/v1/auth/logout");
+    await api.delete("/auth/logout");
   } catch (error) {
     // Log error but don't throw - we still want to clear local state
     console.error("Logout API call failed:", error);
@@ -88,7 +100,7 @@ export async function logout(): Promise<void> {
  * POST /v1/auth/password
  */
 export async function requestPasswordReset(data: PasswordResetRequest): Promise<void> {
-  await api.post("/v1/auth/password", { user: data });
+  await api.post("/auth/password", { user: data });
 }
 
 /**
@@ -96,7 +108,7 @@ export async function requestPasswordReset(data: PasswordResetRequest): Promise<
  * PATCH /v1/auth/password
  */
 export async function resetPassword(data: PasswordReset): Promise<void> {
-  await api.patch("/v1/auth/password", { user: data });
+  await api.patch("/auth/password", { user: data });
 }
 
 /**

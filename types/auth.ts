@@ -4,7 +4,7 @@
  */
 
 export interface User {
-  id: string;
+  id: number;
   email: string;
   name: string | null;
   created_at: string;
@@ -35,6 +35,9 @@ export interface PasswordReset {
 export interface AuthResponse {
   user: User;
   message?: string;
+  token?: string; // JWT token if returned in body
+  jwt?: string; // Alternative field name
+  access_token?: string; // Another alternative
 }
 
 export interface ApiError {
@@ -42,6 +45,15 @@ export interface ApiError {
     type: string;
     message: string;
     errors?: Record<string, string[]>;
+  };
+}
+
+export interface RailsAuthResponse {
+  user?: User;
+  message?: string;
+  error?: {
+    type: string;
+    message: string;
   };
 }
 
