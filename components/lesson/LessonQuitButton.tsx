@@ -2,6 +2,7 @@
 
 import { showConfirmation } from "@/lib/modal";
 import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface LessonQuitButtonProps {
   onQuit?: () => void;
@@ -9,6 +10,8 @@ interface LessonQuitButtonProps {
 }
 
 export function LessonQuitButton({ onQuit, className = "" }: LessonQuitButtonProps) {
+  const router = useRouter();
+
   const handleQuit = () => {
     showConfirmation({
       title: "Quit Lesson",
@@ -20,7 +23,7 @@ export function LessonQuitButton({ onQuit, className = "" }: LessonQuitButtonPro
         if (onQuit) {
           onQuit();
         } else {
-          window.history.back();
+          router.back();
         }
       }
     });

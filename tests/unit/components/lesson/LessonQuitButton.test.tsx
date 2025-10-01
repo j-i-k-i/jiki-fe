@@ -1,22 +1,20 @@
-import React from "react";
-import { render, screen, fireEvent, act } from "@testing-library/react";
-import "@testing-library/jest-dom";
 import { LessonQuitButton } from "@/components/lesson/LessonQuitButton";
 import { showConfirmation } from "@/lib/modal";
+import "@testing-library/jest-dom";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 // Mock the modal store
 jest.mock("@/lib/modal", () => ({
   showConfirmation: jest.fn()
 }));
 
-// Mock window.history.back
-const mockHistoryBack = jest.fn();
-Object.defineProperty(window, "history", {
-  value: {
-    back: mockHistoryBack
-  },
-  writable: true
-});
+// Mock Next.js router
+const mockRouterBack = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn(() => ({
+    back: mockRouterBack
+  }))
+}));
 
 describe("LessonQuitButton", () => {
   beforeEach(() => {
@@ -65,7 +63,7 @@ describe("LessonQuitButton", () => {
     });
 
     expect(mockOnQuit).toHaveBeenCalledTimes(1);
-    expect(mockHistoryBack).not.toHaveBeenCalled();
+    expect(mockRouterBack).not.toHaveBeenCalled();
   });
 
   it("should navigate back when no onQuit callback is provided", () => {
@@ -83,7 +81,7 @@ describe("LessonQuitButton", () => {
       onConfirm();
     });
 
-    expect(mockHistoryBack).toHaveBeenCalledTimes(1);
+    expect(mockRouterBack).toHaveBeenCalledTimes(1);
   });
 
   it("should apply custom className to button", () => {
@@ -105,6 +103,6 @@ describe("LessonQuitButton", () => {
 
     // Verify no navigation or quit callback was executed
     expect(mockOnQuit).not.toHaveBeenCalled();
-    expect(mockHistoryBack).not.toHaveBeenCalled();
+    expect(mockRouterBack).not.toHaveBeenCalled();
   });
 });
