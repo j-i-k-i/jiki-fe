@@ -247,7 +247,7 @@ export function UserProfile({ userId }: { userId: number }) {
 
 The API client automatically selects the correct backend URL based on environment:
 
-- **Development**: `http://127.0.0.1:3061` (localhost)
+- **Development**: `http://localhost:3061`
 - **Production**: Uses `NEXT_PUBLIC_API_URL` environment variable or defaults to `https://api.jiki.com`
 
 To override defaults, create `.env.local`:
@@ -266,11 +266,11 @@ import { getApiConfig, getApiUrl } from "@/lib/api";
 
 // Get current config
 const config = getApiConfig();
-console.log(config.baseUrl); // "http://127.0.0.1:3061" in dev
+console.log(config.baseUrl); // "http://localhost:3061" in dev
 
 // Build a full URL
 const url = getApiUrl("/users/1");
-// Returns: "http://127.0.0.1:3061/users/1" in dev
+// Returns: "http://localhost:3061/users/1" in dev
 ```
 
 ## Best Practices
