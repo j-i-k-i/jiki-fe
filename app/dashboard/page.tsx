@@ -18,39 +18,37 @@ export default function DashboardPage() {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
+    async function initializeAndLoadData() {
+      // Check authentication
       await checkAuth();
       setIsInitializing(false);
-    };
-    void initAuth();
-  }, [checkAuth]);
 
-  useEffect(() => {
-    if (!isInitializing && !authLoading && !isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, authLoading, isInitializing, router]);
+      // Get the current auth state
+      const currentAuthState = useAuthStore.getState();
 
-  useEffect(() => {
-    async function loadLevels() {
-      if (!isAuthenticated) {
+      // Redirect if not authenticated
+      if (!currentAuthState.isLoading && !currentAuthState.isAuthenticated) {
+        router.push("/auth/login");
         return;
       }
 
-      try {
-        setLevelsLoading(true);
-        const data = await fetchLevelsWithProgress();
-        setLevels(data);
-      } catch (error) {
-        console.error("Failed to fetch levels:", error);
-        setLevelsError(error instanceof Error ? error.message : "Failed to load levels");
-      } finally {
-        setLevelsLoading(false);
+      // Load levels if authenticated
+      if (currentAuthState.isAuthenticated) {
+        try {
+          setLevelsLoading(true);
+          const data = await fetchLevelsWithProgress();
+          setLevels(data);
+        } catch (error) {
+          console.error("Failed to fetch levels:", error);
+          setLevelsError(error instanceof Error ? error.message : "Failed to load levels");
+        } finally {
+          setLevelsLoading(false);
+        }
       }
     }
 
-    void loadLevels();
-  }, [isAuthenticated]);
+    void initializeAndLoadData();
+  }, [checkAuth, router]);
 
   if (isInitializing || authLoading || levelsLoading) {
     return (

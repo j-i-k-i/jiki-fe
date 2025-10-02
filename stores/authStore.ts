@@ -102,37 +102,67 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       // Check authentication status
-      checkAuth: () => {
+      checkAuth: async () => {
         // Skip if already loading
         if (get().isLoading) {
-          return Promise.resolve();
+          return;
         }
 
-        // Quick check for token existence
-        if (!hasValidToken()) {
+        set({ isLoading: true });
+
+        try {
+          // Quick check for token existence and basic validity
+          if (!hasValidToken()) {
+            set({
+              user: null,
+              isAuthenticated: false,
+              isLoading: false
+            });
+            return;
+          }
+
+          // If we have user data in state, validate the token is still valid
+          const currentState = get();
+          if (currentState.user && currentState.isAuthenticated) {
+            // Validate token using the auth service (now without circular dependency)
+            const isValid = await authService.validateToken();
+            if (!isValid) {
+              // Token is invalid or expired, clear auth state
+              removeToken();
+              set({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: "Session expired. Please login again."
+              });
+              return;
+            }
+
+            // Token is still valid
+            set({ isLoading: false });
+            return;
+          }
+
+          // If we have a token but no user data, the session is invalid
+          // This shouldn't happen in normal flow as user data is persisted
+          removeToken();
           set({
             user: null,
             isAuthenticated: false,
-            isLoading: false
+            isLoading: false,
+            error: "Invalid session. Please login again."
           });
-          return Promise.resolve();
+        } catch (error) {
+          console.error("Auth check failed:", error);
+          // On error, clear auth state for safety
+          removeToken();
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: "Authentication check failed"
+          });
         }
-
-        // If we have a valid token and user data in state, we're authenticated
-        const currentState = get();
-        if (currentState.user && currentState.isAuthenticated) {
-          // User data is already in state from persist
-          set({ isLoading: false });
-          return Promise.resolve();
-        }
-
-        // If we have a token but no user data, assume authenticated
-        // (user data should have been persisted from login/signup)
-        set({
-          isAuthenticated: true,
-          isLoading: false
-        });
-        return Promise.resolve();
       },
 
       // Request password reset

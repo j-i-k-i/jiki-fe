@@ -49,11 +49,13 @@ describe("Dashboard Page", () => {
 
   it("redirects to login when not authenticated", async () => {
     const mockCheckAuth = jest.fn().mockResolvedValue(undefined);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+    const mockState = {
       isAuthenticated: false,
       isLoading: false,
       checkAuth: mockCheckAuth
-    });
+    };
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockState);
+    (useAuthStore as any).getState = jest.fn().mockReturnValue(mockState);
 
     render(<Dashboard />);
 
@@ -64,11 +66,14 @@ describe("Dashboard Page", () => {
 
   it("renders dashboard when authenticated", async () => {
     const mockCheckAuth = jest.fn().mockResolvedValue(undefined);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+    const mockState = {
       isAuthenticated: true,
       isLoading: false,
-      checkAuth: mockCheckAuth
-    });
+      checkAuth: mockCheckAuth,
+      user: { id: "1", email: "test@test.com" }
+    };
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockState);
+    (useAuthStore as any).getState = jest.fn().mockReturnValue(mockState);
 
     render(<Dashboard />);
 
@@ -79,11 +84,14 @@ describe("Dashboard Page", () => {
 
   it("displays the navigation sidebar", async () => {
     const mockCheckAuth = jest.fn().mockResolvedValue(undefined);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+    const mockState = {
       isAuthenticated: true,
       isLoading: false,
-      checkAuth: mockCheckAuth
-    });
+      checkAuth: mockCheckAuth,
+      user: { id: "1", email: "test@test.com" }
+    };
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockState);
+    (useAuthStore as any).getState = jest.fn().mockReturnValue(mockState);
 
     render(<Dashboard />);
 
@@ -95,11 +103,14 @@ describe("Dashboard Page", () => {
 
   it("displays loading state while fetching levels", () => {
     const mockCheckAuth = jest.fn().mockResolvedValue(undefined);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+    const mockState = {
       isAuthenticated: true,
       isLoading: false,
-      checkAuth: mockCheckAuth
-    });
+      checkAuth: mockCheckAuth,
+      user: { id: "1", email: "test@test.com" }
+    };
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockState);
+    (useAuthStore as any).getState = jest.fn().mockReturnValue(mockState);
 
     render(<Dashboard />);
 

@@ -69,10 +69,31 @@ export function removeToken(): void {
 
 /**
  * Check if token exists and is valid
+ * Validates both stored expiry and JWT exp claim
  */
 export function hasValidToken(): boolean {
   const token = getToken();
-  return !!token && !isTokenExpired();
+  if (!token) {
+    return false;
+  }
+
+  // Check stored expiry first
+  if (isTokenExpired()) {
+    return false;
+  }
+
+  // Also check JWT exp claim for additional validation
+  const payload = parseJwtPayload(token);
+  if (payload && payload.exp) {
+    const expiryMs = payload.exp * 1000;
+    if (Date.now() > expiryMs) {
+      // Token has expired according to JWT claim
+      removeToken();
+      return false;
+    }
+  }
+
+  return true;
 }
 
 /**

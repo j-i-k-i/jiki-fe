@@ -113,39 +113,41 @@ export async function resetPassword(data: PasswordReset): Promise<void> {
 
 /**
  * Get current user
- * Returns the persisted user data from the auth store (set during login/signup)
- * Since there's no /auth/me endpoint in the backend, we rely on the locally stored user data
+ * This function has been removed to avoid circular dependencies.
+ * User data should be accessed directly from the auth store.
  */
-export async function getCurrentUser(): Promise<User | null> {
-  const { getToken } = await import("@/lib/auth/storage");
-  const token = getToken();
-
-  if (!token) {
-    return null;
-  }
-
-  // Get the persisted user data from the auth store
-  const { useAuthStore } = await import("@/stores/authStore");
-  const user = useAuthStore.getState().user;
-
-  // Return the stored user if available and authenticated
-  if (user && useAuthStore.getState().isAuthenticated) {
-    return user;
-  }
-
-  // If we have a token but no stored user data, the session may be invalid
-  return null;
-}
 
 /**
  * Validate current token
+ * Checks JWT expiry client-side and validates token structure
  */
 export async function validateToken(): Promise<boolean> {
   try {
-    // Try to get current user - if successful, token is valid
-    const user = await getCurrentUser();
-    return !!user;
-  } catch {
+    const { getToken, parseJwtPayload } = await import("@/lib/auth/storage");
+    const token = getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    // Parse JWT to check expiry
+    const payload = parseJwtPayload(token);
+    if (!payload) {
+      return false;
+    }
+
+    // Check if token has expired (exp is in seconds)
+    if (payload.exp) {
+      const expiryMs = payload.exp * 1000;
+      if (Date.now() > expiryMs) {
+        return false;
+      }
+    }
+
+    // Token structure is valid and not expired
+    return true;
+  } catch (error) {
+    console.error("Token validation failed:", error);
     return false;
   }
 }
