@@ -5,10 +5,8 @@ import { exercises, type ExerciseSlug } from "@jiki/curriculum";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
 import CodeEditor from "./ui/CodeEditor";
-import FrameDescription from "./ui/FrameDescription";
 import RunButton from "./ui/RunButton";
-import Scrubber from "./ui/scrubber/Scrubber";
-import TestResultsView from "./ui/test-results-view/TestResultsView";
+import ScenariosPanel from "./ui/test-results-view/ScenariosPanel";
 import { TestModalButtons } from "./ui/TestModalButtons";
 
 interface ComplexExerciseProps {
@@ -75,7 +73,7 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
 // Separate component that assumes orchestrator is loaded
 function ComplexExerciseContent({ orchestrator }: { orchestrator: Orchestrator }) {
   // Call the hook directly with the orchestrator
-  const { output, status, error, currentTest } = useOrchestratorStore(orchestrator);
+  const { output, status, error } = useOrchestratorStore(orchestrator);
 
   return (
     <OrchestratorProvider orchestrator={orchestrator}>
@@ -91,20 +89,7 @@ function ComplexExerciseContent({ orchestrator }: { orchestrator: Orchestrator }
               <h2 className="text-lg font-semibold text-gray-700">Code Editor</h2>
             </div>
             <CodeEditor />
-            <div className="border-t border-gray-200 p-4 max-h-[50%] flex flex-col overflow-hidden">
-              <TestResultsView />
-            </div>
-
-            {/* Single scrubber that updates based on current test */}
-            {currentTest?.frames && currentTest.frames.length > 1 && (
-              <div className="border-t border-gray-200 px-4 py-2">
-                <div className="flex items-center gap-4">
-                  <div className="text-sm font-medium text-gray-700">Timeline:</div>
-                  <Scrubber />
-                  <FrameDescription />
-                </div>
-              </div>
-            )}
+            <ScenariosPanel />
           </div>
 
           <div className="w-1/3 border-l border-gray-200 flex flex-col bg-white">
