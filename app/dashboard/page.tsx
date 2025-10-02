@@ -15,16 +15,21 @@ export default function DashboardPage() {
   const [levels, setLevels] = useState<LevelWithProgress[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
   const [levelsError, setLevelsError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    void checkAuth();
+    const initAuth = async () => {
+      await checkAuth();
+      setIsInitializing(false);
+    };
+    void initAuth();
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isInitializing && !authLoading && !isAuthenticated) {
       router.push("/auth/login");
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, isInitializing, router]);
 
   useEffect(() => {
     async function loadLevels() {
@@ -47,7 +52,7 @@ export default function DashboardPage() {
     void loadLevels();
   }, [isAuthenticated]);
 
-  if (authLoading || levelsLoading) {
+  if (isInitializing || authLoading || levelsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
