@@ -19,6 +19,7 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
   const [videoSkipped, setVideoSkipped] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isMarking, setIsMarking] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   // Extract video source from lesson data
@@ -49,10 +50,20 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
 
   const handleVideoEnd = () => {
     setVideoWatched(true);
+    setVideoProgress(100);
   };
 
   const handleVideoPlay = () => {
     setIsVideoVisible(true);
+  };
+
+  const handleTimeUpdate = () => {
+    if (playerRef.current) {
+      const currentTime = playerRef.current.currentTime || 0;
+      const duration = playerRef.current.duration || 1;
+      const progress = (currentTime / duration) * 100;
+      setVideoProgress(Math.min(progress, 100));
+    }
   };
 
   const handleSkipClick = () => {
@@ -63,6 +74,7 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
       onConfirm: () => {
         setVideoSkipped(true);
         setVideoWatched(true);
+        setVideoProgress(100); // Mark as complete
         if (playerRef.current) {
           playerRef.current.pause();
         }
@@ -90,6 +102,21 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
     <div className="flex flex-col items-center justify-center min-h-screen py-2 relative">
       <LessonQuitButton />
       <h1 className="text-4xl font-bold mb-8">{lessonData.title}</h1>
+
+      {/* Progress Bar */}
+      <div className="w-full max-w-4xl mb-4">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600 font-medium">Progress</span>
+          <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${videoProgress}%` }}
+            />
+          </div>
+          <span className="text-sm text-gray-600 font-medium">{Math.round(videoProgress)}%</span>
+        </div>
+      </div>
+
       <div className="w-full max-w-4xl relative">
         {/* Reserve space with aspect ratio to prevent layout shift */}
         <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
@@ -109,6 +136,7 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
               style={{ visibility: isVideoVisible ? "visible" : "hidden" }}
               onPlay={handleVideoPlay}
               onEnded={handleVideoEnd}
+              onTimeUpdate={handleTimeUpdate}
             />
           ) : (
             <div className="absolute inset-0 bg-gray-900 flex items-center justify-center rounded-lg">
