@@ -651,3 +651,7 @@ body {
         }
     }
 }
+
+.container-size {
+    container-type: size;
+}

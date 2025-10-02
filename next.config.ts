@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   experimental: {
     reactCompiler: true
   },
-  transpilePackages: ["interpreters"],
+  transpilePackages: ["interpreters", "@jiki/curriculum"],
   allowedDevOrigins: ["localhost", "local.exercism.io"]
 };
 

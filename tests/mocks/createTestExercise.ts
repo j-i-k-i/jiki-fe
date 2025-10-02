@@ -11,10 +11,14 @@ export function createTestExercise(overrides?: Partial<ExerciseDefinition>): Exe
     title: "Test Exercise",
     instructions: "This is a test exercise",
     estimatedMinutes: 5,
+    levelId: "level-1",
     initialCode: "// Test code",
     ExerciseClass: TestExercise,
     tasks,
     scenarios,
+    solutions: {
+      jikiscript: "// Test solution"
+    },
     ...overrides
   };
 }
