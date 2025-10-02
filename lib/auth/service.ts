@@ -113,27 +113,41 @@ export async function resetPassword(data: PasswordReset): Promise<void> {
 
 /**
  * Get current user
- * GET /v1/auth/me (or similar endpoint)
+ * This function has been removed to avoid circular dependencies.
+ * User data should be accessed directly from the auth store.
  */
-export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const response = await api.get<AuthResponse>("/v1/auth/me");
-    return response.data.user;
-  } catch {
-    // Return null if not authenticated
-    return null;
-  }
-}
 
 /**
  * Validate current token
+ * Checks JWT expiry client-side and validates token structure
  */
 export async function validateToken(): Promise<boolean> {
   try {
-    // Try to get current user - if successful, token is valid
-    const user = await getCurrentUser();
-    return !!user;
-  } catch {
+    const { getToken, parseJwtPayload } = await import("@/lib/auth/storage");
+    const token = getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    // Parse JWT to check expiry
+    const payload = parseJwtPayload(token);
+    if (!payload) {
+      return false;
+    }
+
+    // Check if token has expired (exp is in seconds)
+    if (payload.exp) {
+      const expiryMs = payload.exp * 1000;
+      if (Date.now() > expiryMs) {
+        return false;
+      }
+    }
+
+    // Token structure is valid and not expired
+    return true;
+  } catch (error) {
+    console.error("Token validation failed:", error);
     return false;
   }
 }
