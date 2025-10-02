@@ -176,16 +176,16 @@ describe("ExercisePath", () => {
 
     const svg = document.querySelector("svg");
     expect(svg).toBeInTheDocument();
-    // pathHeight = 4 mock exercises * 120 + 200 = 680
-    expect(svg).toHaveAttribute("viewBox", "0 0 200 680");
+    // pathHeight = 1 section header (80) + 4 mock exercises * 120 + 200 = 760
+    expect(svg).toHaveAttribute("viewBox", "0 0 200 760");
     expect(svg).toHaveClass("absolute", "inset-0", "w-full", "h-full", "pointer-events-none");
   });
 
   it("sets correct height for the exercise container", () => {
     render(<ExercisePath />);
 
-    // pathHeight = 4 mock exercises * 120 + 200 = 680
-    const container = document.querySelector('[style*="height: 680px"]');
+    // pathHeight = 1 section header (80) + 4 mock exercises * 120 + 200 = 760
+    const container = document.querySelector('[style*="height: 760px"]');
     expect(container).toBeInTheDocument();
     expect(container).toHaveClass("relative");
   });

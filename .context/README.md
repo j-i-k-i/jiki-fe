@@ -30,6 +30,7 @@ General documentation that applies across the entire codebase:
 - **[toasts.md](./toasts.md)** - Toast notifications system using react-hot-toast
 - **[modals.md](./modals.md)** - Global modal system with Zustand state management
 - **[sound.md](./sound.md)** - Sound system for audio feedback
+- **[lessons.md](./lessons.md)** - Lesson system for videos and exercises
 - **[exercises.md](./exercises.md)** - Exercise system structure and creation guide
 - **[api.md](./api.md)** - Backend API client and usage patterns
 - **[auth.md](./auth.md)** - JWT authentication system and auth flow

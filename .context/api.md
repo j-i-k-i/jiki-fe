@@ -305,7 +305,93 @@ test("fetches users", async () => {
 });
 ```
 
+## Lesson API Endpoints
+
+### Levels and Lessons
+
+The lesson system uses specific API endpoints for content delivery:
+
+#### Get Levels with Progress
+
+```typescript
+import { fetchLevelsWithProgress } from "@/lib/api/levels";
+
+const levels = await fetchLevelsWithProgress();
+// Returns: LevelWithProgress[]
+```
+
+Response structure:
+
+```typescript
+interface Level {
+  slug: string;
+  lessons: Array<{
+    slug: string;
+    type: "exercise" | "video";
+  }>;
+}
+```
+
+#### Get Lesson Details
+
+```typescript
+import { fetchLesson } from "@/lib/api/lessons";
+
+const lesson = await fetchLesson("solve-a-maze");
+// Returns: LessonData
+```
+
+Response structure:
+
+```typescript
+interface LessonData {
+  slug: string;
+  type: "exercise" | "video";
+  title: string;
+  description?: string;
+  data?: {
+    sources?: Array<{
+      host: string; // e.g., "mux"
+      id: string; // Video playback ID
+    }>;
+  };
+}
+```
+
+#### Mark Lesson Complete
+
+```typescript
+import { markLessonComplete } from "@/lib/api/lessons";
+
+await markLessonComplete("solve-a-maze");
+```
+
+### Usage in Components
+
+```typescript
+// In lesson page
+useEffect(() => {
+  async function loadLesson() {
+    try {
+      const lessonData = await fetchLesson(slug);
+      setLesson(lessonData);
+
+      // For video lessons, extract playback ID
+      if (lessonData.type === "video") {
+        const playbackId = lessonData.data?.sources?.[0]?.id;
+        // Use with MuxPlayer
+      }
+    } catch (error) {
+      console.error("Failed to load lesson:", error);
+    }
+  }
+  void loadLesson();
+}, [slug]);
+```
+
 ## Related Documentation
 
 - [Architecture](./architecture.md) - Overall frontend architecture
 - [Testing](./testing.md) - Testing patterns and guidelines
+- [Lessons](./lessons.md) - Lesson system documentation
+- [Exercises](./exercises.md) - Exercise system details

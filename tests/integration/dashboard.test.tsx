@@ -28,13 +28,14 @@ jest.mock("@/lib/api/levels", () => ({
       slug: "getting-started",
       status: "in_progress",
       lessons: [
-        { id: "1", title: "Introduction", status: "completed" },
-        { id: "2", title: "Variables", status: "in_progress" }
+        { slug: "introduction", type: "video" },
+        { slug: "variables", type: "exercise" }
       ],
       userProgress: {
+        level_slug: "getting-started",
         user_lessons: [
-          { id: "1", status: "completed" },
-          { id: "2", status: "in_progress" }
+          { lesson_slug: "introduction", status: "completed" },
+          { lesson_slug: "variables", status: "in_progress" }
         ]
       }
     }
