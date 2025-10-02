@@ -17,38 +17,43 @@ export default function DashboardPage() {
   const [levelsError, setLevelsError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
 
+  // Effect 1: Check authentication on mount
   useEffect(() => {
-    async function initializeAndLoadData() {
-      // Check authentication
+    async function initAuth() {
       await checkAuth();
       setIsInitializing(false);
+    }
+    void initAuth();
+  }, [checkAuth]);
 
-      // Get the current auth state
-      const currentAuthState = useAuthStore.getState();
+  // Effect 2: Handle redirect based on reactive auth state
+  useEffect(() => {
+    if (!isInitializing && !authLoading && !isAuthenticated) {
+      router.push("/auth/login");
+    }
+  }, [isAuthenticated, authLoading, isInitializing, router]);
 
-      // Redirect if not authenticated
-      if (!currentAuthState.isLoading && !currentAuthState.isAuthenticated) {
-        router.push("/auth/login");
+  // Effect 3: Load levels when authenticated
+  useEffect(() => {
+    async function loadLevels() {
+      if (!isAuthenticated || isInitializing || authLoading) {
         return;
       }
 
-      // Load levels if authenticated
-      if (currentAuthState.isAuthenticated) {
-        try {
-          setLevelsLoading(true);
-          const data = await fetchLevelsWithProgress();
-          setLevels(data);
-        } catch (error) {
-          console.error("Failed to fetch levels:", error);
-          setLevelsError(error instanceof Error ? error.message : "Failed to load levels");
-        } finally {
-          setLevelsLoading(false);
-        }
+      try {
+        setLevelsLoading(true);
+        const data = await fetchLevelsWithProgress();
+        setLevels(data);
+      } catch (error) {
+        console.error("Failed to fetch levels:", error);
+        setLevelsError(error instanceof Error ? error.message : "Failed to load levels");
+      } finally {
+        setLevelsLoading(false);
       }
     }
 
-    void initializeAndLoadData();
-  }, [checkAuth, router]);
+    void loadLevels();
+  }, [isAuthenticated, isInitializing, authLoading]);
 
   if (isInitializing || authLoading || levelsLoading) {
     return (
