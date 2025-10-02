@@ -113,16 +113,27 @@ export async function resetPassword(data: PasswordReset): Promise<void> {
 
 /**
  * Get current user
- * GET /v1/auth/me (or similar endpoint)
+ * Since there's no /auth/me endpoint, we return the stored user from successful login/signup
+ * In a real app, you might want to fetch user data from a /users/profile endpoint
  */
 export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const response = await api.get<AuthResponse>("/v1/auth/me");
-    return response.data.user;
-  } catch {
-    // Return null if not authenticated
+  // For now, just check if we have a valid token
+  // The actual user data is stored in the Zustand store after login/signup
+  const { getToken } = await import("@/lib/auth/storage");
+  const token = getToken();
+
+  if (!token) {
     return null;
   }
+
+  // Since we don't have a /me endpoint, we'll return a basic user object
+  // The actual user data should be persisted in the auth store
+  return {
+    id: 0,
+    email: "",
+    name: null,
+    created_at: new Date().toISOString()
+  };
 }
 
 /**

@@ -102,10 +102,10 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       // Check authentication status
-      checkAuth: async () => {
+      checkAuth: () => {
         // Skip if already loading
         if (get().isLoading) {
-          return;
+          return Promise.resolve();
         }
 
         // Quick check for token existence
@@ -115,34 +115,24 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: false,
             isLoading: false
           });
-          return;
+          return Promise.resolve();
         }
 
-        set({ isLoading: true });
-        try {
-          const user = await authService.getCurrentUser();
-          if (user) {
-            set({
-              user,
-              isAuthenticated: true,
-              isLoading: false
-            });
-          } else {
-            set({
-              user: null,
-              isAuthenticated: false,
-              isLoading: false
-            });
-          }
-        } catch (error) {
-          console.error("Auth check failed:", error);
-          removeToken();
-          set({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
+        // If we have a valid token and user data in state, we're authenticated
+        const currentState = get();
+        if (currentState.user && currentState.isAuthenticated) {
+          // User data is already in state from persist
+          set({ isLoading: false });
+          return Promise.resolve();
         }
+
+        // If we have a token but no user data, assume authenticated
+        // (user data should have been persisted from login/signup)
+        set({
+          isAuthenticated: true,
+          isLoading: false
+        });
+        return Promise.resolve();
       },
 
       // Request password reset
