@@ -199,13 +199,18 @@ class Orchestrator {
       return;
     }
 
+    // If animation completed, reset orchestrator time to beginning
+    if (state.currentTest.animationTimeline.completed) {
+      state.setCurrentTestTime(0);
+    }
+
     // Set isPlaying state
     state.setIsPlaying(true);
 
     // Hide information widget on play (matches original behavior)
     state.setShouldShowInformationWidget(false);
 
-    // Play the animation timeline
+    // Play the animation timeline (will also seek to 0 if completed)
     state.currentTest.animationTimeline.play();
   }
 

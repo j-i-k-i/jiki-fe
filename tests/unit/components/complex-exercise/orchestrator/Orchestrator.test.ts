@@ -81,6 +81,35 @@ describe("Orchestrator", () => {
     });
   });
 
+  describe("animation completion", () => {
+    it("should set isPlaying to false when animation completes", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Start playing
+      orchestrator.play();
+      expect(orchestrator.getStore().getState().isPlaying).toBe(true);
+
+      // Simulate animation completion by triggering onComplete callback
+      const onCompleteCallback = (mockTimeline.onComplete as jest.Mock).mock.calls[0][0];
+      onCompleteCallback(mockTimeline);
+
+      // Should set isPlaying to false
+      expect(orchestrator.getStore().getState().isPlaying).toBe(false);
+    });
+  });
+
   describe("frame synchronization", () => {
     it("should only update currentFrame when landing exactly on a frame", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
@@ -390,6 +419,64 @@ describe("Orchestrator", () => {
       const orchestrator = new Orchestrator(exercise);
 
       expect(() => orchestrator.play()).not.toThrow();
+    });
+
+    it("should reset time to 0 when playing after completion", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      // Make timeline appear completed
+      Object.defineProperty(mockTimeline, "completed", { value: true, writable: true });
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Set time to end
+      orchestrator.setCurrentTestTime(100000);
+
+      // Play should reset time to 0
+      orchestrator.play();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.currentTestTime).toBe(0);
+      expect(mockTimeline.play).toHaveBeenCalled();
+    });
+
+    it("should NOT reset time when playing if not completed", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      // Timeline is NOT completed
+      Object.defineProperty(mockTimeline, "completed", { value: false, writable: true });
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Set time to middle
+      orchestrator.setCurrentTestTime(50000);
+
+      // Play should NOT reset time
+      orchestrator.play();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.currentTestTime).toBe(50000);
+      expect(mockTimeline.play).toHaveBeenCalled();
     });
   });
 
