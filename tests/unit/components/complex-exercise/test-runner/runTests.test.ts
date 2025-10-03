@@ -7,6 +7,7 @@ import { TestExercise } from "@jiki/curriculum";
 // Mock the interpreters module
 jest.mock("@jiki/interpreters", () => ({
   jikiscript: {
+    compile: jest.fn(),
     interpret: jest.fn()
   },
   TIME_SCALE_FACTOR: 1000
@@ -70,6 +71,9 @@ describe("runTests", () => {
       ExerciseClass: TestExercise,
       scenarios: testScenarios
     });
+
+    // Default compile mock returns success
+    (jikiscript.compile as jest.Mock).mockReturnValue({ success: true });
   });
 
   describe("initial scrubber time", () => {
