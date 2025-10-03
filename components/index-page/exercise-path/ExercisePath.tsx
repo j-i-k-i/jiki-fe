@@ -94,6 +94,23 @@ function mapLevelsToSections(levels: LevelWithProgress[]): LevelSection[] {
 export default function ExercisePath({ levels }: ExercisePathProps) {
   const router = useRouter();
   const [clickedLessonId, setClickedLessonId] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleLessonNavigation = (lessonRoute: string) => {
+    // Show loading state immediately
+    setIsNavigating(true);
+
+    // Navigate immediately
+    router.push(lessonRoute);
+
+    // Fire-and-forget pattern: Start tracking in background
+    const lessonSlug = lessonRoute.split("/").pop();
+    if (lessonSlug) {
+      startLesson(lessonSlug).catch((error) => {
+        console.error("Failed to start lesson tracking:", error);
+      });
+    }
+  };
 
   const sections = useMemo(() => {
     if (!levels || levels.length === 0) {
@@ -121,6 +138,28 @@ export default function ExercisePath({ levels }: ExercisePathProps) {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 overflow-y-auto overflow-x-hidden">
+      {/* Full-screen loading overlay with smooth fade transition */}
+      {isNavigating && (
+        <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center animate-[fadeIn_0.2s_ease-in-out]">
+          <div className="text-center">
+            <div className="relative">
+              <div className="w-20 h-20 border-4 border-blue-200 rounded-full animate-spin mx-auto">
+                <div
+                  className="absolute inset-2 border-4 border-transparent border-t-blue-500 rounded-full animate-spin"
+                  style={{ animationDirection: "reverse", animationDuration: "0.8s" }}
+                />
+              </div>
+            </div>
+            <p className="mt-6 text-lg text-gray-700 font-medium">Loading exercise...</p>
+            <div className="mt-2 flex justify-center gap-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="relative w-full max-w-2xl mx-auto px-8 py-12">
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox={`0 0 200 ${pathHeight}`}>
           {allExercises.slice(0, -1).map((exercise, index) => (
@@ -162,7 +201,7 @@ export default function ExercisePath({ levels }: ExercisePathProps) {
                     transform: "translateX(-50%)"
                   }}
                 >
-                  <LessonTooltip exercise={lesson} placement="bottom">
+                  <LessonTooltip exercise={lesson} placement="bottom" onNavigate={handleLessonNavigation}>
                     <div
                       className={`transition-all duration-200 ${
                         clickedLessonId === lesson.id ? "scale-95 opacity-75" : ""
@@ -171,26 +210,13 @@ export default function ExercisePath({ levels }: ExercisePathProps) {
                       <ExerciseNode
                         exercise={lesson}
                         onClick={() => {
-                          // Don't block UI - navigate immediately if lesson is unlocked
+                          // Don't navigate on node click if lesson is unlocked
+                          // The tooltip will handle navigation
                           if (lesson.locked) {
                             return;
                           }
-
-                          // Provide immediate visual feedback
+                          // Just provide visual feedback on node click
                           setClickedLessonId(lesson.id);
-
-                          // Navigate immediately for better UX
-                          router.push(lesson.route);
-
-                          // Fire-and-forget pattern: Start tracking in background
-                          const lessonSlug = lesson.route.split("/").pop();
-                          if (lessonSlug) {
-                            // Don't await - let it complete in background
-                            startLesson(lessonSlug).catch((error) => {
-                              console.error("Failed to start lesson tracking:", error);
-                              // Tracking failure doesn't affect user experience
-                            });
-                          }
                         }}
                       />
                     </div>

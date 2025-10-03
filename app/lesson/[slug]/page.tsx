@@ -1,6 +1,7 @@
 "use client";
 
 import ComplexExercise from "@/components/complex-exercise/ComplexExercise";
+import LessonLoadingPage from "@/components/lesson/LessonLoadingPage";
 import VideoExercise from "@/components/video-exercise/VideoExercise";
 import { fetchLesson, type LessonData } from "@/lib/api/lessons";
 import { useRequireAuth } from "@/lib/auth/hooks";
@@ -63,14 +64,8 @@ export default function LessonPage({ params }: PageProps) {
   }, [params, isAuthenticated, isReady]);
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading lesson...</p>
-        </div>
-      </div>
-    );
+    // Show loading page - will default to exercise type if not specified
+    return <LessonLoadingPage type={lesson?.type} />;
   }
 
   if (!isAuthenticated) {

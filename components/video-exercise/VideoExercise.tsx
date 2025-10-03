@@ -20,6 +20,7 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
   const [isVideoVisible, setIsVideoVisible] = useState(false);
   const [isMarking, setIsMarking] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
+  const [isInitializing, setIsInitializing] = useState(true);
   const playerRef = useRef<MuxPlayerRefAttributes>(null);
 
   // Extract video source from lesson data
@@ -34,18 +35,15 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
   }
 
   useEffect(() => {
-    // Add a small delay to ensure the component is fully mounted
-    const playTimer = setTimeout(() => {
-      if (playerRef.current) {
-        playerRef.current.play().catch((error) => {
-          // Autoplay failed, but still show the video so user can manually play
-          console.warn("Autoplay was prevented:", error.message);
-          setIsVideoVisible(true);
-        });
-      }
-    }, 100);
-
-    return () => clearTimeout(playTimer);
+    // Start playing immediately when component mounts
+    setIsInitializing(false);
+    if (playerRef.current) {
+      playerRef.current.play().catch((error) => {
+        // Autoplay failed, but still show the video so user can manually play
+        console.warn("Autoplay was prevented:", error.message);
+        setIsVideoVisible(true);
+      });
+    }
   }, []);
 
   const handleVideoEnd = () => {
@@ -99,7 +97,9 @@ export default function VideoExercise({ lessonData }: VideoExerciseProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 relative">
+    <div
+      className={`flex flex-col items-center justify-center min-h-screen py-2 relative transition-opacity duration-500 ${isInitializing ? "opacity-0" : "opacity-100"}`}
+    >
       <LessonQuitButton />
       <h1 className="text-4xl font-bold mb-8">{lessonData.title}</h1>
 

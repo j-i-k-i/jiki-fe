@@ -22,13 +22,15 @@ interface LessonTooltipProps {
   exercise: Exercise;
   placement?: Placement;
   offset?: number;
+  onNavigate?: (route: string) => void;
 }
 
 export function LessonTooltip({
   children,
   exercise,
   placement = "bottom",
-  offset: offsetValue = 12
+  offset: offsetValue = 12,
+  onNavigate
 }: LessonTooltipProps) {
   const [isOpen, setIsOpen] = useState(false);
   const headingId = useId();
@@ -82,6 +84,7 @@ export function LessonTooltip({
               <TooltipContent
                 exercise={exercise}
                 onClose={() => setIsOpen(false)}
+                onNavigate={onNavigate}
                 headingId={headingId}
                 descriptionId={descriptionId}
               />

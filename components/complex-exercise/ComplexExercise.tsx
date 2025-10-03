@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { exercises, type ExerciseSlug } from "@jiki/curriculum";
+import LessonLoadingPage from "@/components/lesson/LessonLoadingPage";
 import Orchestrator, { useOrchestratorStore } from "./lib/Orchestrator";
 import OrchestratorProvider from "./lib/OrchestratorProvider";
 import CodeEditor from "./ui/CodeEditor";
@@ -61,11 +62,7 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-lg text-gray-600">Loading exercise...</div>
-      </div>
-    );
+    return <LessonLoadingPage type="exercise" />;
   }
 
   // At this point, orchestratorRef.current is guaranteed to be set
