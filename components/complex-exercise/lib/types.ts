@@ -47,7 +47,7 @@ export interface OrchestratorState {
 
   // Test results state
   testSuiteResult: TestSuiteResult | null;
-  shouldAutoplayAnimation: boolean;
+  userHasPaused: boolean;
 
   // Frame navigation state (moved from currentTest to top level)
   prevFrame?: Frame;
@@ -106,7 +106,7 @@ export interface OrchestratorActions {
 
   // Play/pause action
   setIsPlaying: (playing: boolean) => void;
-  setShouldAutoplayAnimation: (autoplay: boolean) => void;
+  setUserHasPaused: (paused: boolean) => void;
 
   // Exercise data initialization
   initializeExerciseData: (serverData?: {
