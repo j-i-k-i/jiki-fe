@@ -18,6 +18,14 @@ interface RequireAuthOptions {
  * Handles auth checking and redirects in a centralized way.
  *
  * @param options Configuration options for auth behavior
+ * @param options.redirectTo URL to redirect to when not authenticated (default: "/auth/login")
+ * @param options.redirectIfAuthenticated If true, redirects to dashboard when authenticated
+ * @param options.onAuthenticated Callback when user is authenticated (called once)
+ * @param options.onUnauthenticated Callback when user is not authenticated (called once)
+ *
+ * Note: Callbacks are intentionally excluded from useEffect dependencies to prevent
+ * infinite re-renders. They will only be called once per auth state change.
+ *
  * @returns Object with auth state and loading status
  */
 export function useRequireAuth(options: RequireAuthOptions = {}) {
@@ -50,7 +58,11 @@ export function useRequireAuth(options: RequireAuthOptions = {}) {
     }
 
     setIsReady(true);
-  }, [isAuthenticated, authLoading, router, redirectTo, redirectIfAuthenticated, onAuthenticated, onUnauthenticated]);
+    // Excluding callback functions from dependencies to prevent infinite re-renders
+    // when consumers pass inline functions. The callbacks are only used for side effects
+    // and don't affect the core auth logic flow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authLoading, router, redirectTo, redirectIfAuthenticated]);
 
   return {
     isAuthenticated,
@@ -71,23 +83,18 @@ export function useRedirectIfAuthenticated(_redirectTo = "/dashboard") {
 }
 
 /**
- * Hook to get current auth status without any redirects
+ * Hook to get current auth status without any redirects.
+ * Relies on AuthProvider having already checked authentication status.
+ *
+ * @returns Current auth state from the store
  */
 export function useAuth() {
-  const { isAuthenticated, isLoading, user, checkAuth } = useAuthStore();
-  const [hasChecked, setHasChecked] = useState(false);
-
-  useEffect(() => {
-    if (!hasChecked) {
-      void checkAuth();
-      setHasChecked(true);
-    }
-  }, [checkAuth, hasChecked]);
+  const { isAuthenticated, isLoading, user } = useAuthStore();
 
   return {
     isAuthenticated,
     isLoading,
     user,
-    isReady: hasChecked && !isLoading
+    isReady: !isLoading
   };
 }

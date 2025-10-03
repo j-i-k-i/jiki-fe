@@ -15,6 +15,7 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  hasCheckedAuth: boolean;
 
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -35,6 +36,7 @@ export const useAuthStore = create<AuthStore>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      hasCheckedAuth: false,
 
       // Login action
       login: async (credentials) => {
@@ -103,8 +105,10 @@ export const useAuthStore = create<AuthStore>()(
 
       // Check authentication status
       checkAuth: async () => {
-        // Skip if already loading
-        if (get().isLoading) {
+        const currentState = get();
+
+        // Skip if already checked or currently checking
+        if (currentState.hasCheckedAuth || currentState.isLoading) {
           return;
         }
 
@@ -116,7 +120,8 @@ export const useAuthStore = create<AuthStore>()(
             set({
               user: null,
               isAuthenticated: false,
-              isLoading: false
+              isLoading: false,
+              hasCheckedAuth: true
             });
             return;
           }
@@ -133,13 +138,14 @@ export const useAuthStore = create<AuthStore>()(
                 user: null,
                 isAuthenticated: false,
                 isLoading: false,
-                error: "Session expired. Please login again."
+                error: "Session expired. Please login again.",
+                hasCheckedAuth: true
               });
               return;
             }
 
             // Token is still valid
-            set({ isLoading: false });
+            set({ isLoading: false, hasCheckedAuth: true });
             return;
           }
 
@@ -150,7 +156,8 @@ export const useAuthStore = create<AuthStore>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
-            error: "Invalid session. Please login again."
+            error: "Invalid session. Please login again.",
+            hasCheckedAuth: true
           });
         } catch (error) {
           console.error("Auth check failed:", error);
@@ -160,7 +167,8 @@ export const useAuthStore = create<AuthStore>()(
             user: null,
             isAuthenticated: false,
             isLoading: false,
-            error: "Authentication check failed"
+            error: "Authentication check failed",
+            hasCheckedAuth: true
           });
         }
       },
@@ -204,9 +212,10 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: "auth-storage", // Storage key
       partialize: (state) => ({
-        // Only persist user data, not loading/error states
+        // Only persist user data and auth check status, not loading/error states
         user: state.user,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
+        hasCheckedAuth: state.hasCheckedAuth
       })
     }
   )
