@@ -1,8 +1,7 @@
 describe("Home Page E2E", () => {
   beforeAll(async () => {
-    await page.goto("http://localhost:3070", {
-      waitUntil: "networkidle2"
-    });
+    await page.goto("http://localhost:3070");
+    await page.waitForSelector("h1");
   });
 
   it("should load the landing page", async () => {

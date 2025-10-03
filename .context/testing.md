@@ -32,6 +32,44 @@ The project uses two testing approaches:
 - **Naming Convention**: `[feature].test.ts`
 - **Examples**: `tests/e2e/home.test.ts`, `tests/e2e/navigation.test.ts`
 
+#### E2E Test Best Practices
+
+**IMPORTANT: Never use `waitUntil: "networkidle2"`**
+
+❌ **DON'T** use `networkidle2`:
+
+```typescript
+// BAD - Slow and unreliable
+await page.goto(url, { waitUntil: "networkidle2" });
+await page.waitForNavigation({ waitUntil: "networkidle2" });
+```
+
+✅ **DO** use `waitForSelector()`:
+
+```typescript
+// GOOD - Fast and explicit
+await page.goto(url);
+await page.waitForSelector("h1"); // Wait for specific content
+```
+
+**Why**:
+
+- `networkidle2` waits for network idle, but **doesn't guarantee React has rendered**
+- Auth checks complete instantly (synchronous localStorage), so network is idle before UI updates
+- `waitForSelector()` waits for the exact element you need
+- Much faster and more reliable in practice
+
+**Pattern for navigation**:
+
+```typescript
+// Navigate to new page
+await page.click('a[href="/some-page"]');
+await page.waitForSelector("h1"); // Wait for page-specific content
+
+// NOT
+await page.waitForNavigation({ waitUntil: "networkidle2" }); // ❌ Slow and unreliable
+```
+
 ## Configuration
 
 ### Unit Test Configuration (`jest.config.mjs`)

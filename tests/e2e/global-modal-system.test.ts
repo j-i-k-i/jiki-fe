@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 describe("Global Modal System E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3070/dev/test-global-modals", {
-      waitUntil: "networkidle2"
-    });
-    // Ensure page is ready by waiting for a known element
-    await page.waitForSelector("h1", { timeout: 10000 });
+    await page.goto("http://localhost:3070/dev/test-global-modals");
+    await page.waitForSelector("h1");
 
     // Wait a bit for page to fully stabilize
     await new Promise((resolve) => setTimeout(resolve, 1000));
