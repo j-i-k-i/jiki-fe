@@ -6,9 +6,36 @@
 
 const { spawn, execSync } = require("child_process");
 const waitOn = require("wait-on");
+const fs = require("fs");
+const path = require("path");
 
 const PORT = 3070;
 const SERVER_URL = `http://localhost:${PORT}`;
+
+/**
+ * Recursively find all page.tsx/page.ts files in a directory
+ * and convert them to route paths
+ */
+function discoverRoutes(dir, baseDir = dir) {
+  const routes = [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      // Recursively search subdirectories
+      routes.push(...discoverRoutes(fullPath, baseDir));
+    } else if (entry.name === "page.tsx" || entry.name === "page.ts") {
+      // Convert file path to route path
+      const relativePath = path.relative(baseDir, dir);
+      const route = "/" + relativePath.replace(/\\/g, "/");
+      routes.push(route);
+    }
+  }
+
+  return routes;
+}
 
 function killPort(port) {
   try {
@@ -65,6 +92,26 @@ async function runE2ETests() {
     });
     console.log("Server is ready!");
 
+    // Warm up routes to trigger Next.js compilation
+    console.log("Warming up routes...");
+
+    // Auto-discover test routes
+    const testRoutes = discoverRoutes(path.join(__dirname, "..", "app", "test"));
+
+    // Include common auth routes that tests use
+    const authRoutes = ["/", "/auth/login", "/auth/signup"];
+
+    const routesToWarm = [...authRoutes, ...testRoutes];
+
+    for (const route of routesToWarm) {
+      try {
+        await fetch(`${SERVER_URL}${route}`);
+      } catch (err) {
+        // Ignore errors during warmup
+      }
+    }
+    console.log(`Routes warmed up! (${routesToWarm.length} routes)`);
+
     // Run the E2E tests
     console.log("Running E2E tests...");
     const testProcess = spawn("pnpm", ["jest", "--config", "jest.e2e.config.mjs", ...process.argv.slice(2)], {
@@ -76,7 +123,7 @@ async function runE2ETests() {
       }
     });
 
-    await new Promise((resolve) => {
+    return await new Promise((resolve) => {
       testProcess.on("close", (code) => {
         resolve(code);
       });
@@ -101,8 +148,6 @@ async function runE2ETests() {
     // Also ensure port is free
     killPort(PORT);
   }
-
-  process.exit(0);
 }
 
 // Handle interrupts gracefully
@@ -118,8 +163,12 @@ process.on("SIGTERM", () => {
   process.exit(143);
 });
 
-runE2ETests().catch((err) => {
-  console.error("Failed to run E2E tests:", err);
-  killPort(PORT);
-  process.exit(1);
-});
+runE2ETests()
+  .then((exitCode) => {
+    process.exit(exitCode || 0);
+  })
+  .catch((err) => {
+    console.error("Failed to run E2E tests:", err);
+    killPort(PORT);
+    process.exit(1);
+  });

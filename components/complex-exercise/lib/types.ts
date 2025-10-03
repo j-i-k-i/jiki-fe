@@ -40,6 +40,7 @@ export interface OrchestratorState {
   // Error store state
   hasUnhandledError: boolean;
   unhandledErrorBase64: string;
+  hasSyntaxError: boolean;
 
   // Editor handler state
   latestValueSnapshot: string | undefined;
@@ -95,6 +96,7 @@ export interface OrchestratorActions {
   // Error store actions
   setHasUnhandledError: (hasError: boolean) => void;
   setUnhandledErrorBase64: (errorData: string) => void;
+  setHasSyntaxError: (hasError: boolean) => void;
 
   // Editor handler actions
   setLatestValueSnapshot: (value: string | undefined) => void;

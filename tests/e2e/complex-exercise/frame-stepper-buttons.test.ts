@@ -1,13 +1,11 @@
 describe("FrameStepper Buttons E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3070/test/complex-exercise/frame-stepper-buttons", {
-      waitUntil: "networkidle2"
-    });
-  }, 20000); // 20s timeout for navigation + compilation
+    await page.goto("http://localhost:3070/test/complex-exercise/frame-stepper-buttons");
+    await page.waitForSelector('[data-testid="frame-stepper-container"]');
+  });
 
   it("should render with initial state - prev button disabled, next button enabled", async () => {
-    // Wait for the component to be rendered
-    await page.waitForSelector('[data-testid="frame-stepper-container"]');
+    // Wait for the buttons to be rendered
     await page.waitForSelector('[data-testid="frame-stepper-buttons"]');
 
     // Get the buttons

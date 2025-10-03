@@ -33,6 +33,7 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
       // Error store state
       hasUnhandledError: false,
       unhandledErrorBase64: "",
+      hasSyntaxError: false,
 
       // Editor handler state
       latestValueSnapshot: undefined,
@@ -102,6 +103,7 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
       // Error store actions
       setHasUnhandledError: jest.fn(),
       setUnhandledErrorBase64: jest.fn(),
+      setHasSyntaxError: jest.fn(),
 
       // Editor handler actions
       setLatestValueSnapshot: jest.fn(),

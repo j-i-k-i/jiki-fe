@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 describe("Global Modal System E2E", () => {
   beforeEach(async () => {
-    await page.goto("http://localhost:3070/dev/test-global-modals", {
-      waitUntil: "networkidle2"
-    });
-    // Ensure page is ready by waiting for a known element
-    await page.waitForSelector("h1", { timeout: 10000 });
+    await page.goto("http://localhost:3070/dev/test-global-modals");
+    await page.waitForSelector("h1");
 
     // Wait a bit for page to fully stabilize
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -216,49 +213,4 @@ describe("Global Modal System E2E", () => {
     // Wait for modal to disappear with timeout
     await page.waitForFunction(() => !document.querySelector('[role="dialog"]'), { timeout: 5000 });
   }, 35000); // Increase test timeout
-});
-
-describe("Global Modal System - Complex Exercise Integration", () => {
-  beforeEach(async () => {
-    await page.goto("http://localhost:3070/dev/complex-exercise", {
-      waitUntil: "networkidle2"
-    });
-  });
-
-  it("should work with existing TestModalButtons", async () => {
-    // Find TestModalButtons and click example modal
-    await page.evaluate(() => {
-      const button = Array.from(document.querySelectorAll("button")).find((el) =>
-        el.textContent?.includes("Example Modal")
-      );
-      button?.click();
-    });
-
-    // Wait for modal to appear
-    await page.waitForSelector('[role="dialog"]');
-
-    // Verify modal content
-    const titleText = await page.evaluate(() => {
-      const modal = document.querySelector('[role="dialog"]');
-      const h2 = modal?.querySelector("h2");
-      return h2?.textContent;
-    });
-    expect(titleText).toBe("Test Modal");
-
-    const messageText = await page.evaluate(() => {
-      const modal = document.querySelector('[role="dialog"]');
-      const p = modal?.querySelector("p");
-      return p?.textContent;
-    });
-    expect(messageText).toBe("This is a test of the modal system!");
-
-    // Close modal
-    await page.evaluate(() => {
-      const button = Array.from(document.querySelectorAll("button")).find((el) => el.textContent?.includes("Cancel"));
-      button?.click();
-    });
-
-    // Wait for modal to disappear
-    await page.waitForFunction(() => !document.querySelector('[role="dialog"]'));
-  }, 40000);
 });

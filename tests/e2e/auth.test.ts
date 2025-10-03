@@ -1,9 +1,7 @@
 describe("Authentication E2E", () => {
   describe("Landing Page", () => {
     it("should show landing page for unauthenticated users", async () => {
-      await page.goto("http://localhost:3070", { waitUntil: "networkidle2" });
-
-      // Wait for the page to load
+      await page.goto("http://localhost:3070");
       await page.waitForSelector("h1");
 
       const heading = await page.$eval("h1", (el) => el.textContent);
@@ -18,41 +16,35 @@ describe("Authentication E2E", () => {
     });
 
     it("should navigate to login page when login button clicked", async () => {
-      await page.goto("http://localhost:3070", { waitUntil: "networkidle2" });
+      await page.goto("http://localhost:3070");
       await page.waitForSelector('a[href="/auth/login"]');
 
       // Click the login link
       await page.click('a[href="/auth/login"]');
 
-      // Wait for navigation
-      await page.waitForNavigation({ waitUntil: "networkidle2" });
+      // Wait for login page heading to appear
+      await page.waitForSelector("h2");
 
       // Check we're on the login page
       const url = page.url();
       expect(url).toContain("/auth/login");
-
-      // Check for login page heading
-      await page.waitForSelector("h2");
       const heading = await page.$eval("h2", (el) => el.textContent);
       expect(heading).toBe("Sign in to your account");
     });
 
     it("should navigate to signup page when signup button clicked", async () => {
-      await page.goto("http://localhost:3070", { waitUntil: "networkidle2" });
+      await page.goto("http://localhost:3070");
       await page.waitForSelector('a[href="/auth/signup"]');
 
       // Click the signup link
       await page.click('a[href="/auth/signup"]');
 
-      // Wait for navigation
-      await page.waitForNavigation({ waitUntil: "networkidle2" });
+      // Wait for signup page heading to appear
+      await page.waitForSelector("h2");
 
       // Check we're on the signup page
       const url = page.url();
       expect(url).toContain("/auth/signup");
-
-      // Check for signup page heading
-      await page.waitForSelector("h2");
       const heading = await page.$eval("h2", (el) => el.textContent);
       expect(heading).toBe("Create your account");
     });
@@ -60,7 +52,8 @@ describe("Authentication E2E", () => {
 
   describe("Login Page", () => {
     beforeEach(async () => {
-      await page.goto("http://localhost:3070/auth/login", { waitUntil: "networkidle2" });
+      await page.goto("http://localhost:3070/auth/login");
+      await page.waitForSelector("h2");
     });
 
     it("should display login form with email and password fields", async () => {
@@ -97,7 +90,7 @@ describe("Authentication E2E", () => {
       expect(signupLink).toBeTruthy();
 
       await page.click('a[href="/auth/signup"]');
-      await page.waitForNavigation({ waitUntil: "networkidle2" });
+      await page.waitForFunction(() => window.location.href.includes("/auth/signup"));
 
       // Check we're on signup page
       const url = page.url();
@@ -107,7 +100,8 @@ describe("Authentication E2E", () => {
 
   describe("Signup Page", () => {
     beforeEach(async () => {
-      await page.goto("http://localhost:3070/auth/signup", { waitUntil: "networkidle2" });
+      await page.goto("http://localhost:3070/auth/signup");
+      await page.waitForSelector("h2");
     });
 
     it("should display signup form with all required fields", async () => {
@@ -154,7 +148,7 @@ describe("Authentication E2E", () => {
       expect(loginLink).toBeTruthy();
 
       await page.click('a[href="/auth/login"]');
-      await page.waitForNavigation({ waitUntil: "networkidle2" });
+      await page.waitForFunction(() => window.location.href.includes("/auth/login"));
 
       // Check we're on login page
       const url = page.url();

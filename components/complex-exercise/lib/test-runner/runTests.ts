@@ -1,4 +1,4 @@
-import { jikiscript } from "@jiki/interpreters";
+import { jikiscript, type CompilationResult } from "@jiki/interpreters";
 import { AnimationTimeline as AnimationTimelineClass } from "../AnimationTimeline";
 import type { TestResult, TestSuiteResult } from "../test-results-types";
 import type { ExerciseDefinition, Scenario, Exercise } from "@jiki/curriculum";
@@ -50,9 +50,28 @@ function runScenario(scenario: Scenario, studentCode: string, ExerciseClass: new
 }
 
 export function runTests(studentCode: string, exercise: ExerciseDefinition): TestSuiteResult {
-  const tests: TestResult[] = [];
+  // Create a temporary exercise to get external functions
+  const tempExercise = new exercise.ExerciseClass();
 
-  // Run all scenarios
+  // Compile ONCE before running any scenarios
+  const compilationResult: CompilationResult = jikiscript.compile(studentCode, {
+    externalFunctions: tempExercise.availableFunctions.map((func) => ({
+      name: func.name,
+      func: func.func
+    })) as any,
+    languageFeatures: {
+      timePerFrame: 1,
+      maxTotalLoopIterations: 1000
+    }
+  });
+
+  // If compilation failed, throw the syntax error
+  if (!compilationResult.success) {
+    throw compilationResult.error;
+  }
+
+  // Compilation succeeded, run all scenarios with interpret()
+  const tests: TestResult[] = [];
   for (const scenario of exercise.scenarios) {
     const result = runScenario(scenario, studentCode, exercise.ExerciseClass);
     tests.push(result);

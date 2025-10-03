@@ -39,6 +39,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Error store state
       hasUnhandledError: false,
       unhandledErrorBase64: "",
+      hasSyntaxError: false,
 
       // Editor handler state
       latestValueSnapshot: undefined as string | undefined,
@@ -239,6 +240,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       // Error store actions
       setHasUnhandledError: (hasError) => set({ hasUnhandledError: hasError }),
       setUnhandledErrorBase64: (errorData) => set({ unhandledErrorBase64: errorData }),
+      setHasSyntaxError: (hasError) => set({ hasSyntaxError: hasError }),
 
       // Editor handler actions
       setLatestValueSnapshot: (value) => set({ latestValueSnapshot: value }),
@@ -382,6 +384,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           // Reset error store state
           hasUnhandledError: false,
           unhandledErrorBase64: "",
+          hasSyntaxError: false,
 
           // Reset editor handler state
           latestValueSnapshot: undefined,
@@ -437,6 +440,7 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
       // Error store state
       hasUnhandledError: state.hasUnhandledError,
       unhandledErrorBase64: state.unhandledErrorBase64,
+      hasSyntaxError: state.hasSyntaxError,
 
       // Editor handler state
       latestValueSnapshot: state.latestValueSnapshot,

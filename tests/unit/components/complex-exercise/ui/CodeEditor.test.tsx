@@ -59,6 +59,7 @@ describe("CodeEditor", () => {
       shouldAutoRunCode: false,
       hasUnhandledError: false,
       unhandledErrorBase64: "",
+      hasSyntaxError: false,
       latestValueSnapshot: undefined,
 
       // Test results state

@@ -8,13 +8,11 @@ import { InspectedTestResultView } from "@/components/complex-exercise/ui/test-r
 import { createTestExercise } from "@/tests/mocks/createTestExercise";
 import { useEffect, useRef } from "react";
 
-const initialCode = `function hello(name) {
-  return \`Hello, \${name}!\`;
-}
-
-function add(a, b) {
-  return a + b;
-}`;
+const initialCode = `move()
+move()
+move()
+move()
+move()`;
 
 export default function TestButtonsTestPage() {
   // Create orchestrator once using useRef (prevents re-creation on re-renders)
