@@ -49,15 +49,16 @@ describe("LessonLoadingPage", () => {
     const loadingText = screen.getByText("Loading").parentElement;
     expect(loadingText).toBeInTheDocument();
 
-    // Check for three animated dots - look for spans with animation classes
-    const dots = loadingText?.querySelectorAll("span[class*='animate-']");
-    expect(dots?.length).toBe(3);
+    // Check for animated ellipsis - simplified to single span now
+    const animatedSpan = loadingText?.querySelector("span.animate-pulse");
+    expect(animatedSpan).toBeInTheDocument();
+    expect(animatedSpan?.textContent).toBe("...");
   });
 
-  it("renders progress bar with shimmer animation", () => {
+  it("renders progress bar with pulse animation", () => {
     render(<LessonLoadingPage />);
 
-    const progressBar = document.querySelector("[class*='animate-'][class*='shimmer']");
+    const progressBar = document.querySelector(".animate-pulse.bg-gradient-to-r");
     expect(progressBar).toBeInTheDocument();
     expect(progressBar).toHaveClass("bg-gradient-to-r", "from-blue-500", "to-purple-500");
   });
@@ -67,14 +68,15 @@ describe("LessonLoadingPage", () => {
 
     const spinningRing = document.querySelector(".animate-spin");
     expect(spinningRing).toBeInTheDocument();
-    expect(spinningRing).toHaveClass("border-t-blue-500", "border-r-purple-500");
+    expect(spinningRing).toHaveClass("border-t-blue-500", "border-blue-200");
   });
 
-  it("renders background floating circles", () => {
+  it("renders background circles for depth", () => {
     render(<LessonLoadingPage />);
 
-    const floatingCircles = document.querySelectorAll("[class*='animate-'][class*='float']");
-    expect(floatingCircles.length).toBeGreaterThanOrEqual(2);
+    // Background circles no longer have float animation, just blur effect
+    const backgroundCircles = document.querySelectorAll(".blur-3xl");
+    expect(backgroundCircles.length).toBeGreaterThanOrEqual(2);
   });
 
   it("applies fadeIn animation to main container", () => {
@@ -84,10 +86,11 @@ describe("LessonLoadingPage", () => {
     expect(mainContainer).toBeInTheDocument();
   });
 
-  it("applies iconPulse animation to icon container", () => {
+  it("applies pulse animation to icon container", () => {
     render(<LessonLoadingPage />);
 
-    const iconContainer = document.querySelector("[class*='animate-'][class*='iconPulse']");
+    // Icon container now uses animate-pulse instead of iconPulse
+    const iconContainer = document.querySelector(".relative.animate-pulse");
     expect(iconContainer).toBeInTheDocument();
   });
 
