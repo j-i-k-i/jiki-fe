@@ -25,8 +25,16 @@ export default function ComplexExercise({ exerciseSlug }: ComplexExerciseProps) 
   useEffect(() => {
     const loadExercise = async () => {
       try {
-        // Load the exercise module
+        // Check if exercise exists
         const loader = exercises[exerciseSlug];
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!loader) {
+          throw new Error(
+            `Exercise "${exerciseSlug}" not found in curriculum. Available exercises: ${Object.keys(exercises).join(", ")}`
+          );
+        }
+
+        // Load the exercise module
         const exercise = (await loader()).default;
 
         // Create orchestrator only once and store in ref

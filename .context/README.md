@@ -30,7 +30,10 @@ General documentation that applies across the entire codebase:
 - **[toasts.md](./toasts.md)** - Toast notifications system using react-hot-toast
 - **[modals.md](./modals.md)** - Global modal system with Zustand state management
 - **[sound.md](./sound.md)** - Sound system for audio feedback
+- **[lessons.md](./lessons.md)** - Lesson system for videos and exercises
 - **[exercises.md](./exercises.md)** - Exercise system structure and creation guide
+- **[api.md](./api.md)** - Backend API client and usage patterns
+- **[auth.md](./auth.md)** - JWT authentication system and auth flow
 
 ### Complex Exercise Context (`complex-exercise/`)
 
@@ -111,6 +114,8 @@ All context files should include:
 - **The product?** → [about-jiki.md](./about-jiki.md)
 - **Code style?** → [coding-style.md](./coding-style.md)
 - **Architecture?** → [architecture.md](./architecture.md)
+- **API integration?** → [api.md](./api.md)
+- **Authentication?** → [auth.md](./auth.md)
 - **Complex exercises?** → [complex-exercise/README.md](./complex-exercise/README.md)
 - **Testing approach?** → [testing.md](./testing.md)
 - **Deployment?** → [deployment.md](./deployment.md)

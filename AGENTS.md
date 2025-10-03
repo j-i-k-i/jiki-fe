@@ -66,10 +66,13 @@ This is the frontend for Jiki, a learn-to-code platform.
 
 ### Core Technology Stack
 
-- **Framework**: Next.js 15 with App Router, TypeScript, React 19
+- **Framework**: Next.js 15 with App Router, TypeScript
+- **UI Library**: React 19 with React Compiler (automatic optimization)
 - **Styling**: Tailwind CSS v4
 - **Deployment**: Cloudflare Workers (Edge Runtime)
 - **Package Manager**: pnpm
+
+**Note**: React Compiler is enabled, so manual memoization (`useMemo`, `useCallback`, `memo()`) is generally not needed.
 
 ### Organizational Patterns
 

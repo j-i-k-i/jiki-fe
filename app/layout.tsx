@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ToasterProvider } from "@/components/toaster-config";
 import { GlobalModalProvider } from "@/lib/modal";
 import type { Metadata } from "next";
@@ -28,9 +29,11 @@ export default function RootLayout({
     <html lang="en">
       {/*<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>*/}
       <body className={`antialiased`}>
-        {children}
-        <GlobalModalProvider />
-        <ToasterProvider />
+        <AuthProvider>
+          {children}
+          <GlobalModalProvider />
+          <ToasterProvider />
+        </AuthProvider>
       </body>
     </html>
   );
