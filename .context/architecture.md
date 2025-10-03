@@ -44,6 +44,8 @@ The Jiki frontend is a Next.js application designed for global edge deployment o
 - Edge caching strategies
 - Bundle optimization for exercises and content
 - Mobile-first responsive design
+- React Compiler for automatic component optimization
+- React 19 features for improved performance and DX
 
 ## Project Structure
 

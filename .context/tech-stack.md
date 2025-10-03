@@ -4,10 +4,24 @@
 
 - **Framework**: Next.js 15.5.2 with App Router
 - **Language**: TypeScript 5
-- **UI Library**: React 19.1.0
+- **UI Library**: React 19.1.0 with React Compiler
 - **Styling**: Tailwind CSS v4
 - **Package Manager**: pnpm
 - **Deployment Target**: Cloudflare Workers
+
+### React 19 & React Compiler
+
+This project uses React 19 with the React Compiler (formerly React Forget) enabled. The React Compiler automatically optimizes components by:
+
+- Auto-memoizing components and hooks without manual `useMemo`, `useCallback`, or `memo()`
+- Preventing unnecessary re-renders through compile-time optimizations
+- Reducing bundle size by eliminating manual memoization code
+
+The compiler is configured in `next.config.ts` with `experimental.reactCompiler: true` and applies to all components in the codebase. This means:
+
+- You generally don't need to manually memoize values or callbacks
+- Components are automatically optimized for performance
+- The compiler handles dependency tracking and optimization
 
 ## Key Dependencies
 

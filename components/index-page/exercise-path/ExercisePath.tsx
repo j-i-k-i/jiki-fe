@@ -3,7 +3,7 @@
 import { startLesson } from "@/lib/api/lessons";
 import type { LevelWithProgress } from "@/types/levels";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { type Exercise, generateMockExercises } from "../lib/mockData";
 import { ExerciseNode } from "./ExerciseNode";
 import { LessonTooltip } from "./LessonTooltip";
@@ -93,6 +93,7 @@ function mapLevelsToSections(levels: LevelWithProgress[]): LevelSection[] {
 
 export default function ExercisePath({ levels }: ExercisePathProps) {
   const router = useRouter();
+  const [clickedLessonId, setClickedLessonId] = useState<string | null>(null);
 
   const sections = useMemo(() => {
     if (!levels || levels.length === 0) {
@@ -162,27 +163,37 @@ export default function ExercisePath({ levels }: ExercisePathProps) {
                   }}
                 >
                   <LessonTooltip exercise={lesson} placement="bottom">
-                    <ExerciseNode
-                      exercise={lesson}
-                      onClick={async () => {
-                        // Extract slug from the route (format: /lesson/slug)
-                        const lessonSlug = lesson.route.split("/").pop();
-                        if (lessonSlug && !lesson.locked) {
-                          try {
-                            // Start tracking the lesson
-                            await startLesson(lessonSlug);
-                          } catch (error) {
-                            console.error("Failed to start lesson tracking:", error);
-                            // Don't show error toast - just log it and continue
+                    <div
+                      className={`transition-all duration-200 ${
+                        clickedLessonId === lesson.id ? "scale-95 opacity-75" : ""
+                      }`}
+                    >
+                      <ExerciseNode
+                        exercise={lesson}
+                        onClick={() => {
+                          // Don't block UI - navigate immediately if lesson is unlocked
+                          if (lesson.locked) {
+                            return;
                           }
-                          // Navigate to the lesson regardless of tracking success
+
+                          // Provide immediate visual feedback
+                          setClickedLessonId(lesson.id);
+
+                          // Navigate immediately for better UX
                           router.push(lesson.route);
-                        } else if (!lesson.locked) {
-                          // If we can't extract slug but lesson is unlocked, still navigate
-                          router.push(lesson.route);
-                        }
-                      }}
-                    />
+
+                          // Fire-and-forget pattern: Start tracking in background
+                          const lessonSlug = lesson.route.split("/").pop();
+                          if (lessonSlug) {
+                            // Don't await - let it complete in background
+                            startLesson(lessonSlug).catch((error) => {
+                              console.error("Failed to start lesson tracking:", error);
+                              // Tracking failure doesn't affect user experience
+                            });
+                          }
+                        }}
+                      />
+                    </div>
                   </LessonTooltip>
                 </div>
               ))}
