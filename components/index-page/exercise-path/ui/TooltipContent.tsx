@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { MouseEvent } from "react";
 import type { Exercise } from "../../lib/mockData";
 import { formatDifficulty, getDifficultyBadgeClasses, getDifficultyColor, getTypeLabel } from "../lib/exerciseUtils";
 import { CodingIcon, CompletedIcon, QuizIcon, TimeIcon, VideoIcon, XpIcon } from "./ExerciseIcons";
@@ -6,6 +7,7 @@ import { CodingIcon, CompletedIcon, QuizIcon, TimeIcon, VideoIcon, XpIcon } from
 interface TooltipContentProps {
   exercise: Exercise;
   onClose: () => void;
+  onNavigate?: (route: string) => void;
   headingId?: string;
   descriptionId?: string;
 }
@@ -23,7 +25,14 @@ function ExerciseIcon({ type }: { type: Exercise["type"] }) {
   }
 }
 
-export function TooltipContent({ exercise, onClose, headingId, descriptionId }: TooltipContentProps) {
+export function TooltipContent({ exercise, onClose, onNavigate, headingId, descriptionId }: TooltipContentProps) {
+  const handleLessonStart = (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    onClose(); // Close tooltip immediately
+    if (onNavigate) {
+      onNavigate(exercise.route); // Let parent handle navigation with loading state
+    }
+  };
   return (
     <div className="flex items-start gap-3">
       <div className={`mt-1 ${getDifficultyColor(exercise.difficulty)}`}>
@@ -68,7 +77,7 @@ export function TooltipContent({ exercise, onClose, headingId, descriptionId }: 
 
         <Link
           href={exercise.route}
-          onClick={onClose}
+          onClick={handleLessonStart}
           className={`mt-4 w-full px-4 py-2 rounded-lg font-medium text-sm transition-colors inline-block text-center ${
             exercise.completed
               ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
