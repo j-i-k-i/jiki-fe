@@ -54,7 +54,10 @@ export function InspectedTestResultView() {
         result={result}
       />
 
-      <div className={assembleClassNames("spotlight", "flex-grow")} ref={viewContainerRef} id="view-container" />
+      <div
+        className="spotlight flex-grow relative p-2.5 bg-white [container-type:size] min-w-[300px] aspect-square flex-shrink"
+        ref={viewContainerRef}
+      />
     </div>
   );
 }
