@@ -7,12 +7,15 @@ export const testExerciseDefinition: ExerciseDefinition = {
   title: "Test Exercise",
   instructions: "This is a test exercise for unit tests",
   estimatedMinutes: 5,
+  levelId: "level-1",
   initialCode: "// Test code",
   ExerciseClass: TestExercise,
   tasks,
   scenarios,
   hints: ["Test hint 1", "Test hint 2"],
-  solution: "move()\nmove()\nmove()\nmove()\nmove()"
+  solutions: {
+    jikiscript: "move()\nmove()\nmove()\nmove()\nmove()"
+  }
 };
 
 export default testExerciseDefinition;

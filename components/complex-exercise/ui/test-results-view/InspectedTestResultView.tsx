@@ -28,6 +28,14 @@ export function InspectedTestResultView() {
     }
 
     viewContainerRef.current.innerHTML = "";
+    result.view.classList.add(
+      "container-size",
+      "aspect-square",
+      "max-h-[100cqh]",
+      "max-w-[100cqw]",
+      "bg-white",
+      "relative"
+    );
     viewContainerRef.current.appendChild(result.view);
     result.view.style.display = "block";
   }, [result]);
@@ -46,7 +54,10 @@ export function InspectedTestResultView() {
         result={result}
       />
 
-      <div className={assembleClassNames("spotlight", "flex-grow")} ref={viewContainerRef} id="view-container" />
+      <div
+        className="spotlight flex-grow relative p-2.5 bg-white [container-type:size] min-w-[300px] aspect-square flex-shrink"
+        ref={viewContainerRef}
+      />
     </div>
   );
 }

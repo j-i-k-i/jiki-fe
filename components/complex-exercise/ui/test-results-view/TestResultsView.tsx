@@ -21,12 +21,12 @@ export default function TestResultsView() {
   const allTestsPassed = testSuiteResult.tests.every((test) => test.status === "pass");
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg">
+    <div className="bg-white border border-gray-200 rounded-lg flex flex-col overflow-hidden">
       <div className="border-b border-gray-200 px-4 py-2">
         <h3 className="text-lg font-semibold text-gray-700">Test Results</h3>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 flex flex-col overflow-hidden">
         {/* Main test results */}
         {hasTests && (
           <div>
@@ -48,11 +48,7 @@ export default function TestResultsView() {
         )}
 
         {/* Test result details */}
-        {currentTest && (
-          <div className="border-t border-gray-200 pt-4">
-            <InspectedTestResultView />
-          </div>
-        )}
+        {currentTest && <InspectedTestResultView />}
       </div>
     </div>
   );

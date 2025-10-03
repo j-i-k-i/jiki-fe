@@ -82,10 +82,8 @@ function ComplexExerciseContent({ orchestrator }: { orchestrator: Orchestrator }
             <div className="bg-white border-b border-gray-200 px-4 py-2">
               <h2 className="text-lg font-semibold text-gray-700">Code Editor</h2>
             </div>
-            <div className="flex-1 p-4">
-              <CodeEditor />
-            </div>
-            <div className="border-t border-gray-200 p-4">
+            <CodeEditor />
+            <div className="border-t border-gray-200 p-4 max-h-[50%] flex flex-col overflow-hidden">
               <TestResultsView />
             </div>
 
