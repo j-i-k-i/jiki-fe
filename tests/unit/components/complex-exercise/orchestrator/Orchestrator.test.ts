@@ -295,4 +295,272 @@ describe("Orchestrator", () => {
       expect(state.defaultCode).toBe(localCode);
     });
   });
+
+  describe("play() method", () => {
+    it("should play timeline when userHasPaused is false", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      orchestrator.play();
+
+      expect(mockTimeline.play).toHaveBeenCalled();
+    });
+
+    it("should NOT play when userHasPaused is true", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Set userHasPaused to true
+      orchestrator.setUserHasPaused(true);
+
+      orchestrator.play();
+
+      expect(mockTimeline.play).not.toHaveBeenCalled();
+    });
+
+    it("should set isPlaying to true when playing", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      orchestrator.play();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.isPlaying).toBe(true);
+    });
+
+    it("should hide information widget when playing", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Set widget visible first
+      orchestrator.setShouldShowInformationWidget(true);
+
+      orchestrator.play();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.shouldShowInformationWidget).toBe(false);
+    });
+
+    it("should not throw when currentTest is null", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+
+      expect(() => orchestrator.play()).not.toThrow();
+    });
+  });
+
+  describe("pause() method", () => {
+    it("should pause the timeline", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      orchestrator.pause();
+
+      expect(mockTimeline.pause).toHaveBeenCalled();
+    });
+
+    it("should set userHasPaused to true", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      orchestrator.pause();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.userHasPaused).toBe(true);
+    });
+
+    it("should set isPlaying to false", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Start playing first
+      orchestrator.getStore().getState().setIsPlaying(true);
+
+      orchestrator.pause();
+
+      const state = orchestrator.getStore().getState();
+      expect(state.isPlaying).toBe(false);
+    });
+
+    it("should not throw when currentTest is null", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+
+      expect(() => orchestrator.pause()).not.toThrow();
+    });
+  });
+
+  describe("runCode() method", () => {
+    beforeEach(() => {
+      // Mock the test runner module
+      jest.mock("@/components/complex-exercise/lib/test-runner/runTests", () => ({
+        runTests: jest.fn()
+      }));
+    });
+
+    it("should reset userHasPaused and call play() after successful test run", async () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "const x = 1;" });
+      const orchestrator = new Orchestrator(exercise);
+
+      // Set userHasPaused to true first
+      orchestrator.setUserHasPaused(true);
+
+      // Mock testSuiteManager.runCode to simulate successful execution
+      const testSuiteManager = (orchestrator as any).testSuiteManager;
+      const mockRunCode = jest.spyOn(testSuiteManager, "runCode").mockResolvedValue(undefined);
+
+      // Mock the play method
+      const mockPlay = jest.spyOn(orchestrator, "play");
+
+      await orchestrator.runCode();
+
+      // Verify testSuiteManager.runCode was called
+      expect(mockRunCode).toHaveBeenCalledWith("const x = 1;", exercise);
+
+      // Verify userHasPaused was reset and play was called
+      const state = orchestrator.getStore().getState();
+      expect(state.userHasPaused).toBe(false);
+      expect(mockPlay).toHaveBeenCalled();
+    });
+
+    it("should NOT call play() when syntax error occurs", async () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "invalid code" });
+      const orchestrator = new Orchestrator(exercise);
+
+      // Mock testSuiteManager.runCode to simulate successful execution (but with syntax error state)
+      const testSuiteManager = (orchestrator as any).testSuiteManager;
+      const mockRunCode = jest.spyOn(testSuiteManager, "runCode").mockResolvedValue(undefined);
+
+      // Manually set hasSyntaxError to true to simulate error state
+      orchestrator.getStore().getState().setHasSyntaxError(true);
+
+      // Mock the play method
+      const mockPlay = jest.spyOn(orchestrator, "play");
+
+      await orchestrator.runCode();
+
+      // Verify testSuiteManager.runCode was called
+      expect(mockRunCode).toHaveBeenCalled();
+
+      // Verify play was NOT called due to syntax error
+      expect(mockPlay).not.toHaveBeenCalled();
+    });
+
+    it("should use editor value if available", async () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "initial" });
+      const orchestrator = new Orchestrator(exercise);
+
+      // Mock getCurrentEditorValue to return different code
+      jest.spyOn(orchestrator as any, "getCurrentEditorValue").mockReturnValue("editor code");
+
+      // Mock testSuiteManager.runCode
+      const testSuiteManager = (orchestrator as any).testSuiteManager;
+      const mockRunCode = jest.spyOn(testSuiteManager, "runCode").mockResolvedValue(undefined);
+
+      // Mock play to avoid side effects
+      jest.spyOn(orchestrator, "play").mockImplementation(() => {});
+
+      await orchestrator.runCode();
+
+      // Should use editor code, not store code
+      expect(mockRunCode).toHaveBeenCalledWith("editor code", exercise);
+    });
+
+    it("should use store code if editor value is not available", async () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "store code" });
+      const orchestrator = new Orchestrator(exercise);
+
+      // Mock getCurrentEditorValue to return undefined
+      jest.spyOn(orchestrator as any, "getCurrentEditorValue").mockReturnValue(undefined);
+
+      // Mock testSuiteManager.runCode
+      const testSuiteManager = (orchestrator as any).testSuiteManager;
+      const mockRunCode = jest.spyOn(testSuiteManager, "runCode").mockResolvedValue(undefined);
+
+      // Mock play to avoid side effects
+      jest.spyOn(orchestrator, "play").mockImplementation(() => {});
+
+      await orchestrator.runCode();
+
+      // Should use store code
+      expect(mockRunCode).toHaveBeenCalledWith("store code", exercise);
+    });
+  });
 });
