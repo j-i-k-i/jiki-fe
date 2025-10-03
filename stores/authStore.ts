@@ -47,7 +47,8 @@ export const useAuthStore = create<AuthStore>()(
             user,
             isAuthenticated: true,
             isLoading: false,
-            error: null
+            error: null,
+            hasCheckedAuth: true
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Login failed";
@@ -70,7 +71,8 @@ export const useAuthStore = create<AuthStore>()(
             user,
             isAuthenticated: true,
             isLoading: false,
-            error: null
+            error: null,
+            hasCheckedAuth: true
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Signup failed";
@@ -212,10 +214,10 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: "auth-storage", // Storage key
       partialize: (state) => ({
-        // Only persist user data and auth check status, not loading/error states
+        // Only persist user data and authentication state
+        // hasCheckedAuth is NOT persisted - it should reset on each app load
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        hasCheckedAuth: state.hasCheckedAuth
+        isAuthenticated: state.isAuthenticated
       })
     }
   )
