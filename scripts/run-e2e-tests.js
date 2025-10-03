@@ -65,6 +65,34 @@ async function runE2ETests() {
     });
     console.log("Server is ready!");
 
+    // Warm up routes to trigger Next.js compilation
+    console.log("Warming up routes...");
+    const routesToWarm = [
+      "/",
+      "/auth/login",
+      "/auth/signup",
+      "/test/quiz",
+      "/test/test-buttons",
+      "/test/complex-exercise/orchestrator-codemirror",
+      "/test/complex-exercise/scrubber-tooltip",
+      "/test/complex-exercise/scrubber-input",
+      "/test/complex-exercise/breakpoint-gutter",
+      "/test/complex-exercise/breakpoint-stepper-buttons",
+      "/test/complex-exercise/frame-stepper-buttons",
+      "/test/complex-exercise/code-folding",
+      "/dev/complex-exercise",
+      "/dev/test-global-modals"
+    ];
+
+    for (const route of routesToWarm) {
+      try {
+        await fetch(`${SERVER_URL}${route}`);
+      } catch (err) {
+        // Ignore errors during warmup
+      }
+    }
+    console.log("Routes warmed up!");
+
     // Run the E2E tests
     console.log("Running E2E tests...");
     const testProcess = spawn("pnpm", ["jest", "--config", "jest.e2e.config.mjs", ...process.argv.slice(2)], {
