@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/stores/authStore";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,23 +13,20 @@ interface AuthProviderProps {
  * avoiding duplicate checkAuth() calls and race conditions.
  */
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { checkAuth, isLoading } = useAuthStore();
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const { checkAuth, hasCheckedAuth, isLoading } = useAuthStore();
+  const initRef = useRef(false);
 
   useEffect(() => {
-    async function initialize() {
-      // Only check auth if we haven't initialized yet
-      if (!hasInitialized) {
-        await checkAuth();
-        setHasInitialized(true);
-      }
+    // Use ref to ensure we only initialize once, avoiding race conditions
+    if (!initRef.current && !hasCheckedAuth) {
+      initRef.current = true;
+      void checkAuth();
     }
-    void initialize();
-  }, [checkAuth, hasInitialized]);
+  }, [checkAuth, hasCheckedAuth]);
 
   // Wait for initial auth check to complete before rendering children
-  // This prevents race conditions where child components might try to check auth
-  if (!hasInitialized && isLoading) {
+  // Use the store's hasCheckedAuth as the single source of truth
+  if (!hasCheckedAuth && isLoading) {
     return null; // Or a loading spinner if preferred
   }
 
