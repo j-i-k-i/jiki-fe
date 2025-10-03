@@ -19,48 +19,66 @@ export default function LessonPage({ params }: PageProps) {
   const [lesson, setLesson] = useState<LessonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
 
-  // Check authentication
+  // Combined auth flow with loading gate pattern to prevent race conditions
   useEffect(() => {
-    async function initAuth() {
-      await checkAuth();
-      setIsInitializing(false);
-    }
-    void initAuth();
-  }, [checkAuth]);
+    let cancelled = false;
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (!isInitializing && !authLoading && !isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, authLoading, isInitializing, router]);
-
-  // Load lesson details
-  useEffect(() => {
-    async function loadLesson() {
-      if (!isAuthenticated || isInitializing || authLoading) {
-        return;
-      }
-
+    async function initializeAndLoadLesson() {
       try {
+        // Step 1: Check authentication
+        await checkAuth();
+
+        // Check if component unmounted during auth check
+        if (cancelled) {
+          return;
+        }
+
+        // Step 2: Handle unauthenticated state
+        if (!isAuthenticated) {
+          router.push("/auth/login");
+          return; // Exit early - no lesson loading
+        }
+
+        // Step 3: Load lesson only if authenticated
         setLoading(true);
         const resolvedParams = await params;
+
+        // Check again if component unmounted
+        // ESLint doesn't understand the cleanup pattern - cancelled is set to true in the cleanup function
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (cancelled) {
+          return;
+        }
+
         const lessonData = await fetchLesson(resolvedParams.slug);
-        setLesson(lessonData);
+
+        // ESLint doesn't understand the cleanup pattern - cancelled is set to true in the cleanup function
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!cancelled) {
+          setLesson(lessonData);
+        }
       } catch (err) {
-        console.error("Failed to fetch lesson:", err);
-        setError(err instanceof Error ? err.message : "Failed to load lesson");
+        if (!cancelled) {
+          console.error("Failed to fetch lesson:", err);
+          setError(err instanceof Error ? err.message : "Failed to load lesson");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
-    void loadLesson();
-  }, [params, isAuthenticated, isInitializing, authLoading]);
+    void initializeAndLoadLesson();
 
-  if (isInitializing || authLoading || loading) {
+    // Cleanup function to prevent state updates on unmounted components
+    return () => {
+      cancelled = true;
+    };
+  }, [params, checkAuth, isAuthenticated, router]);
+
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
