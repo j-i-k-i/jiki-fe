@@ -44,10 +44,6 @@ jobs:
           # Install from fe directory which will handle the workspace
           pnpm install --frozen-lockfile
 
-      - name: Build curriculum package
-        working-directory: curriculum
-        run: pnpm run build
-
       - name: Build application
         working-directory: fe
         run: pnpm run build
