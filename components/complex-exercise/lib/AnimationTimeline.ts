@@ -20,6 +20,7 @@ export type Animation =
 export class AnimationTimeline {
   private animationTimeline: Timeline;
   private updateCallbacks: ((anim: Timeline) => void)[] = [];
+  private completeCallbacks: ((anim: Timeline) => void)[] = [];
   public hasPlayedOrScrubbed = false;
 
   constructor(initialOptions: DefaultsParams) {
@@ -31,6 +32,9 @@ export class AnimationTimeline {
       autoplay: false,
       onUpdate: (anim: Timeline) => {
         this.updateCallbacks.forEach((cb) => cb(anim));
+      },
+      onComplete: (anim: Timeline) => {
+        this.completeCallbacks.forEach((cb) => cb(anim));
       }
     });
   }
@@ -47,6 +51,14 @@ export class AnimationTimeline {
 
   public clearUpdateCallbacks() {
     this.updateCallbacks = [];
+  }
+
+  public onComplete(callback: (anim: Timeline) => void) {
+    this.completeCallbacks.push(callback);
+  }
+
+  public clearCompleteCallbacks() {
+    this.completeCallbacks = [];
   }
 
   public populateTimeline(animations: CurriculumAnimation[], frames: Frame[] = []): this {

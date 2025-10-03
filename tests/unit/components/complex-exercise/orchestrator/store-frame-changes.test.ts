@@ -29,6 +29,9 @@ describe("Store Frame Changes", () => {
         view: document.createElement("div"),
         animationTimeline: {
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 100000
         }
       } as any);
@@ -65,6 +68,9 @@ describe("Store Frame Changes", () => {
         view: document.createElement("div"),
         animationTimeline: {
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 100000
         }
       } as any);
@@ -97,6 +103,9 @@ describe("Store Frame Changes", () => {
         view: document.createElement("div"),
         animationTimeline: {
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 200000
         }
       } as any);

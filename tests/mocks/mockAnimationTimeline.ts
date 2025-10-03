@@ -33,6 +33,10 @@ export function mockAnimationTimeline(options: MockAnimationTimelineOptions = {}
   const onUpdate = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const clearUpdateCallbacks = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const onComplete = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const clearCompleteCallbacks = typeof jest !== "undefined" && jest.fn ? jest.fn() : () => {};
 
   return {
     pause,
@@ -44,6 +48,8 @@ export function mockAnimationTimeline(options: MockAnimationTimelineOptions = {}
     seek,
     onUpdate,
     clearUpdateCallbacks,
+    onComplete,
+    clearCompleteCallbacks,
     showPlayButton: true
   } as unknown as AnimationTimeline;
 }

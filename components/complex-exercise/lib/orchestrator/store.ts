@@ -133,6 +133,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Clean up old test's animation timeline callbacks
         if (oldTest?.animationTimeline) {
           oldTest.animationTimeline.clearUpdateCallbacks();
+          oldTest.animationTimeline.clearCompleteCallbacks();
         }
 
         if (!test) {
@@ -160,6 +161,11 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         test.animationTimeline.onUpdate((anim) => {
           // Convert from milliseconds to microseconds
           get().setCurrentTestTime(anim.currentTime * TIME_SCALE_FACTOR);
+        });
+
+        // Set up completion callback to update play/pause state
+        test.animationTimeline.onComplete(() => {
+          get().setIsPlaying(false);
         });
 
         // Trigger frame calculations with the restored/initial time
