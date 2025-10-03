@@ -13,6 +13,11 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/index-page/lib/mockData");
 
+// Mock the API startLesson function
+jest.mock("@/lib/api/lessons", () => ({
+  startLesson: jest.fn().mockResolvedValue(undefined)
+}));
+
 jest.mock("@/components/index-page/exercise-path/LessonTooltip", () => ({
   LessonTooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
@@ -176,16 +181,16 @@ describe("ExercisePath", () => {
 
     const svg = document.querySelector("svg");
     expect(svg).toBeInTheDocument();
-    // pathHeight = 4 mock exercises * 120 + 200 = 680
-    expect(svg).toHaveAttribute("viewBox", "0 0 200 680");
+    // pathHeight = 1 section header (80) + 4 mock exercises * 120 + 200 = 760
+    expect(svg).toHaveAttribute("viewBox", "0 0 200 760");
     expect(svg).toHaveClass("absolute", "inset-0", "w-full", "h-full", "pointer-events-none");
   });
 
   it("sets correct height for the exercise container", () => {
     render(<ExercisePath />);
 
-    // pathHeight = 4 mock exercises * 120 + 200 = 680
-    const container = document.querySelector('[style*="height: 680px"]');
+    // pathHeight = 1 section header (80) + 4 mock exercises * 120 + 200 = 760
+    const container = document.querySelector('[style*="height: 760px"]');
     expect(container).toBeInTheDocument();
     expect(container).toHaveClass("relative");
   });
@@ -196,11 +201,14 @@ describe("ExercisePath", () => {
     expect(mockData.generateMockExercises).toHaveBeenCalledTimes(1);
   });
 
-  it("navigates to exercise route when clicked", () => {
+  it("navigates to exercise route when clicked", async () => {
     render(<ExercisePath />);
 
     const firstButton = screen.getAllByRole("button")[0];
     firstButton.click();
+
+    // Wait for async operations to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith("/lesson/1");
@@ -209,6 +217,9 @@ describe("ExercisePath", () => {
     mockPush.mockClear();
     const secondButton = screen.getAllByRole("button")[1];
     secondButton.click();
+
+    // Wait for async operations to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith("/lesson/2");
