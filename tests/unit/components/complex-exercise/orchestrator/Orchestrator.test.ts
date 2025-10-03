@@ -108,6 +108,94 @@ describe("Orchestrator", () => {
       // Should set isPlaying to false
       expect(orchestrator.getStore().getState().isPlaying).toBe(false);
     });
+
+    it("should register onComplete callback when setting current test", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline
+      });
+
+      // Verify onComplete callback was registered
+      expect(mockTimeline.onComplete).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("should clear complete callbacks when changing tests", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline1 = mockAnimationTimeline();
+      const mockTimeline2 = mockAnimationTimeline();
+
+      // Set first test
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline1
+      });
+
+      // Set second test - should clear callbacks from first timeline
+      orchestrator.setCurrentTest({
+        slug: "test-2",
+        name: "Test 2",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 })],
+        animationTimeline: mockTimeline2
+      });
+
+      expect(mockTimeline1.clearCompleteCallbacks).toHaveBeenCalled();
+      expect(mockTimeline2.onComplete).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("should allow multiple play/complete cycles", () => {
+      const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
+      const orchestrator = new Orchestrator(exercise);
+      const mockTimeline = mockAnimationTimeline();
+
+      orchestrator.setCurrentTest({
+        slug: "test-1",
+        name: "Test 1",
+        status: "pass" as const,
+        expects: [],
+        view: document.createElement("div"),
+        frames: [mockFrame(0, { line: 1 }), mockFrame(100000, { line: 2 })],
+        animationTimeline: mockTimeline
+      });
+
+      const onCompleteCallback = (mockTimeline.onComplete as jest.Mock).mock.calls[0][0];
+
+      // First cycle: play and complete
+      Object.defineProperty(mockTimeline, "completed", { value: false, writable: true });
+      orchestrator.play();
+      expect(orchestrator.getStore().getState().isPlaying).toBe(true);
+
+      Object.defineProperty(mockTimeline, "completed", { value: true, writable: true });
+      onCompleteCallback(mockTimeline);
+      expect(orchestrator.getStore().getState().isPlaying).toBe(false);
+
+      // Second cycle: play should reset and start again
+      orchestrator.setUserHasPaused(false);
+      orchestrator.play();
+      expect(orchestrator.getStore().getState().currentTestTime).toBe(0);
+      expect(orchestrator.getStore().getState().isPlaying).toBe(true);
+
+      // Complete again
+      onCompleteCallback(mockTimeline);
+      expect(orchestrator.getStore().getState().isPlaying).toBe(false);
+    });
   });
 
   describe("frame synchronization", () => {
