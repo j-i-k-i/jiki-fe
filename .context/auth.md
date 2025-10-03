@@ -12,7 +12,9 @@ The authentication system consists of several layers:
 2. **API Client** (`/lib/api/client.ts`) - Automatic token attachment to requests
 3. **Auth Service** (`/lib/auth/service.ts`) - API endpoint integration
 4. **Auth Store** (`/stores/authStore.ts`) - Global state management with Zustand
-5. **Type Definitions** (`/types/auth.ts`) - TypeScript interfaces
+5. **Auth Provider** (`/components/auth/AuthProvider.tsx`) - Centralized auth checking on app load
+6. **Auth Hooks** (`/lib/auth/hooks.ts`) - Reusable hooks for auth logic
+7. **Type Definitions** (`/types/auth.ts`) - TypeScript interfaces
 
 ## Token Management
 
@@ -68,34 +70,45 @@ function LoginComponent() {
 
 ### Protected Routes
 
+The app uses a centralized authentication pattern with `AuthProvider` at the root and specialized hooks for different auth scenarios.
+
+#### For Protected Pages
+
 ```typescript
-import { useAuthStore } from "@/stores/authStore";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRequireAuth } from "@/lib/auth/hooks";
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, isLoading]);
+export default function ProtectedPage() {
+  const { isAuthenticated, isLoading, user, isReady } = useRequireAuth();
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    return null;
+    return null; // Will redirect to login
   }
 
-  return <>{children}</>;
+  return <div>Welcome {user?.name}!</div>;
+}
+```
+
+#### For Auth Pages (Login/Signup)
+
+```typescript
+import { useRedirectIfAuthenticated } from "@/lib/auth/hooks";
+
+export default function LoginPage() {
+  const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return null; // Will redirect to dashboard
+  }
+
+  return <LoginForm />;
 }
 ```
 
@@ -267,50 +280,68 @@ NEXT_PUBLIC_API_VERSION=v1
 - [x] TypeScript types
 - [x] Environment configuration
 
-### Phase 2: UI Components (To Do)
+### Phase 2: UI Components ✅
 
-- [ ] Login form component
-- [ ] Signup form component
+- [x] Login form component
+- [x] Signup form component
 - [ ] Password reset forms
-- [ ] Protected route wrapper
+- [x] Protected route wrapper (via hooks)
 - [ ] User menu component
 
-### Phase 3: Pages (To Do)
+### Phase 3: Pages ✅
 
-- [ ] /auth/login page
-- [ ] /auth/signup page
+- [x] /auth/login page
+- [x] /auth/signup page
 - [ ] /auth/forgot-password page
 - [ ] /auth/reset-password page
 
-### Phase 4: Integration (To Do)
+### Phase 4: Integration ✅
 
-- [ ] Middleware for route protection
+- [x] Centralized auth checking with AuthProvider
+- [x] Protected route hooks
 - [ ] Auto-refresh token logic
-- [ ] Session persistence
+- [x] Session persistence (via Zustand)
 - [ ] Logout across tabs
 
-## Common Patterns
+## Centralized Authentication
 
-### Auto-login on App Start
+### AuthProvider Setup
+
+Authentication is checked once at the app root level using `AuthProvider`:
 
 ```typescript
 // app/layout.tsx
-import { useAuthStore } from "@/stores/authStore";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const checkAuth = useAuthStore(state => state.checkAuth);
-
-  useEffect(() => {
-    checkAuth(); // Check if user has valid token on app load
-  }, []);
-
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+          {/* Other providers */}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
 ```
+
+### Available Hooks
+
+1. **`useRequireAuth(options)`** - For protected pages that require authentication
+   - Automatically redirects to login if not authenticated
+   - Returns: `{ isAuthenticated, isLoading, user, isReady }`
+
+2. **`useRedirectIfAuthenticated(redirectTo)`** - For auth pages (login/signup)
+   - Automatically redirects to dashboard if already authenticated
+   - Returns: `{ isAuthenticated, isLoading }`
+
+3. **`useAuth()`** - For components that need auth status without redirects
+   - Just checks auth status without any side effects
+   - Returns: `{ isAuthenticated, isLoading, user, isReady }`
+
+## Common Patterns
 
 ### Form with Validation
 

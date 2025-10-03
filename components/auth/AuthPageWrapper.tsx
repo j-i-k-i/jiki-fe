@@ -1,34 +1,17 @@
 "use client";
 
-import { useAuthStore } from "@/stores/authStore";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useRedirectIfAuthenticated } from "@/lib/auth/hooks";
+import type { ReactNode } from "react";
 
 interface AuthPageWrapperProps {
   children: ReactNode;
 }
 
 export function AuthPageWrapper({ children }: AuthPageWrapperProps) {
-  const router = useRouter();
-  const { isAuthenticated, checkAuth } = useAuthStore();
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    const performCheck = async () => {
-      await checkAuth();
-      setIsChecking(false);
-    };
-    void performCheck();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!isChecking && isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, isChecking, router]);
+  const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
 
   // Show loading while checking auth
-  if (isChecking) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
