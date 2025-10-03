@@ -4,39 +4,20 @@ import ExercisePath from "@/components/index-page/exercise-path/ExercisePath";
 import InfoPanel from "@/components/index-page/info-panel/InfoPanel";
 import Sidebar from "@/components/index-page/sidebar/Sidebar";
 import { fetchLevelsWithProgress } from "@/lib/api/levels";
-import { useAuthStore } from "@/stores/authStore";
+import { useRequireAuth } from "@/lib/auth/hooks";
 import type { LevelWithProgress } from "@/types/levels";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, isReady } = useRequireAuth();
   const [levels, setLevels] = useState<LevelWithProgress[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
   const [levelsError, setLevelsError] = useState<string | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
 
-  // Effect 1: Check authentication on mount
-  useEffect(() => {
-    async function initAuth() {
-      await checkAuth();
-      setIsInitializing(false);
-    }
-    void initAuth();
-  }, [checkAuth]);
-
-  // Effect 2: Handle redirect based on reactive auth state
-  useEffect(() => {
-    if (!isInitializing && !authLoading && !isAuthenticated) {
-      router.push("/auth/login");
-    }
-  }, [isAuthenticated, authLoading, isInitializing, router]);
-
-  // Effect 3: Load levels when authenticated
+  // Load levels when authenticated
   useEffect(() => {
     async function loadLevels() {
-      if (!isAuthenticated || isInitializing || authLoading) {
+      if (!isReady || !isAuthenticated) {
         return;
       }
 
@@ -53,9 +34,9 @@ export default function DashboardPage() {
     }
 
     void loadLevels();
-  }, [isAuthenticated, isInitializing, authLoading]);
+  }, [isAuthenticated, isReady]);
 
-  if (isInitializing || authLoading || levelsLoading) {
+  if (authLoading || levelsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

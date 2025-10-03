@@ -1,31 +1,13 @@
 "use client";
 
-import { useAuthStore } from "@/stores/authStore";
+import { useRedirectIfAuthenticated } from "@/lib/auth/hooks";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function LandingPage() {
-  const router = useRouter();
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
-  const [isChecking, setIsChecking] = useState(true);
-
-  useEffect(() => {
-    const performCheck = async () => {
-      await checkAuth();
-      setIsChecking(false);
-    };
-    void performCheck();
-  }, [checkAuth]);
-
-  useEffect(() => {
-    if (!isChecking && !isLoading && isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, isLoading, isChecking, router]);
+  const { isLoading, isAuthenticated } = useRedirectIfAuthenticated();
 
   // Show loading while checking auth status
-  if (isChecking || isLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
@@ -36,7 +18,7 @@ export default function LandingPage() {
     );
   }
 
-  // If authenticated, show nothing while redirecting
+  // If authenticated, show loading while redirecting
   if (isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
