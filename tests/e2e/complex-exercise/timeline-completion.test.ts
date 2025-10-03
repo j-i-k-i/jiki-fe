@@ -92,19 +92,41 @@ describe("Timeline Completion and Restart E2E", () => {
     await page.click('[data-testid="run-button"]');
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
-    // Wait for auto-play to start
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    // Wait briefly for auto-play to start
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
-    // Verify playing
+    // Verify playing - if not playing, animation completed too fast (which is fine, just verify the behavior differently)
     let isPlaying = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       return orchestrator.getStore().getState().isPlaying;
     });
 
-    // If not playing yet, skip pause test (animation may have completed already)
+    // If animation already completed, verify we can still test restart behavior
     if (!isPlaying) {
-      // Animation completed too quickly to test pause/resume
-      return;
+      const completed = await page.evaluate(() => {
+        const orchestrator = (window as any).testOrchestrator;
+        const currentTest = orchestrator.getStore().getState().currentTest;
+        return currentTest?.animationTimeline.completed || false;
+      });
+      expect(completed).toBe(true);
+
+      // Click play to restart
+      await page.click('[data-ci="play-button"]');
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Should be playing again from near start
+      isPlaying = await page.evaluate(() => {
+        const orchestrator = (window as any).testOrchestrator;
+        return orchestrator.getStore().getState().isPlaying;
+      });
+      expect(isPlaying).toBe(true);
+
+      const currentTime = await page.evaluate(() => {
+        const orchestrator = (window as any).testOrchestrator;
+        return orchestrator.getStore().getState().currentTestTime;
+      });
+      expect(currentTime).toBeLessThan(250000);
+      return; // Test complete - we verified restart instead of pause/resume
     }
 
     // Pause in the middle
