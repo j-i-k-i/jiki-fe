@@ -43,3 +43,10 @@ export async function fetchLesson(slug: string): Promise<LessonData> {
 export async function markLessonComplete(slug: string): Promise<void> {
   await api.post(`/lessons/${slug}/complete`);
 }
+
+/**
+ * Start tracking a lesson - called when user clicks on a lesson
+ */
+export async function startLesson(slug: string): Promise<void> {
+  await api.post(`/user_lessons/${slug}/start`);
+}

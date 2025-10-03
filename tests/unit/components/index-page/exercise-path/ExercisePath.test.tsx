@@ -13,6 +13,11 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/index-page/lib/mockData");
 
+// Mock the API startLesson function
+jest.mock("@/lib/api/lessons", () => ({
+  startLesson: jest.fn().mockResolvedValue(undefined)
+}));
+
 jest.mock("@/components/index-page/exercise-path/LessonTooltip", () => ({
   LessonTooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
@@ -196,11 +201,14 @@ describe("ExercisePath", () => {
     expect(mockData.generateMockExercises).toHaveBeenCalledTimes(1);
   });
 
-  it("navigates to exercise route when clicked", () => {
+  it("navigates to exercise route when clicked", async () => {
     render(<ExercisePath />);
 
     const firstButton = screen.getAllByRole("button")[0];
     firstButton.click();
+
+    // Wait for async operations to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith("/lesson/1");
@@ -209,6 +217,9 @@ describe("ExercisePath", () => {
     mockPush.mockClear();
     const secondButton = screen.getAllByRole("button")[1];
     secondButton.click();
+
+    // Wait for async operations to complete
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith("/lesson/2");

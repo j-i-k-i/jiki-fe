@@ -1,5 +1,6 @@
 "use client";
 
+import { startLesson } from "@/lib/api/lessons";
 import type { LevelWithProgress } from "@/types/levels";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -161,7 +162,27 @@ export default function ExercisePath({ levels }: ExercisePathProps) {
                   }}
                 >
                   <LessonTooltip exercise={lesson} placement="bottom">
-                    <ExerciseNode exercise={lesson} onClick={() => router.push(lesson.route)} />
+                    <ExerciseNode
+                      exercise={lesson}
+                      onClick={async () => {
+                        // Extract slug from the route (format: /lesson/slug)
+                        const lessonSlug = lesson.route.split("/").pop();
+                        if (lessonSlug && !lesson.locked) {
+                          try {
+                            // Start tracking the lesson
+                            await startLesson(lessonSlug);
+                          } catch (error) {
+                            console.error("Failed to start lesson tracking:", error);
+                            // Don't show error toast - just log it and continue
+                          }
+                          // Navigate to the lesson regardless of tracking success
+                          router.push(lesson.route);
+                        } else if (!lesson.locked) {
+                          // If we can't extract slug but lesson is unlocked, still navigate
+                          router.push(lesson.route);
+                        }
+                      }}
+                    />
                   </LessonTooltip>
                 </div>
               ))}
