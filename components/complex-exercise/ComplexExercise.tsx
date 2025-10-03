@@ -83,7 +83,7 @@ function ComplexExerciseContent({ orchestrator }: { orchestrator: Orchestrator }
               <h2 className="text-lg font-semibold text-gray-700">Code Editor</h2>
             </div>
             <CodeEditor />
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-gray-200 p-4 max-h-[50%] flex flex-col overflow-hidden">
               <TestResultsView />
             </div>
 
