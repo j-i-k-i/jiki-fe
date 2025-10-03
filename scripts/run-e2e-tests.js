@@ -76,7 +76,7 @@ async function runE2ETests() {
       }
     });
 
-    await new Promise((resolve) => {
+    return await new Promise((resolve) => {
       testProcess.on("close", (code) => {
         resolve(code);
       });
@@ -101,8 +101,6 @@ async function runE2ETests() {
     // Also ensure port is free
     killPort(PORT);
   }
-
-  process.exit(0);
 }
 
 // Handle interrupts gracefully
@@ -118,8 +116,12 @@ process.on("SIGTERM", () => {
   process.exit(143);
 });
 
-runE2ETests().catch((err) => {
-  console.error("Failed to run E2E tests:", err);
-  killPort(PORT);
-  process.exit(1);
-});
+runE2ETests()
+  .then((exitCode) => {
+    process.exit(exitCode || 0);
+  })
+  .catch((err) => {
+    console.error("Failed to run E2E tests:", err);
+    killPort(PORT);
+    process.exit(1);
+  });
