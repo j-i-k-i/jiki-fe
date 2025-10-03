@@ -29,16 +29,14 @@ export class TestSuiteManager {
     state.setHasSyntaxError(true);
     state.setTestSuiteResult(null);
 
-    // Only set widget data if location exists
-    if (error.location) {
-      state.setInformationWidgetData({
-        html: error.message,
-        line: error.location.line,
-        status: "ERROR"
-      });
-      state.setShouldShowInformationWidget(true);
-      state.setHighlightedLine(error.location.line);
-    }
+    // Location is always present in SyntaxError
+    state.setInformationWidgetData({
+      html: error.message,
+      line: error.location.line,
+      status: "ERROR"
+    });
+    state.setShouldShowInformationWidget(true);
+    state.setHighlightedLine(error.location.line);
   }
 
   /**
