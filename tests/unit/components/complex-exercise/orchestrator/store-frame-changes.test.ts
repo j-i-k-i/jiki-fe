@@ -21,7 +21,7 @@ describe("Store Frame Changes", () => {
 
       // Need to set a current test first for setCurrentFrame to work
       // Set shouldAutoPlay to false to prevent auto-play in tests
-      state.setShouldAutoPlay(false);
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [testFrame],
         slug: "test-1",
@@ -63,7 +63,7 @@ describe("Store Frame Changes", () => {
 
       // Need to set a current test first
       // Set shouldAutoPlay to false to prevent auto-play in tests
-      state.setShouldAutoPlay(false);
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [testFrame],
         slug: "test-1",
@@ -101,7 +101,7 @@ describe("Store Frame Changes", () => {
 
       // Set up test with multiple frames
       // Set shouldAutoPlay to false to prevent auto-play in tests
-      state.setShouldAutoPlay(false);
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [frame1, frame2, frame3],
         slug: "test-1",

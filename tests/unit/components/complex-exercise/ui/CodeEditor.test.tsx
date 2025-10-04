@@ -1,10 +1,9 @@
-import React from "react";
-import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import CodeEditor from "@/components/complex-exercise/ui/CodeEditor";
 import type { Orchestrator } from "@/components/complex-exercise/lib/Orchestrator";
 import { useOrchestratorStore } from "@/components/complex-exercise/lib/Orchestrator";
+import CodeEditor from "@/components/complex-exercise/ui/CodeEditor";
 import OrchestratorTestProvider from "@/tests/test-utils/OrchestratorTestProvider";
+import "@testing-library/jest-dom";
+import { render, screen } from "@testing-library/react";
 
 // Mock the CodeMirror component
 jest.mock("@/components/complex-exercise/ui/codemirror/CodeMirror", () => ({
@@ -64,7 +63,7 @@ describe("CodeEditor", () => {
 
       // Test results state
       testSuiteResult: null,
-      shouldAutoPlay: true,
+      shouldPlayOnTestChange: true,
 
       // Frame navigation state
       prevFrame: undefined,

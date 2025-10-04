@@ -59,7 +59,7 @@ describe("Store Auto-Play Behavior", () => {
   describe("setTestSuiteResult", () => {
     it("should set shouldAutoPlay to true", () => {
       const store = createOrchestratorStore("test-uuid", "");
-      store.getState().setShouldAutoPlay(false);
+      store.getState().setShouldPlayOnTestChange(false);
 
       const testResults = {
         tests: [createMockTest("test-1")],
@@ -68,7 +68,7 @@ describe("Store Auto-Play Behavior", () => {
 
       store.getState().setTestSuiteResult(testResults);
 
-      expect(store.getState().shouldAutoPlay).toBe(true);
+      expect(store.getState().shouldPlayOnTestChange).toBe(true);
     });
 
     it("should reset testCurrentTimes before setting first test", () => {
@@ -172,7 +172,7 @@ describe("Store Auto-Play Behavior", () => {
     it("should auto-play if shouldAutoPlay is true", () => {
       const store = createOrchestratorStore("test-uuid", "");
       const test = createMockTest("test-1");
-      store.getState().setShouldAutoPlay(true);
+      store.getState().setShouldPlayOnTestChange(true);
 
       store.getState().setCurrentTest(test);
 
@@ -183,7 +183,7 @@ describe("Store Auto-Play Behavior", () => {
     it("should not auto-play if shouldAutoPlay is false", () => {
       const store = createOrchestratorStore("test-uuid", "");
       const test = createMockTest("test-1");
-      store.getState().setShouldAutoPlay(false);
+      store.getState().setShouldPlayOnTestChange(false);
 
       store.getState().setCurrentTest(test);
 
@@ -201,7 +201,7 @@ describe("Store Auto-Play Behavior", () => {
 
       // Pause and show widget
       store.getState().setIsPlaying(false);
-      store.getState().setShouldAutoPlay(true);
+      store.getState().setShouldPlayOnTestChange(true);
       store.getState().setShouldShowInformationWidget(true);
 
       // Switch to second test (should auto-play and hide widget)
@@ -271,7 +271,7 @@ describe("Store Auto-Play Behavior", () => {
       const test = createMockTest("test-1");
 
       // Disable auto-play to start paused
-      store.getState().setShouldAutoPlay(false);
+      store.getState().setShouldPlayOnTestChange(false);
       store.getState().setCurrentTest(test);
 
       // Set widget visible while paused
@@ -288,7 +288,7 @@ describe("Store Auto-Play Behavior", () => {
       const test = createMockTest("test-1");
 
       // Don't auto-play on setCurrentTest
-      store.getState().setShouldAutoPlay(false);
+      store.getState().setShouldPlayOnTestChange(false);
       store.getState().setCurrentTest(test);
 
       // Clear the mock from setCurrentTest

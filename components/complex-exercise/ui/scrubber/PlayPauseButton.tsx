@@ -19,8 +19,6 @@ export default function PlayPauseButton({ disabled }: PlayPauseButtonProps) {
     if (isPlaying) {
       orchestrator.pause();
     } else {
-      // User manually clicking play should enable auto-play
-      orchestrator.setShouldAutoPlay(true);
       orchestrator.play();
     }
   };

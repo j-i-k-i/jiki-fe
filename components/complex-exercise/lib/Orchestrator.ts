@@ -192,10 +192,6 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
-  setShouldAutoPlay(shouldAutoPlay: boolean) {
-    this.store.getState().setShouldAutoPlay(shouldAutoPlay);
-  }
-
   // Play/pause methods
   play() {
     const state = this.store.getState();
@@ -222,7 +218,7 @@ class Orchestrator {
     state.setIsPlaying(false);
 
     // Disable auto-play when user manually pauses
-    state.setShouldAutoPlay(false);
+    state.setShouldPlayOnTestChange(false);
 
     // Snap to nearest frame after pausing
     this.snapToNearestFrame();
