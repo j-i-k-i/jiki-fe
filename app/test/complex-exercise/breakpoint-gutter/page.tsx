@@ -65,7 +65,10 @@ export default function BreakpointGutterTestPage() {
         completed: false,
         hasPlayedOrScrubbed: false,
         seekEndOfTimeline: () => {},
-        onUpdate: () => {},
+        onUpdate: (_callback: any) => {},
+        onComplete: (_callback: any) => {},
+        clearUpdateCallbacks: () => {},
+        clearCompleteCallbacks: () => {},
         timeline: {
           duration: 8,
           currentTime: 0

@@ -62,7 +62,10 @@ export default function FrameStepperButtonsTestPage() {
           completed: false,
           hasPlayedOrScrubbed: false,
           seekEndOfTimeline: () => {},
-          onUpdate: () => {},
+          onUpdate: (_callback: any) => {},
+          onComplete: (_callback: any) => {},
+          clearUpdateCallbacks: () => {},
+          clearCompleteCallbacks: () => {},
           timeline: {
             duration: 5,
             currentTime: 0

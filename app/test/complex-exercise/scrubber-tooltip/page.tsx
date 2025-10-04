@@ -50,8 +50,10 @@ export default function ScrubberTooltipTestPage() {
         completed: false,
         hasPlayedOrScrubbed: false,
         seekEndOfTimeline: () => {},
-        onUpdate: () => {},
+        onUpdate: (_callback: any) => {},
+        onComplete: (_callback: any) => {},
         clearUpdateCallbacks: () => {},
+        clearCompleteCallbacks: () => {},
         timeline: {
           duration: 400,
           currentTime: 0
@@ -133,8 +135,10 @@ export default function ScrubberTooltipTestPage() {
                   completed: false,
                   hasPlayedOrScrubbed: false,
                   seekEndOfTimeline: () => {},
-                  onUpdate: () => {},
+                  onUpdate: (_callback: any) => {},
+                  onComplete: (_callback: any) => {},
                   clearUpdateCallbacks: () => {},
+                  clearCompleteCallbacks: () => {},
                   timeline: {
                     duration: 100,
                     currentTime: 0
