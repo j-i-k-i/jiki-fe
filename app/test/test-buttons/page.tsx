@@ -62,9 +62,9 @@ export default function TestButtonsTestPage() {
                   .filter((t) => !t.slug || !t.slug.includes("bonus"))
                   .map((test, idx) => (
                     <button
-                      key={test.slug || test.name}
+                      key={test.slug}
                       onClick={() => orchestrator.setCurrentTest(test)}
-                      className={`test-button ${test.status} ${currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""}`}
+                      className={`test-button ${test.status} ${currentTest?.slug === test.slug ? "selected" : ""}`}
                       style={{
                         padding: "8px 12px",
                         border: `1px solid ${test.status === "pass" ? "#10b981" : "#ef4444"}`,
@@ -92,9 +92,9 @@ export default function TestButtonsTestPage() {
                   .filter((t) => t.slug && t.slug.includes("bonus"))
                   .map((test) => (
                     <button
-                      key={test.slug || test.name}
+                      key={test.slug}
                       onClick={() => orchestrator.setCurrentTest(test)}
-                      className={`test-button ${test.status} ${currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""}`}
+                      className={`test-button ${test.status} ${currentTest?.slug === test.slug ? "selected" : ""}`}
                       style={{
                         padding: "8px 12px",
                         border: `1px solid ${test.status === "pass" ? "#10b981" : "#ef4444"}`,
@@ -130,7 +130,7 @@ export default function TestButtonsTestPage() {
         >
           <h3>Debug Info</h3>
           <p data-testid="tests-count">Tests: {testSuiteResult?.tests.length || 0}</p>
-          <p data-testid="inspected-test-name">Inspected test: {currentTest ? currentTest.name : "None"}</p>
+          <p data-testid="inspected-test-name">Inspected test: {currentTest ? currentTest.slug : "None"}</p>
           <p data-testid="inspected-test-status">Inspected test status: {currentTest ? currentTest.status : "None"}</p>
         </div>
       </div>

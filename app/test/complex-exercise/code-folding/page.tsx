@@ -84,7 +84,10 @@ export default function CodeFoldingTestPage() {
         completed: false,
         hasPlayedOrScrubbed: false,
         seekEndOfTimeline: () => {},
-        onUpdate: () => {},
+        onUpdate: (_callback: any) => {},
+        onComplete: (_callback: any) => {},
+        clearUpdateCallbacks: () => {},
+        clearCompleteCallbacks: () => {},
         timeline: {
           duration: 15,
           currentTime: 0

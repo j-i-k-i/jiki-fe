@@ -50,6 +50,8 @@ function setupOrchestrator(frames: Frame[], breakpoints: number[] = [], foldedLi
   });
 
   // Trigger recalculation of breakpoint frames
+  // Set to non-zero first to avoid early return, then to 0
+  orchestrator.setCurrentTestTime(100);
   orchestrator.setCurrentTestTime(0);
 
   return orchestrator;

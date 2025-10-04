@@ -47,7 +47,7 @@ export interface OrchestratorState {
 
   // Test results state
   testSuiteResult: TestSuiteResult | null;
-  shouldAutoplayAnimation: boolean;
+  shouldPlayOnTestChange: boolean;
 
   // Frame navigation state (moved from currentTest to top level)
   prevFrame?: Frame;
@@ -77,7 +77,7 @@ export interface OrchestratorActions {
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestResult | null) => void;
   setCurrentFrame: (frame: Frame) => void;
-  setCurrentTestTime: (time: number, nearestOrExactFrame?: "nearest" | "exact") => void;
+  setCurrentTestTime: (time: number, nearestOrExactFrame?: "nearest" | "exact", force?: boolean) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;
   setFoldedLines: (lines: number[]) => void;
@@ -106,7 +106,7 @@ export interface OrchestratorActions {
 
   // Play/pause action
   setIsPlaying: (playing: boolean) => void;
-  setShouldAutoplayAnimation: (autoplay: boolean) => void;
+  setShouldPlayOnTestChange: (shouldPlayOnTestChange: boolean) => void;
 
   // Exercise data initialization
   initializeExerciseData: (serverData?: {

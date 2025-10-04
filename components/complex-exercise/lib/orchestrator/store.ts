@@ -1,8 +1,8 @@
+import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";
@@ -46,7 +46,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results state
       testSuiteResult: null,
-      shouldAutoplayAnimation: false,
+      shouldPlayOnTestChange: true,
 
       // Frame navigation state (moved from currentTest to top level)
       prevFrame: undefined,
@@ -128,11 +128,18 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setError: (error) => set({ error }),
       setCurrentTest: (test) => {
         const state = get();
+
+        // Early return if setting the same test
+        if (test === state.currentTest) {
+          return;
+        }
+
         const oldTest = state.currentTest;
 
         // Clean up old test's animation timeline callbacks
         if (oldTest?.animationTimeline) {
           oldTest.animationTimeline.clearUpdateCallbacks();
+          oldTest.animationTimeline.clearCompleteCallbacks();
         }
 
         if (!test) {
@@ -151,7 +158,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         set({
           currentTest: test,
-          currentTestTime: timeToUse,
           currentFrame: undefined,
           highlightedLine: 0
         });
@@ -162,10 +168,28 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           get().setCurrentTestTime(anim.currentTime * TIME_SCALE_FACTOR);
         });
 
+        // Set up completion callback to update play/pause state
+        test.animationTimeline.onComplete(() => {
+          get().setIsPlaying(false);
+        });
+
         // Trigger frame calculations with the restored/initial time
-        get().setCurrentTestTime(timeToUse, "nearest");
+        get().setCurrentTestTime(timeToUse, "nearest", true);
+
+        if (state.shouldPlayOnTestChange) {
+          get().setIsPlaying(true);
+        }
       },
-      setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact") => {
+
+      setCurrentTestTime: (
+        time: number,
+        nearestOrExactFrame: "nearest" | "exact" = "exact",
+        force: boolean = false
+      ) => {
+        if (get().currentTestTime === time && !force) {
+          return;
+        }
+
         const state = get();
         if (!state.currentTest) {
           return;
@@ -190,6 +214,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           get().setCurrentFrame(frame);
         }
       },
+
       setCurrentFrame: (frame) => {
         const state = get();
         if (!state.currentTest) {
@@ -247,15 +272,47 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results actions
       setTestSuiteResult: (result) => {
-        set({ testSuiteResult: result });
+        // Set the test suite result and reset things.
+        set({
+          testSuiteResult: result,
+          shouldPlayOnTestChange: true,
+          hasCodeBeenEdited: false,
+          status: "success",
+          testCurrentTimes: {}
+        });
+
         // Also set the first test as current by default
         if (result && result.tests.length > 0) {
           // Call setCurrentTest which will handle all the logic including setting time
+          // and auto-playing the test.
           get().setCurrentTest(result.tests[0]);
         }
       },
-      setShouldAutoplayAnimation: (autoplay) => set({ shouldAutoplayAnimation: autoplay }),
-      setIsPlaying: (playing) => set({ isPlaying: playing }),
+      setShouldPlayOnTestChange: (shouldAutoPlay) => set({ shouldPlayOnTestChange: shouldAutoPlay }),
+      setIsPlaying: (playing) => {
+        const state = get();
+
+        // Early return if state hasn't changed
+        if (state.isPlaying === playing) {
+          return;
+        }
+
+        set({ isPlaying: playing });
+
+        if (!state.currentTest) {
+          return;
+        }
+
+        if (playing) {
+          // Hide information widget when playing
+          state.setShouldShowInformationWidget(false);
+          // Start the animation timeline
+          state.currentTest.animationTimeline.play();
+        } else {
+          // Pause the animation timeline
+          state.currentTest.animationTimeline.pause();
+        }
+      },
 
       // Exercise data initialization with priority logic
       initializeExerciseData: (serverData?: {
@@ -391,7 +448,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset test results state
           testSuiteResult: null,
-          shouldAutoplayAnimation: false,
+          shouldPlayOnTestChange: true,
 
           // Reset frame navigation state
           prevFrame: undefined,
@@ -447,7 +504,7 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
 
       // Test results state
       testSuiteResult: state.testSuiteResult,
-      shouldAutoplayAnimation: state.shouldAutoplayAnimation,
+      shouldPlayOnTestChange: state.shouldPlayOnTestChange,
 
       // Frame navigation state
       prevFrame: state.prevFrame,

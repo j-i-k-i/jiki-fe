@@ -20,6 +20,8 @@ describe("Store Frame Changes", () => {
       });
 
       // Need to set a current test first for setCurrentFrame to work
+      // Set shouldAutoPlay to false to prevent auto-play in tests
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [testFrame],
         slug: "test-1",
@@ -28,7 +30,11 @@ describe("Store Frame Changes", () => {
         expects: [],
         view: document.createElement("div"),
         animationTimeline: {
+          play: jest.fn(),
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 100000
         }
       } as any);
@@ -56,6 +62,8 @@ describe("Store Frame Changes", () => {
       });
 
       // Need to set a current test first
+      // Set shouldAutoPlay to false to prevent auto-play in tests
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [testFrame],
         slug: "test-1",
@@ -64,7 +72,11 @@ describe("Store Frame Changes", () => {
         expects: [],
         view: document.createElement("div"),
         animationTimeline: {
+          play: jest.fn(),
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 100000
         }
       } as any);
@@ -88,6 +100,8 @@ describe("Store Frame Changes", () => {
       const frame3 = mockFrame(200000, { line: 3 });
 
       // Set up test with multiple frames
+      // Set shouldAutoPlay to false to prevent auto-play in tests
+      state.setShouldPlayOnTestChange(false);
       state.setCurrentTest({
         frames: [frame1, frame2, frame3],
         slug: "test-1",
@@ -96,7 +110,11 @@ describe("Store Frame Changes", () => {
         expects: [],
         view: document.createElement("div"),
         animationTimeline: {
+          play: jest.fn(),
           onUpdate: jest.fn(),
+          onComplete: jest.fn(),
+          clearUpdateCallbacks: jest.fn(),
+          clearCompleteCallbacks: jest.fn(),
           duration: 200000
         }
       } as any);

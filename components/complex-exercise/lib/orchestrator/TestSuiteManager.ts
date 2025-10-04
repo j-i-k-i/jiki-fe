@@ -53,10 +53,6 @@ export class TestSuiteManager {
       // Set the results in the store (will also set the first test as current)
       const state = this.store.getState();
       state.setTestSuiteResult(testResults);
-
-      state.setStatus("success");
-      // Reset hasCodeBeenEdited flag when running code
-      state.setHasCodeBeenEdited(false);
     } catch (error) {
       // Check if it's a SyntaxError (has location property)
       if (error && typeof error === "object" && "location" in error) {

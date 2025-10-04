@@ -3,6 +3,7 @@
 // passed around, controls the state, etc.
 
 import type { EditorView } from "@codemirror/view";
+import type { ExerciseDefinition } from "@jiki/curriculum";
 import type { StoreApi } from "zustand/vanilla";
 import { BreakpointManager } from "./orchestrator/BreakpointManager";
 import { EditorManager } from "./orchestrator/EditorManager";
@@ -11,7 +12,6 @@ import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { TestExpect, TestResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
-import type { ExerciseDefinition } from "@jiki/curriculum";
 
 class Orchestrator {
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
@@ -114,17 +114,26 @@ class Orchestrator {
     are syncing the time).
   */
   setCurrentTestTime(time: number) {
-    this.timelineManager.setTime(time);
+    this.store.getState().setCurrentTestTime(time);
+
+    // Also seek to the relevant spot on the animation timeline if it exists
+    // This is what powers the stepper buttons.
+    this.store.getState().currentTest?.animationTimeline.seek(time);
   }
 
   setFoldedLines(lines: number[]) {
     // When folded lines change, recalculate the current frame
     const state = this.store.getState();
+
     // Set folded lines first
     state.setFoldedLines(lines);
+
     // Then recalculate the frame with the new folded lines
+    // We don't want to update the animation itself, so we just
+    // update the store manually.
+    // Use force=true to ensure recalculation even if time hasn't changed
     if (state.currentTest) {
-      state.setCurrentTestTime(state.currentTestTime, "nearest");
+      state.setCurrentTestTime(state.currentTestTime, "nearest", true);
     }
   }
 
@@ -183,10 +192,6 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
-  setShouldAutoplayAnimation(autoplay: boolean) {
-    this.store.getState().setShouldAutoplayAnimation(autoplay);
-  }
-
   // Play/pause methods
   play() {
     const state = this.store.getState();
@@ -194,14 +199,13 @@ class Orchestrator {
       return;
     }
 
-    // Set isPlaying state
+    // If animation completed, reset orchestrator time to beginning
+    if (state.currentTest.animationTimeline.completed) {
+      state.setCurrentTestTime(0);
+    }
+
+    // Set isPlaying state (this will handle animation.play() and hide widget)
     state.setIsPlaying(true);
-
-    // Hide information widget on play (matches original behavior)
-    state.setShouldShowInformationWidget(false);
-
-    // Play the animation timeline
-    state.currentTest.animationTimeline.play();
   }
 
   pause() {
@@ -210,11 +214,11 @@ class Orchestrator {
       return;
     }
 
-    // Set isPlaying state
+    // Set isPlaying state (this also pauses the animation timeline)
     state.setIsPlaying(false);
 
-    // Pause the animation timeline
-    state.currentTest.animationTimeline.pause();
+    // Disable auto-play when user manually pauses
+    state.setShouldPlayOnTestChange(false);
 
     // Snap to nearest frame after pausing
     this.snapToNearestFrame();
@@ -255,6 +259,7 @@ class Orchestrator {
     const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
     // Delegate to TestSuiteManager with exercise definition
+    // This automatically plays the first scenario.
     await this.testSuiteManager.runCode(currentCode, this.exercise);
   }
 

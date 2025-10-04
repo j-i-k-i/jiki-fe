@@ -69,7 +69,8 @@ describe("AnimationTimeline", () => {
           ease: "linear"
         },
         autoplay: false,
-        onUpdate: expect.any(Function)
+        onUpdate: expect.any(Function),
+        onComplete: expect.any(Function)
       });
     });
 
@@ -83,7 +84,8 @@ describe("AnimationTimeline", () => {
           duration: 500
         },
         autoplay: false,
-        onUpdate: expect.any(Function)
+        onUpdate: expect.any(Function),
+        onComplete: expect.any(Function)
       });
     });
 

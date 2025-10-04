@@ -57,7 +57,10 @@ export default function ScrubberInputTestPage() {
         completed: false,
         hasPlayedOrScrubbed: false,
         seekEndOfTimeline: () => {},
-        onUpdate: () => {},
+        onUpdate: (_callback: any) => {},
+        onComplete: (_callback: any) => {},
+        clearUpdateCallbacks: () => {},
+        clearCompleteCallbacks: () => {},
         timeline: {
           duration: 1000,
           currentTime: 0

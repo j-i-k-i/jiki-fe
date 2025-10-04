@@ -45,7 +45,7 @@ export function TestResultsButtons() {
     >
       {testSuiteResult.tests.map((test, idx) => (
         <button
-          key={(test.slug || test.name) + idx}
+          key={test.slug + idx}
           onClick={() => handleTestResultSelection(test)}
           style={{
             transitionDelay: `${idx * TRANSITION_DELAY}s`,
@@ -58,11 +58,7 @@ export function TestResultsButtons() {
             fontWeight: "500",
             transition: "all 0.2s ease"
           }}
-          className={assembleClassNames(
-            "test-button",
-            test.status,
-            currentTest?.slug === test.slug || currentTest?.name === test.name ? "selected" : ""
-          )}
+          className={assembleClassNames("test-button", test.status, currentTest?.slug === test.slug ? "selected" : "")}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = "#f3f4f6";
           }}

@@ -349,7 +349,7 @@ describe("Test Buttons E2E", () => {
         const state = orchestrator.store.getState();
         return {
           hasInspectedTest: !!state.currentTest,
-          inspectedTestName: state.currentTest && "name" in state.currentTest ? state.currentTest.name : null
+          inspectedTestName: state.currentTest?.slug || null
         };
       });
 
