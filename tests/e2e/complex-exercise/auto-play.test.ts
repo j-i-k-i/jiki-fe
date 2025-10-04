@@ -202,10 +202,7 @@ describe("Auto-Play Timeline E2E", () => {
     // Now manually click play
     await page.click('[data-ci="play-button"]');
 
-    // Wait a bit
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // Should start playing (manual play click sets shouldAutoPlay to true)
+    // Check immediately that it started playing (don't wait or timeline might complete)
     isPlaying = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       return orchestrator.getStore().getState().isPlaying;
