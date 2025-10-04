@@ -127,6 +127,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setStatus: (status) => set({ status }),
       setError: (error) => set({ error }),
       setCurrentTest: (test) => {
+
         const state = get();
         const oldTest = state.currentTest;
 
@@ -152,7 +153,6 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         set({
           currentTest: test,
-          currentTestTime: timeToUse,
           currentFrame: undefined,
           highlightedLine: 0
         });
@@ -169,13 +169,16 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         });
 
         // Trigger frame calculations with the restored/initial time
-        get().setCurrentTestTime(timeToUse, "nearest");
+        get().setCurrentTestTime(timeToUse, "nearest", true);
 
         if(state.shouldAutoPlay) {
           get().setIsPlaying(true)
         }
       },
-      setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact") => {
+
+      setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact", force: boolean = false) => {
+        if(get().currentTestTime === time && !force) { return }
+
         const state = get();
         if (!state.currentTest) {
           return;
@@ -200,6 +203,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           get().setCurrentFrame(frame);
         }
       },
+
       setCurrentFrame: (frame) => {
         const state = get();
         if (!state.currentTest) {
@@ -262,7 +266,8 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           testSuiteResult: result,
           shouldAutoPlay: true,
           hasCodeBeenEdited: false,
-          status: "success"
+          status: "success",
+          testCurrentTimes: {}
         });
 
         // Also set the first test as current by default

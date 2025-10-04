@@ -114,7 +114,10 @@ class Orchestrator {
     are syncing the time).
   */
   setCurrentTestTime(time: number) {
-    this.timelineManager.setTime(time);
+    this.store.getState().setCurrentTestTime(time);
+
+    // Also seek the animation timeline if it exists
+    this.store.getState().currentTest?.animationTimeline.seek(time);
   }
 
   setFoldedLines(lines: number[]) {

@@ -77,7 +77,7 @@ export interface OrchestratorActions {
   setError: (error: string | null) => void;
   setCurrentTest: (test: TestResult | null) => void;
   setCurrentFrame: (frame: Frame) => void;
-  setCurrentTestTime: (time: number, nearestOrExactFrame?: "nearest" | "exact") => void;
+  setCurrentTestTime: (time: number, nearestOrExactFrame?: "nearest" | "exact", force?: boolean) => void;
   setHasCodeBeenEdited: (value: boolean) => void;
   setIsSpotlightActive: (value: boolean) => void;
   setFoldedLines: (lines: number[]) => void;
