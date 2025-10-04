@@ -23,16 +23,22 @@ describe("Store Auto-Play Behavior", () => {
     slug,
     name: slug,
     status: "pass" as const,
+    expects: [],
+    view: document.createElement("div"),
     frames: [
       {
         time: 0,
+        timeInMs: 0,
         line: 1,
+        code: "move()",
         status: "SUCCESS" as const,
         generateDescription: () => "Frame 1"
       },
       {
         time: 100,
+        timeInMs: 0.1,
         line: 2,
+        code: "move()",
         status: "SUCCESS" as const,
         generateDescription: () => "Frame 2"
       }

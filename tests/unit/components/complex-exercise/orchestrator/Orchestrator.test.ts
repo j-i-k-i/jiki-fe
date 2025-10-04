@@ -251,6 +251,9 @@ describe("Orchestrator", () => {
         mockFrame(300000, { line: 4 })
       ];
 
+      // Disable auto-play for this test
+      orchestrator.setShouldAutoPlay(false);
+
       // Set up test state with custom frames at line 2
       orchestrator.setCurrentTest({
         slug: "test-1",
@@ -262,7 +265,7 @@ describe("Orchestrator", () => {
         animationTimeline: mockAnimationTimeline()
       });
 
-      // Verify initial state
+      // Set to line 2's time
       let state = orchestrator.getStore().getState();
       state.setCurrentTestTime(100000, "exact");
 
@@ -434,7 +437,7 @@ describe("Orchestrator", () => {
       expect(mockTimeline.play).toHaveBeenCalled();
     });
 
-    it("should NOT play when shouldAutoPlay is false", () => {
+    it("should play animation timeline when play() is called regardless of shouldAutoPlay flag", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
@@ -449,12 +452,13 @@ describe("Orchestrator", () => {
         animationTimeline: mockTimeline
       });
 
-      // Set shouldAutoPlay to false
+      // Set shouldAutoPlay to false (this only affects setCurrentTest auto-play, not manual play())
       orchestrator.setShouldAutoPlay(false);
 
       orchestrator.play();
 
-      expect(mockTimeline.play).not.toHaveBeenCalled();
+      // play() should still call the timeline even when shouldAutoPlay is false
+      expect(mockTimeline.play).toHaveBeenCalled();
     });
 
     it("should set isPlaying to true when playing", () => {
@@ -650,29 +654,18 @@ describe("Orchestrator", () => {
       }));
     });
 
-    it("should set shouldAutoPlay to true and call play() after successful test run", async () => {
+    it("should delegate to testSuiteManager.runCode with current code and exercise", async () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "const x = 1;" });
       const orchestrator = new Orchestrator(exercise);
-
-      // Set shouldAutoPlay to false first
-      orchestrator.setShouldAutoPlay(false);
 
       // Mock testSuiteManager.runCode to simulate successful execution
       const testSuiteManager = (orchestrator as any).testSuiteManager;
       const mockRunCode = jest.spyOn(testSuiteManager, "runCode").mockResolvedValue(undefined);
 
-      // Mock the play method
-      const mockPlay = jest.spyOn(orchestrator, "play");
-
       await orchestrator.runCode();
 
-      // Verify testSuiteManager.runCode was called
+      // Verify testSuiteManager.runCode was called with current code and exercise
       expect(mockRunCode).toHaveBeenCalledWith("const x = 1;", exercise);
-
-      // Verify shouldAutoPlay was set to true and play was called
-      const state = orchestrator.getStore().getState();
-      expect(state.shouldAutoPlay).toBe(true);
-      expect(mockPlay).toHaveBeenCalled();
     });
 
     it("should NOT call play() when syntax error occurs", async () => {

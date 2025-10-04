@@ -131,8 +131,9 @@ class Orchestrator {
     // Then recalculate the frame with the new folded lines
     // We don't want to update the animation itself, so we just
     // update the store manually.
+    // Use force=true to ensure recalculation even if time hasn't changed
     if (state.currentTest) {
-      state.setCurrentTestTime(state.currentTestTime, "nearest");
+      state.setCurrentTestTime(state.currentTestTime, "nearest", true);
     }
   }
 
