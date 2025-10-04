@@ -156,7 +156,7 @@ describe("Test Switching E2E", () => {
       expect(isPlaying).toBe(true);
     });
 
-    it("should auto-play second test after manually clicking play on first test", async () => {
+    it("should NOT auto-play second test after pausing first test", async () => {
       await page.waitForSelector(".test-selector-buttons", { timeout: 5000 });
 
       // Click first test
@@ -174,12 +174,12 @@ describe("Test Switching E2E", () => {
       await page.click('[data-ci="play-button"]');
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Verify shouldAutoPlay is now true
+      // Verify shouldPlayOnTestChange remains false (manual play doesn't change auto-play preference)
       const shouldAutoPlay = await page.evaluate(() => {
         const orchestrator = (window as any).testOrchestrator;
-        return orchestrator.getStore().getState().shouldAutoPlay;
+        return orchestrator.getStore().getState().shouldPlayOnTestChange;
       });
-      expect(shouldAutoPlay).toBe(true);
+      expect(shouldAutoPlay).toBe(false);
 
       // Pause again
       await page.click('[data-ci="pause-button"]');
@@ -190,7 +190,7 @@ describe("Test Switching E2E", () => {
       await secondButton?.click();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Second test should NOT auto-play (pause disables auto-play, manual play re-enables it, but pause again disables it)
+      // Second test should NOT auto-play (pause disabled auto-play)
       const isPlaying = await page.evaluate(() => {
         const orchestrator = (window as any).testOrchestrator;
         return orchestrator.getStore().getState().isPlaying;

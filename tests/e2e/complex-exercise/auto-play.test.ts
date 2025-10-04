@@ -55,7 +55,7 @@ describe("Auto-Play Timeline E2E", () => {
     // Verify shouldAutoPlay is false
     const shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().shouldAutoPlay;
+      return orchestrator.getStore().getState().shouldPlayOnTestChange;
     });
     expect(shouldAutoPlay).toBe(false);
 
@@ -104,7 +104,7 @@ describe("Auto-Play Timeline E2E", () => {
     // Verify shouldAutoPlay is false
     let shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().shouldAutoPlay;
+      return orchestrator.getStore().getState().shouldPlayOnTestChange;
     });
     expect(shouldAutoPlay).toBe(false);
 
@@ -118,7 +118,7 @@ describe("Auto-Play Timeline E2E", () => {
     // shouldAutoPlay should be set to true
     shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().shouldAutoPlay;
+      return orchestrator.getStore().getState().shouldPlayOnTestChange;
     });
     expect(shouldAutoPlay).toBe(true);
 
@@ -195,7 +195,7 @@ describe("Auto-Play Timeline E2E", () => {
     // Verify shouldAutoPlay is false
     let shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().shouldAutoPlay;
+      return orchestrator.getStore().getState().shouldPlayOnTestChange;
     });
     expect(shouldAutoPlay).toBe(false);
 
@@ -209,11 +209,11 @@ describe("Auto-Play Timeline E2E", () => {
     });
     expect(isPlaying).toBe(true);
 
-    // And shouldAutoPlay should be set to true
+    // And shouldPlayOnTestChange should remain false (manual play doesn't change auto-play preference)
     shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().shouldAutoPlay;
+      return orchestrator.getStore().getState().shouldPlayOnTestChange;
     });
-    expect(shouldAutoPlay).toBe(true);
+    expect(shouldAutoPlay).toBe(false);
   });
 });
