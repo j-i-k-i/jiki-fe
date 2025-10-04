@@ -128,6 +128,12 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       setError: (error) => set({ error }),
       setCurrentTest: (test) => {
         const state = get();
+
+        // Early return if setting the same test
+        if (test === state.currentTest) {
+          return;
+        }
+
         const oldTest = state.currentTest;
 
         // Clean up old test's animation timeline callbacks
