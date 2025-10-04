@@ -116,16 +116,21 @@ class Orchestrator {
   setCurrentTestTime(time: number) {
     this.store.getState().setCurrentTestTime(time);
 
-    // Also seek the animation timeline if it exists
+    // Also seek to the relevant spot on the animation timeline if it exists
+    // This is what powers the stepper buttons.
     this.store.getState().currentTest?.animationTimeline.seek(time);
   }
 
   setFoldedLines(lines: number[]) {
     // When folded lines change, recalculate the current frame
     const state = this.store.getState();
+
     // Set folded lines first
     state.setFoldedLines(lines);
+
     // Then recalculate the frame with the new folded lines
+    // We don't want to update the animation itself, so we just
+    // update the store manually.
     if (state.currentTest) {
       state.setCurrentTestTime(state.currentTestTime, "nearest");
     }

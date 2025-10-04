@@ -1,0 +1,254 @@
+import { createOrchestratorStore } from "@/components/complex-exercise/lib/orchestrator/store";
+import type { TestResult } from "@/components/complex-exercise/lib/test-results-types";
+
+// Mock TimelineManager
+jest.mock("@/components/complex-exercise/lib/orchestrator/TimelineManager", () => ({
+  TimelineManager: {
+    findNearestFrame: jest.fn((frames) => frames[0]),
+    findPrevFrame: jest.fn(),
+    findNextFrame: jest.fn()
+  }
+}));
+
+// Mock BreakpointManager
+jest.mock("@/components/complex-exercise/lib/orchestrator/BreakpointManager", () => ({
+  BreakpointManager: {
+    findPrevBreakpointFrame: jest.fn(),
+    findNextBreakpointFrame: jest.fn()
+  }
+}));
+
+describe("Store Auto-Play Behavior", () => {
+  const createMockTest = (slug: string, time = 0): TestResult => ({
+    slug,
+    name: slug,
+    status: "pass" as const,
+    frames: [
+      {
+        time: 0,
+        line: 1,
+        status: "SUCCESS" as const,
+        generateDescription: () => "Frame 1"
+      },
+      {
+        time: 100,
+        line: 2,
+        status: "SUCCESS" as const,
+        generateDescription: () => "Frame 2"
+      }
+    ],
+    animationTimeline: {
+      play: jest.fn(),
+      pause: jest.fn(),
+      seek: jest.fn(),
+      onUpdate: jest.fn(),
+      onComplete: jest.fn(),
+      clearUpdateCallbacks: jest.fn(),
+      clearCompleteCallbacks: jest.fn(),
+      completed: false,
+      currentTime: time
+    } as any
+  });
+
+  describe("setTestSuiteResult", () => {
+    it("should set shouldAutoPlay to true", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      store.getState().setShouldAutoPlay(false);
+
+      const testResults = {
+        tests: [createMockTest("test-1")],
+        status: "pass" as const
+      };
+
+      store.getState().setTestSuiteResult(testResults);
+
+      expect(store.getState().shouldAutoPlay).toBe(true);
+    });
+
+    it("should reset testCurrentTimes before setting first test", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test1 = createMockTest("test-1");
+      const test2 = createMockTest("test-2");
+
+      // First set tests and save a time for test-2
+      store.getState().setCurrentTest(test1);
+      store.getState().setCurrentTest(test2);
+      store.getState().setCurrentTestTime(100);
+      expect(store.getState().testCurrentTimes).toHaveProperty("test-2");
+      expect(store.getState().testCurrentTimes["test-2"]).toBe(100);
+
+      const testResults = {
+        tests: [createMockTest("test-1"), createMockTest("test-2")],
+        status: "pass" as const
+      };
+
+      store.getState().setTestSuiteResult(testResults);
+
+      // Should have test-1 at 0 (new first test), but test-2 should be cleared
+      expect(store.getState().testCurrentTimes).toEqual({ "test-1": 0 });
+    });
+
+    it("should set hasCodeBeenEdited to false and status to success", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      store.getState().setHasCodeBeenEdited(true);
+      store.getState().setStatus("idle");
+
+      const testResults = {
+        tests: [createMockTest("test-1")],
+        status: "pass" as const
+      };
+
+      store.getState().setTestSuiteResult(testResults);
+
+      expect(store.getState().hasCodeBeenEdited).toBe(false);
+      expect(store.getState().status).toBe("success");
+    });
+
+    it("should call setCurrentTest with first test", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test1 = createMockTest("test-1");
+      const test2 = createMockTest("test-2");
+
+      const testResults = {
+        tests: [test1, test2],
+        status: "pass" as const
+      };
+
+      store.getState().setTestSuiteResult(testResults);
+
+      expect(store.getState().currentTest?.slug).toBe("test-1");
+    });
+  });
+
+  describe("setCurrentTest", () => {
+    it("should not set currentTestTime in initial state update", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+
+      // The initial set should not include currentTestTime
+      // We verify this by checking that currentTestTime is only set via setCurrentTestTime call
+      const setCurrentTestTimeSpy = jest.spyOn(store.getState(), "setCurrentTestTime");
+
+      store.getState().setCurrentTest(test);
+
+      // setCurrentTestTime should be called (not set directly in state)
+      expect(setCurrentTestTimeSpy).toHaveBeenCalled();
+    });
+
+    it("should call setCurrentTestTime with force=true", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+
+      const setCurrentTestTimeSpy = jest.spyOn(store.getState(), "setCurrentTestTime");
+
+      store.getState().setCurrentTest(test);
+
+      expect(setCurrentTestTimeSpy).toHaveBeenCalledWith(0, "nearest", true);
+    });
+
+    it("should auto-play if shouldAutoPlay is true", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setShouldAutoPlay(true);
+
+      store.getState().setCurrentTest(test);
+
+      expect(store.getState().isPlaying).toBe(true);
+      expect(test.animationTimeline.play).toHaveBeenCalled();
+    });
+
+    it("should not auto-play if shouldAutoPlay is false", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setShouldAutoPlay(false);
+
+      store.getState().setCurrentTest(test);
+
+      expect(store.getState().isPlaying).toBe(false);
+      expect(test.animationTimeline.play).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("setCurrentTestTime with force flag", () => {
+    it("should update state when force=true even if time is same", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setCurrentTest(test);
+
+      // Set time to 0 (which is already the current time)
+      const stateBefore = store.getState();
+      store.getState().setCurrentTestTime(0, "exact", true);
+      const stateAfter = store.getState();
+
+      // Should still update (force=true bypasses early return)
+      expect(stateBefore).not.toBe(stateAfter);
+    });
+
+    it("should skip update when time is same and force=false", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setCurrentTest(test);
+
+      // Set current time to 100
+      store.getState().setCurrentTestTime(100, "exact", true);
+
+      const stateBefore = store.getState();
+      // Try to set to 100 again without force
+      store.getState().setCurrentTestTime(100, "exact", false);
+      const stateAfter = store.getState();
+
+      // Should not update (early return)
+      expect(stateBefore).toBe(stateAfter);
+    });
+
+    it("should persist time to testCurrentTimes map", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setCurrentTest(test);
+
+      store.getState().setCurrentTestTime(150);
+
+      expect(store.getState().testCurrentTimes["test-1"]).toBe(150);
+    });
+  });
+
+  describe("setIsPlaying", () => {
+    it("should call animationTimeline.play when playing=true", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setCurrentTest(test);
+
+      store.getState().setIsPlaying(true);
+
+      expect(test.animationTimeline.play).toHaveBeenCalled();
+    });
+
+    it("should hide information widget when playing=true", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+      store.getState().setCurrentTest(test);
+      store.getState().setShouldShowInformationWidget(true);
+
+      store.getState().setIsPlaying(true);
+
+      expect(store.getState().shouldShowInformationWidget).toBe(false);
+    });
+
+    it("should not call play when playing=false", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test = createMockTest("test-1");
+
+      // Don't auto-play on setCurrentTest
+      store.getState().setShouldAutoPlay(false);
+      store.getState().setCurrentTest(test);
+
+      // Clear the mock from setCurrentTest
+      (test.animationTimeline.play as jest.Mock).mockClear();
+
+      // Now call setIsPlaying(false)
+      store.getState().setIsPlaying(false);
+
+      expect(test.animationTimeline.play).not.toHaveBeenCalled();
+    });
+  });
+});
