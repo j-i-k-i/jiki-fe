@@ -46,7 +46,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results state
       testSuiteResult: null,
-      shouldAutoPlay: true,
+      shouldPlayOnTestChange: true,
 
       // Frame navigation state (moved from currentTest to top level)
       prevFrame: undefined,
@@ -170,7 +170,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Trigger frame calculations with the restored/initial time
         get().setCurrentTestTime(timeToUse, "nearest", true);
 
-        if (state.shouldAutoPlay) {
+        if (state.shouldPlayOnTestChange) {
           get().setIsPlaying(true);
         }
       },
@@ -269,7 +269,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
         // Set the test suite result and reset things.
         set({
           testSuiteResult: result,
-          shouldAutoPlay: true,
+          shouldPlayOnTestChange: true,
           hasCodeBeenEdited: false,
           status: "success",
           testCurrentTimes: {}
@@ -282,7 +282,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           get().setCurrentTest(result.tests[0]);
         }
       },
-      setShouldAutoPlay: (shouldAutoPlay) => set({ shouldAutoPlay }),
+      setShouldPlayOnTestChange: (shouldAutoPlay) => set({ shouldPlayOnTestChange: shouldAutoPlay }),
       setIsPlaying: (playing) => {
         const state = get();
 
@@ -442,7 +442,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset test results state
           testSuiteResult: null,
-          shouldAutoPlay: true,
+          shouldPlayOnTestChange: true,
 
           // Reset frame navigation state
           prevFrame: undefined,
@@ -498,7 +498,7 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
 
       // Test results state
       testSuiteResult: state.testSuiteResult,
-      shouldAutoPlay: state.shouldAutoPlay,
+      shouldPlayOnTestChange: state.shouldPlayOnTestChange,
 
       // Frame navigation state
       prevFrame: state.prevFrame,

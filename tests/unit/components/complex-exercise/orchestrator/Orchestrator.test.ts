@@ -187,7 +187,6 @@ describe("Orchestrator", () => {
       expect(orchestrator.getStore().getState().isPlaying).toBe(false);
 
       // Second cycle: play should reset and start again
-      orchestrator.setShouldAutoPlay(true);
       orchestrator.play();
       expect(orchestrator.getStore().getState().currentTestTime).toBe(0);
       expect(orchestrator.getStore().getState().isPlaying).toBe(true);
@@ -250,9 +249,6 @@ describe("Orchestrator", () => {
         mockFrame(200000, { line: 3 }),
         mockFrame(300000, { line: 4 })
       ];
-
-      // Disable auto-play for this test
-      orchestrator.setShouldAutoPlay(false);
 
       // Set up test state with custom frames at line 2
       orchestrator.setCurrentTest({
@@ -452,9 +448,6 @@ describe("Orchestrator", () => {
         animationTimeline: mockTimeline
       });
 
-      // Set shouldAutoPlay to false (this only affects setCurrentTest auto-play, not manual play())
-      orchestrator.setShouldAutoPlay(false);
-
       orchestrator.play();
 
       // play() should still call the timeline even when shouldAutoPlay is false
@@ -487,9 +480,6 @@ describe("Orchestrator", () => {
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
 
-      // Disable auto-play to start paused
-      orchestrator.setShouldAutoPlay(false);
-
       orchestrator.setCurrentTest({
         slug: "test-1",
         name: "Test 1",
@@ -499,6 +489,9 @@ describe("Orchestrator", () => {
         frames: [mockFrame(0, { line: 1 })],
         animationTimeline: mockTimeline
       });
+
+      // Pause to stop auto-play
+      orchestrator.pause();
 
       // Set widget visible while paused
       orchestrator.setShouldShowInformationWidget(true);
@@ -615,7 +608,7 @@ describe("Orchestrator", () => {
       orchestrator.pause();
 
       const state = orchestrator.getStore().getState();
-      expect(state.shouldAutoPlay).toBe(false);
+      expect(state.shouldPlayOnTestChange).toBe(false);
     });
 
     it("should set isPlaying to false", () => {
