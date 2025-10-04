@@ -20,7 +20,7 @@ describe("Auto-Play Timeline E2E", () => {
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Wait a bit for auto-play to start
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Check that animation is playing (isPlaying should be true)
     const isPlaying = await page.evaluate(() => {
@@ -44,7 +44,7 @@ describe("Auto-Play Timeline E2E", () => {
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Wait for auto-play to start
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Click pause button
     await page.click('[data-ci="pause-button"]');
@@ -52,12 +52,12 @@ describe("Auto-Play Timeline E2E", () => {
     // Wait a bit
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Verify userHasPaused is true
-    const userHasPaused = await page.evaluate(() => {
+    // Verify shouldAutoPlay is false
+    const shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().userHasPaused;
+      return orchestrator.getStore().getState().shouldAutoPlay;
     });
-    expect(userHasPaused).toBe(true);
+    expect(shouldAutoPlay).toBe(false);
 
     // Run tests again (modify code slightly to trigger re-run)
     await page.click(".cm-content");
@@ -70,21 +70,20 @@ describe("Auto-Play Timeline E2E", () => {
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Wait a bit
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Should NOT be playing (user had paused, so auto-play is disabled)
-    // Wait, actually after running code, userHasPaused is reset!
+    // Should be playing (after running code, shouldAutoPlay is set to true)
     // So it SHOULD auto-play again
     const isPlayingAfterRerun = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       return orchestrator.getStore().getState().isPlaying;
     });
 
-    // After re-running tests, userHasPaused is reset, so should auto-play
+    // After re-running tests, shouldAutoPlay is set to true, so should auto-play
     expect(isPlayingAfterRerun).toBe(true);
   });
 
-  it("should reset userHasPaused flag when running tests again", async () => {
+  it("should set shouldAutoPlay flag when running tests again", async () => {
     // Run tests first
     await page.click(".cm-content");
     const modifier = process.platform === "darwin" ? "Meta" : "Control";
@@ -97,17 +96,17 @@ describe("Auto-Play Timeline E2E", () => {
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Wait for auto-play
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Pause
     await page.click('[data-ci="pause-button"]');
 
-    // Verify userHasPaused is true
-    let userHasPaused = await page.evaluate(() => {
+    // Verify shouldAutoPlay is false
+    let shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().userHasPaused;
+      return orchestrator.getStore().getState().shouldAutoPlay;
     });
-    expect(userHasPaused).toBe(true);
+    expect(shouldAutoPlay).toBe(false);
 
     // Run tests again
     await page.click('[data-testid="run-button"]');
@@ -116,12 +115,12 @@ describe("Auto-Play Timeline E2E", () => {
     // Wait a bit
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // userHasPaused should be reset to false
-    userHasPaused = await page.evaluate(() => {
+    // shouldAutoPlay should be set to true
+    shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().userHasPaused;
+      return orchestrator.getStore().getState().shouldAutoPlay;
     });
-    expect(userHasPaused).toBe(false);
+    expect(shouldAutoPlay).toBe(true);
 
     // And should be playing
     const isPlaying = await page.evaluate(() => {
@@ -178,7 +177,7 @@ describe("Auto-Play Timeline E2E", () => {
     await page.waitForSelector('[data-ci="inspected-test-result-view"]', { timeout: 5000 });
 
     // Wait for auto-play
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Pause
     await page.click('[data-ci="pause-button"]');
@@ -193,12 +192,12 @@ describe("Auto-Play Timeline E2E", () => {
     });
     expect(isPlaying).toBe(false);
 
-    // Verify userHasPaused is true
-    let userHasPaused = await page.evaluate(() => {
+    // Verify shouldAutoPlay is false
+    let shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().userHasPaused;
+      return orchestrator.getStore().getState().shouldAutoPlay;
     });
-    expect(userHasPaused).toBe(true);
+    expect(shouldAutoPlay).toBe(false);
 
     // Now manually click play
     await page.click('[data-ci="play-button"]');
@@ -206,18 +205,18 @@ describe("Auto-Play Timeline E2E", () => {
     // Wait a bit
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Should start playing (manual play click resets userHasPaused)
+    // Should start playing (manual play click sets shouldAutoPlay to true)
     isPlaying = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
       return orchestrator.getStore().getState().isPlaying;
     });
     expect(isPlaying).toBe(true);
 
-    // And userHasPaused should be reset
-    userHasPaused = await page.evaluate(() => {
+    // And shouldAutoPlay should be set to true
+    shouldAutoPlay = await page.evaluate(() => {
       const orchestrator = (window as any).testOrchestrator;
-      return orchestrator.getStore().getState().userHasPaused;
+      return orchestrator.getStore().getState().shouldAutoPlay;
     });
-    expect(userHasPaused).toBe(false);
+    expect(shouldAutoPlay).toBe(true);
   });
 });

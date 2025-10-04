@@ -46,7 +46,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results state
       testSuiteResult: null,
-      userHasPaused: false,
+      shouldAutoPlay: true,
 
       // Frame navigation state (moved from currentTest to top level)
       prevFrame: undefined,
@@ -260,7 +260,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
           get().setCurrentTest(result.tests[0]);
         }
       },
-      setUserHasPaused: (paused) => set({ userHasPaused: paused }),
+      setShouldAutoPlay: (shouldAutoPlay) => set({ shouldAutoPlay }),
       setIsPlaying: (playing) => set({ isPlaying: playing }),
 
       // Exercise data initialization with priority logic
@@ -397,7 +397,7 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
           // Reset test results state
           testSuiteResult: null,
-          userHasPaused: false,
+          shouldAutoPlay: true,
 
           // Reset frame navigation state
           prevFrame: undefined,
@@ -453,7 +453,7 @@ export function useOrchestratorStore(orchestrator: { getStore: () => StoreApi<Or
 
       // Test results state
       testSuiteResult: state.testSuiteResult,
-      userHasPaused: state.userHasPaused,
+      shouldAutoPlay: state.shouldAutoPlay,
 
       // Frame navigation state
       prevFrame: state.prevFrame,

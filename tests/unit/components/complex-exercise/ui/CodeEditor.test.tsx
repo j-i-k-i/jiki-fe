@@ -64,7 +64,7 @@ describe("CodeEditor", () => {
 
       // Test results state
       testSuiteResult: null,
-      userHasPaused: false,
+      shouldAutoPlay: true,
 
       // Frame navigation state
       prevFrame: undefined,

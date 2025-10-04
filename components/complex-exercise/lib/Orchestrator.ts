@@ -183,8 +183,8 @@ class Orchestrator {
     this.store.getState().setShouldAutoRunCode(shouldAutoRun);
   }
 
-  setUserHasPaused(paused: boolean) {
-    this.store.getState().setUserHasPaused(paused);
+  setShouldAutoPlay(shouldAutoPlay: boolean) {
+    this.store.getState().setShouldAutoPlay(shouldAutoPlay);
   }
 
   // Play/pause methods
@@ -194,8 +194,8 @@ class Orchestrator {
       return;
     }
 
-    // Don't auto-play if user has manually paused
-    if (state.userHasPaused) {
+    // Don't auto-play if shouldAutoPlay is false
+    if (!state.shouldAutoPlay) {
       return;
     }
 
@@ -223,8 +223,8 @@ class Orchestrator {
     // Set isPlaying state
     state.setIsPlaying(false);
 
-    // Mark that user has manually paused
-    state.setUserHasPaused(true);
+    // Disable auto-play when user manually pauses
+    state.setShouldAutoPlay(false);
 
     // Pause the animation timeline
     state.currentTest.animationTimeline.pause();
@@ -270,10 +270,10 @@ class Orchestrator {
     // Delegate to TestSuiteManager with exercise definition
     await this.testSuiteManager.runCode(currentCode, this.exercise);
 
-    // After successful test run (no syntax error), reset pause flag and auto-play
+    // After successful test run (no syntax error), enable auto-play and play
     const state = this.store.getState();
     if (!state.hasSyntaxError) {
-      state.setUserHasPaused(false);
+      state.setShouldAutoPlay(true);
       this.play();
     }
   }

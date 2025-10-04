@@ -40,7 +40,7 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
 
       // Test results state
       testSuiteResult: null,
-      userHasPaused: false,
+      shouldAutoPlay: true,
 
       // Frame navigation state
       prevFrame: undefined,
@@ -110,7 +110,7 @@ export function mockStore(overrides: Partial<OrchestratorStore> = {}) {
 
       // Test results actions
       setTestSuiteResult: jest.fn(),
-      setUserHasPaused: jest.fn(),
+      setShouldAutoPlay: jest.fn(),
 
       // Play/pause action
       setIsPlaying: jest.fn(),

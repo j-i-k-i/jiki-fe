@@ -187,7 +187,7 @@ describe("Orchestrator", () => {
       expect(orchestrator.getStore().getState().isPlaying).toBe(false);
 
       // Second cycle: play should reset and start again
-      orchestrator.setUserHasPaused(false);
+      orchestrator.setShouldAutoPlay(true);
       orchestrator.play();
       expect(orchestrator.getStore().getState().currentTestTime).toBe(0);
       expect(orchestrator.getStore().getState().isPlaying).toBe(true);
@@ -414,7 +414,7 @@ describe("Orchestrator", () => {
   });
 
   describe("play() method", () => {
-    it("should play timeline when userHasPaused is false", () => {
+    it("should play timeline when shouldAutoPlay is true", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
@@ -434,7 +434,7 @@ describe("Orchestrator", () => {
       expect(mockTimeline.play).toHaveBeenCalled();
     });
 
-    it("should NOT play when userHasPaused is true", () => {
+    it("should NOT play when shouldAutoPlay is false", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
@@ -449,8 +449,8 @@ describe("Orchestrator", () => {
         animationTimeline: mockTimeline
       });
 
-      // Set userHasPaused to true
-      orchestrator.setUserHasPaused(true);
+      // Set shouldAutoPlay to false
+      orchestrator.setShouldAutoPlay(false);
 
       orchestrator.play();
 
@@ -589,7 +589,7 @@ describe("Orchestrator", () => {
       expect(mockTimeline.pause).toHaveBeenCalled();
     });
 
-    it("should set userHasPaused to true", () => {
+    it("should set shouldAutoPlay to false", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
@@ -607,7 +607,7 @@ describe("Orchestrator", () => {
       orchestrator.pause();
 
       const state = orchestrator.getStore().getState();
-      expect(state.userHasPaused).toBe(true);
+      expect(state.shouldAutoPlay).toBe(false);
     });
 
     it("should set isPlaying to false", () => {
@@ -650,12 +650,12 @@ describe("Orchestrator", () => {
       }));
     });
 
-    it("should reset userHasPaused and call play() after successful test run", async () => {
+    it("should set shouldAutoPlay to true and call play() after successful test run", async () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "const x = 1;" });
       const orchestrator = new Orchestrator(exercise);
 
-      // Set userHasPaused to true first
-      orchestrator.setUserHasPaused(true);
+      // Set shouldAutoPlay to false first
+      orchestrator.setShouldAutoPlay(false);
 
       // Mock testSuiteManager.runCode to simulate successful execution
       const testSuiteManager = (orchestrator as any).testSuiteManager;
@@ -669,9 +669,9 @@ describe("Orchestrator", () => {
       // Verify testSuiteManager.runCode was called
       expect(mockRunCode).toHaveBeenCalledWith("const x = 1;", exercise);
 
-      // Verify userHasPaused was reset and play was called
+      // Verify shouldAutoPlay was set to true and play was called
       const state = orchestrator.getStore().getState();
-      expect(state.userHasPaused).toBe(false);
+      expect(state.shouldAutoPlay).toBe(true);
       expect(mockPlay).toHaveBeenCalled();
     });
 
