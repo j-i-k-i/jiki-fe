@@ -482,10 +482,13 @@ describe("Orchestrator", () => {
       expect(state.isPlaying).toBe(true);
     });
 
-    it("should hide information widget when playing", () => {
+    it("should hide information widget when manually playing", () => {
       const exercise = createTestExercise({ slug: "test-uuid", initialCode: "" });
       const orchestrator = new Orchestrator(exercise);
       const mockTimeline = mockAnimationTimeline();
+
+      // Disable auto-play to start paused
+      orchestrator.setShouldAutoPlay(false);
 
       orchestrator.setCurrentTest({
         slug: "test-1",
@@ -497,9 +500,10 @@ describe("Orchestrator", () => {
         animationTimeline: mockTimeline
       });
 
-      // Set widget visible first
+      // Set widget visible while paused
       orchestrator.setShouldShowInformationWidget(true);
 
+      // Manually play
       orchestrator.play();
 
       const state = orchestrator.getStore().getState();

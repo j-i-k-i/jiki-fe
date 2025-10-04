@@ -284,14 +284,27 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
       },
       setShouldAutoPlay: (shouldAutoPlay) => set({ shouldAutoPlay }),
       setIsPlaying: (playing) => {
+        const state = get();
+
+        // Early return if state hasn't changed
+        if (state.isPlaying === playing) {
+          return;
+        }
+
         set({ isPlaying: playing });
 
-        const state = get();
-        if (playing && state.currentTest) {
+        if (!state.currentTest) {
+          return;
+        }
+
+        if (playing) {
           // Hide information widget when playing
           state.setShouldShowInformationWidget(false);
           // Start the animation timeline
           state.currentTest.animationTimeline.play();
+        } else {
+          // Pause the animation timeline
+          state.currentTest.animationTimeline.pause();
         }
       },
 

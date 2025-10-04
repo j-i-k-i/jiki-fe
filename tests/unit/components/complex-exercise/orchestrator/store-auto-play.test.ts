@@ -124,6 +124,23 @@ describe("Store Auto-Play Behavior", () => {
 
       expect(store.getState().currentTest?.slug).toBe("test-1");
     });
+
+    it("should hide information widget when auto-playing first test", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+
+      // Show widget before running tests
+      store.getState().setShouldShowInformationWidget(true);
+
+      const testResults = {
+        tests: [createMockTest("test-1")],
+        status: "pass" as const
+      };
+
+      store.getState().setTestSuiteResult(testResults);
+
+      // Widget should be hidden due to auto-play
+      expect(store.getState().shouldShowInformationWidget).toBe(false);
+    });
   });
 
   describe("setCurrentTest", () => {
@@ -172,6 +189,26 @@ describe("Store Auto-Play Behavior", () => {
 
       expect(store.getState().isPlaying).toBe(false);
       expect(test.animationTimeline.play).not.toHaveBeenCalled();
+    });
+
+    it("should hide information widget when switching tests with auto-play", () => {
+      const store = createOrchestratorStore("test-uuid", "");
+      const test1 = createMockTest("test-1");
+      const test2 = createMockTest("test-2");
+
+      // Set first test (auto-plays)
+      store.getState().setCurrentTest(test1);
+
+      // Pause and show widget
+      store.getState().setIsPlaying(false);
+      store.getState().setShouldAutoPlay(true);
+      store.getState().setShouldShowInformationWidget(true);
+
+      // Switch to second test (should auto-play and hide widget)
+      store.getState().setCurrentTest(test2);
+
+      expect(store.getState().shouldShowInformationWidget).toBe(false);
+      expect(store.getState().isPlaying).toBe(true);
     });
   });
 
@@ -232,9 +269,15 @@ describe("Store Auto-Play Behavior", () => {
     it("should hide information widget when playing=true", () => {
       const store = createOrchestratorStore("test-uuid", "");
       const test = createMockTest("test-1");
+
+      // Disable auto-play to start paused
+      store.getState().setShouldAutoPlay(false);
       store.getState().setCurrentTest(test);
+
+      // Set widget visible while paused
       store.getState().setShouldShowInformationWidget(true);
 
+      // Manually set playing
       store.getState().setIsPlaying(true);
 
       expect(store.getState().shouldShowInformationWidget).toBe(false);

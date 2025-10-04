@@ -218,14 +218,11 @@ class Orchestrator {
       return;
     }
 
-    // Set isPlaying state
+    // Set isPlaying state (this also pauses the animation timeline)
     state.setIsPlaying(false);
 
     // Disable auto-play when user manually pauses
     state.setShouldAutoPlay(false);
-
-    // Pause the animation timeline
-    state.currentTest.animationTimeline.pause();
 
     // Snap to nearest frame after pausing
     this.snapToNearestFrame();
