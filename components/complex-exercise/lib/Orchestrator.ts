@@ -3,6 +3,7 @@
 // passed around, controls the state, etc.
 
 import type { EditorView } from "@codemirror/view";
+import type { ExerciseDefinition } from "@jiki/curriculum";
 import type { StoreApi } from "zustand/vanilla";
 import { BreakpointManager } from "./orchestrator/BreakpointManager";
 import { EditorManager } from "./orchestrator/EditorManager";
@@ -11,7 +12,6 @@ import { TestSuiteManager } from "./orchestrator/TestSuiteManager";
 import { TimelineManager } from "./orchestrator/TimelineManager";
 import type { TestExpect, TestResult } from "./test-results-types";
 import type { InformationWidgetData, OrchestratorStore, UnderlineRange } from "./types";
-import type { ExerciseDefinition } from "@jiki/curriculum";
 
 class Orchestrator {
   readonly store: StoreApi<OrchestratorStore>; // Made readonly instead of private for methods to access
@@ -194,24 +194,13 @@ class Orchestrator {
       return;
     }
 
-    // Don't auto-play if shouldAutoPlay is false
-    if (!state.shouldAutoPlay) {
-      return;
-    }
-
     // If animation completed, reset orchestrator time to beginning
     if (state.currentTest.animationTimeline.completed) {
       state.setCurrentTestTime(0);
     }
 
-    // Set isPlaying state
+    // Set isPlaying state (this will handle animation.play() and hide widget)
     state.setIsPlaying(true);
-
-    // Hide information widget on play (matches original behavior)
-    state.setShouldShowInformationWidget(false);
-
-    // Play the animation timeline (will also seek to 0 if completed)
-    state.currentTest.animationTimeline.play();
   }
 
   pause() {
@@ -268,14 +257,8 @@ class Orchestrator {
     const currentCode = this.getCurrentEditorValue() || this.store.getState().code;
 
     // Delegate to TestSuiteManager with exercise definition
+    // This automatically plays the first scenario.
     await this.testSuiteManager.runCode(currentCode, this.exercise);
-
-    // After successful test run (no syntax error), enable auto-play and play
-    const state = this.store.getState();
-    if (!state.hasSyntaxError) {
-      state.setShouldAutoPlay(true);
-      this.play();
-    }
   }
 
   // Expose exercise data for UI

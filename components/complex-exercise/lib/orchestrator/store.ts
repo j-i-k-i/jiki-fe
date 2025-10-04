@@ -1,8 +1,8 @@
+import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 import { useStore } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import { TIME_SCALE_FACTOR } from "@jiki/interpreters";
 import { loadCodeMirrorContent } from "../localStorage";
 import type { OrchestratorState, OrchestratorStore } from "../types";
 import { BreakpointManager } from "./BreakpointManager";
@@ -170,6 +170,10 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
         // Trigger frame calculations with the restored/initial time
         get().setCurrentTestTime(timeToUse, "nearest");
+
+        if(state.shouldAutoPlay) {
+          get().setIsPlaying(true)
+        }
       },
       setCurrentTestTime: (time: number, nearestOrExactFrame: "nearest" | "exact" = "exact") => {
         const state = get();
@@ -253,15 +257,33 @@ export function createOrchestratorStore(exerciseUuid: string, initialCode: strin
 
       // Test results actions
       setTestSuiteResult: (result) => {
-        set({ testSuiteResult: result });
+        // Set the test suite result and reset things.
+        set({
+          testSuiteResult: result,
+          shouldAutoPlay: true,
+          hasCodeBeenEdited: false,
+          status: "success"
+        });
+
         // Also set the first test as current by default
         if (result && result.tests.length > 0) {
           // Call setCurrentTest which will handle all the logic including setting time
+          // and auto-playing the test.
           get().setCurrentTest(result.tests[0]);
         }
       },
       setShouldAutoPlay: (shouldAutoPlay) => set({ shouldAutoPlay }),
-      setIsPlaying: (playing) => set({ isPlaying: playing }),
+      setIsPlaying: (playing) => {
+        set({ isPlaying: playing });
+
+        const state = get();
+        if (playing && state.currentTest) {
+          // Hide information widget when playing
+          state.setShouldShowInformationWidget(false);
+          // Start the animation timeline
+          state.currentTest.animationTimeline.play();
+        }
+      },
 
       // Exercise data initialization with priority logic
       initializeExerciseData: (serverData?: {
